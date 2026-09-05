@@ -33,6 +33,7 @@ jobs:
 
       - name: Run Builder
         env:
+          PYTHONUNBUFFERED: "1"
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
         run: python build.py

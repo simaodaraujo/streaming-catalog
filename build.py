@@ -10,10 +10,10 @@ TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
 SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY")
 
 if not TMDB_API_KEY:
-    raise ValueError("TMDB_API_KEY não configurada.")
+    raise ValueError("TMDB_API_KEY não foi encontrada nas variáveis de ambiente.")
 
 session = requests.Session()
-retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+retries = Retry(total=2, backoff_factor=0.3, status_forcelist=[429, 500, 502, 503, 504])
 adapter = HTTPAdapter(max_retries=retries)
 session.mount("https://", adapter)
 session.mount("http://", adapter)
@@ -47,7 +47,7 @@ def search_tmdb_title(title, media_type):
         "page": 1
     }
     try:
-        res = session.get(url, params=params, timeout=6)
+        res = session.get(url, params=params, timeout=5)
         if res.status_code == 200:
             results = res.json().get("results", [])
             if results:
@@ -63,7 +63,7 @@ def search_tmdb_title(title, media_type):
                         "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
                     }
     except Exception as e:
-        print(f"Erro TMDB ({title}): {e}")
+        print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
     return None
 
 def get_tmdb_fallback(tmdb_provider_id, media_type):
@@ -73,19 +73,20 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
         "api_key": TMDB_API_KEY,
         "watch_region": "PT",
         "with_watch_providers": tmdb_provider_id,
+        "with_watch_monetization_types": "flatrate",
         "sort_by": "popularity.desc",
         "language": "pt-PT",
         "page": 1
     }
     items = []
     try:
-        res = session.get(url, params=params, timeout=8)
+        res = session.get(url, params=params, timeout=6)
         if res.status_code == 200:
             results = res.json().get("results", [])
             for item in results[:10]:
                 tmdb_id = item["id"]
                 imdb_id = get_imdb_id(tmdb_id, search_type)
-                time.sleep(0.04)
+                time.sleep(0.03)
                 if imdb_id:
                     name = item.get("title") if search_type == "movie" else item.get("name")
                     items.append({
@@ -95,7 +96,7 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
                         "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}" if item.get("poster_path") else None
                     })
     except Exception as e:
-        print(f"Erro Fallback TMDB: {e}")
+        print(f"  [!] Erro Fallback TMDB: {e}", flush=True)
     return items
 
 def scrape_flixpatrol(flix_slug):
@@ -103,19 +104,20 @@ def scrape_flixpatrol(flix_slug):
     target_url = f"https://flixpatrol.com/top10/{flix_slug}/portugal/today/"
 
     if not SCRAPER_API_KEY:
-        print(f"  [i] SCRAPER_API_KEY não definida. A ignorar scraping de {flix_slug}...")
+        print(f"  [i] SCRAPER_API_KEY não definida. A saltar scraping direto...", flush=True)
         return movies, series
 
     payload = {
         "api_key": SCRAPER_API_KEY,
         "url": target_url,
-        "render": "true"
+        "render": "false"
     }
 
+    print(f"  -> A contactar ScraperAPI para {flix_slug}...", flush=True)
     try:
-        res = session.get("https://api.scraperapi.com/", params=payload, timeout=45)
+        res = requests.get("https://api.scraperapi.com/", params=payload, timeout=15)
         if res.status_code != 200:
-            print(f"  [!] ScraperAPI devolveu HTTP {res.status_code} para {flix_slug}")
+            print(f"  [!] ScraperAPI devolveu status HTTP {res.status_code}", flush=True)
             return movies, series
 
         soup = BeautifulSoup(res.text, "html.parser")
@@ -139,8 +141,10 @@ def scrape_flixpatrol(flix_slug):
             elif idx == 1 and not series:
                 series = extracted
 
+        print(f"  -> FlixPatrol: {len(movies)} filmes e {len(series)} séries encontrados.", flush=True)
+
     except Exception as e:
-        print(f"Erro scraping ({flix_slug}): {e}")
+        print(f"  [!] Timeout ou erro no ScraperAPI: {e}", flush=True)
 
     return movies, series
 
@@ -201,7 +205,7 @@ def create_landing_page():
                 <span class="meta-text">Portugal · Stremio</span>
             </div>
             <h1>Top Streaming</h1>
-            <p class="desc">Top 10 diário real dos filmes e séries mais vistos nos serviços de streaming em Portugal.</p>
+            <p class="desc">Top 10 diário real dos filmes e séries mais populares em streaming em Portugal.</p>
         </div>
 
         <div class="platforms">
@@ -257,21 +261,22 @@ def main():
     manifest_catalogs = []
 
     for prov in PROVIDERS:
-        print(f"\nA processar {prov['name']} via FlixPatrol...")
+        print(f"\n--- A processar {prov['name']} ---", flush=True)
         movie_titles, series_titles = scrape_flixpatrol(prov["flix_slug"])
 
+        # Filmes
         movie_items = []
         for title in movie_titles:
             item = search_tmdb_title(title, "movie")
             if item:
                 movie_items.append(item)
-            time.sleep(0.04)
+            time.sleep(0.03)
 
         if not movie_items:
-            print(f"  [i] A aplicar fallback TMDB para filmes ({prov['name']})...")
+            print(f"  [i] A usar fallback TMDB (Filmes)...", flush=True)
             movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
 
-        print(f"  -> Filmes registados: {len(movie_items)}/10")
+        print(f"  -> Filmes guardados: {len(movie_items)}/10", flush=True)
         if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
@@ -283,18 +288,19 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
+        # Séries
         series_items = []
         for title in series_titles:
             item = search_tmdb_title(title, "series")
             if item:
                 series_items.append(item)
-            time.sleep(0.04)
+            time.sleep(0.03)
 
         if not series_items:
-            print(f"  [i] A aplicar fallback TMDB para séries ({prov['name']})...")
+            print(f"  [i] A usar fallback TMDB (Séries)...", flush=True)
             series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
 
-        print(f"  -> Séries registadas: {len(series_items)}/10")
+        print(f"  -> Séries guardadas: {len(series_items)}/10", flush=True)
         if series_items:
             cat_id = f"{prov['id']}_pt_series"
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
@@ -320,7 +326,7 @@ def main():
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
     create_landing_page()
-    print(f"\nFinalizado com sucesso! {len(manifest_catalogs)} catálogos registados.")
+    print(f"\nFinalizado com sucesso! {len(manifest_catalogs)} catálogos registados.", flush=True)
 
 if __name__ == "__main__":
     main()
