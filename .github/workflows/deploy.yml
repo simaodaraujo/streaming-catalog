@@ -2,6 +2,7 @@ name: Build and Deploy to Vercel
 
 on:
   schedule:
+    # Corre todos os dias às 09:30 UTC
     - cron: '30 9 * * *'
   workflow_dispatch:
 
@@ -39,4 +40,4 @@ jobs:
       - name: Publicar pasta dist para Produção
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
+        run: vercel deploy dist --prod --token=$VERCEL_TOKEN --yes
