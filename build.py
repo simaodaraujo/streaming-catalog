@@ -172,7 +172,7 @@ def create_landing_page():
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Top 10 Filmes e Séries Portugal</title>
+  <title>Top 10 Streams PT - Stremio extension</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -195,11 +195,12 @@ def create_landing_page():
       text-align: center;
     }}
     .main-logo {{
-      width: 140px;
-      height: auto;
-      margin: 0 auto 16px;
       display: block;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+      margin: 0 auto 20px;
+      max-width: 100%;
+      height: auto;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }}
     p.subtitle {{
       font-size: 14px;
@@ -273,7 +274,7 @@ def create_landing_page():
 </head>
 <body>
   <div class="wrapper">
-    <img src="logo.png" alt="Top 10 Filmes e Séries" class="main-logo" onerror="this.style.display='none'">
+    <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" onerror="this.style.display='none'">
     
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
 
