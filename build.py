@@ -150,292 +150,136 @@ def scrape_flixpatrol(flix_slug):
 
 def create_landing_page():
     html_content = """<!DOCTYPE html>
-<html lang="pt">
+<html lang="pt" class="h-full bg-slate-900 text-slate-100 antialiased">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Streaming Portugal</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Streaming Portugal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            stremio: {
+              DEFAULT: '#7B5BF5',
+              hover: '#6D4AEB',
+              active: '#5F3BDD',
+              subtle: '#2E225A',
+            }
+          }
         }
-
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #16181d;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(123, 91, 245, 0.08) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.03) 0px, transparent 50%);
-            color: #e2e4e9;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .card {
-            width: 100%;
-            max-width: 440px;
-            background: #20232a;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 36px 32px;
-            box-shadow: 
-                0 20px 40px -15px rgba(0, 0, 0, 0.45),
-                0 0 0 1px rgba(255, 255, 255, 0.02);
-        }
-
-        .header {
-            margin-bottom: 24px;
-        }
-
-        .title-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
-        .addon-icon {
-            width: 38px;
-            height: 38px;
-            background: rgba(123, 91, 245, 0.15);
-            border: 1px solid rgba(123, 91, 245, 0.3);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9d85f7;
-            flex-shrink: 0;
-        }
-
-        .addon-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        h1 {
-            font-size: 22px;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.02em;
-        }
-
-        p.desc {
-            font-size: 14px;
-            line-height: 1.55;
-            color: #9aa0a6;
-        }
-
-        .platforms-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #717784;
-            margin-bottom: 10px;
-        }
-
-        .platforms {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 7px;
-            margin-bottom: 30px;
-        }
-
-        .platform {
-            font-size: 12px;
-            font-weight: 500;
-            color: #c9cdd4;
-            background: #282c35;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 8px;
-            padding: 5px 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .platform::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #525866;
-        }
-
-        .platform.netflix::before { background: #e50914; }
-        .platform.disney::before { background: #113ccf; }
-        .platform.prime::before { background: #00a8e1; }
-        .platform.hbo::before { background: #9933ff; }
-        .platform.apple::before { background: #a2aaad; }
-        .platform.skyshowtime::before { background: #00ff7f; }
-
-        .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 13px 18px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: inherit;
-        }
-
-        /* Cor oficial roxa do ecossistema Stremio */
-        .btn-stremio {
-            background: #7353f2;
-            background: linear-gradient(135deg, #815ff8 0%, #6842ea 100%);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 14px rgba(115, 83, 242, 0.35);
-        }
-
-        .btn-stremio:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(115, 83, 242, 0.45);
-            filter: brightness(1.06);
-        }
-
-        .btn-stremio:active {
-            transform: translateY(0);
-        }
-
-        .btn-stremio svg {
-            width: 18px;
-            height: 18px;
-            fill: #ffffff;
-        }
-
-        .btn-secondary {
-            background: #282c35;
-            color: #c9cdd4;
-            border: 1px solid rgba(255, 255, 255, 0.07);
-        }
-
-        .btn-secondary:hover {
-            background: #2f343f;
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.14);
-        }
-
-        .btn-secondary svg {
-            width: 16px;
-            height: 16px;
-            stroke: currentColor;
-            stroke-width: 2;
-            fill: none;
-        }
-
-        .footer-note {
-            margin-top: 26px;
-            padding-top: 18px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            font-size: 11px;
-            color: #6c7280;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .pulse-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #10b981;
-            margin-right: 5px;
-        }
-    </style>
+      }
+    }
+  </script>
 </head>
-<body>
-    <div class="card">
-        <div class="header">
-            <div class="title-row">
-                <div class="addon-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
-                    </svg>
-                </div>
-                <h1>Top Streaming</h1>
-            </div>
-            <p class="desc">Títulos mais vistos nas principais plataformas de streaming em território nacional, sincronizados diariamente.</p>
-        </div>
-
-        <div class="platforms-label">Catálogos incluídos</div>
-        <div class="platforms">
-            <span class="platform netflix">Netflix</span>
-            <span class="platform disney">Disney+</span>
-            <span class="platform prime">Prime Video</span>
-            <span class="platform hbo">HBO</span>
-            <span class="platform apple">Apple TV+</span>
-            <span class="platform skyshowtime">SkyShowtime</span>
-        </div>
-
-        <div class="actions">
-            <a id="install-btn" href="#" class="btn btn-stremio">
-                <svg viewBox="0 0 24 24">
-                    <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
-                </svg>
-                Instalar Addon
-            </a>
-            <button id="copy-btn" class="btn btn-secondary" onclick="copyManifestUrl()">
-                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Copiar link do manifesto
-            </button>
-        </div>
-
-        <div class="footer-note">
-            <span><span class="pulse-dot"></span>Atualizado diariamente</span>
-            <span>v1.0.3</span>
-        </div>
+<body class="min-h-full flex flex-col justify-between p-6 sm:p-12 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 font-sans">
+  
+  <header class="max-w-xl mx-auto w-full flex items-center justify-between pb-8">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-stremio/20 border border-stremio/40 flex items-center justify-center text-stremio">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+          <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
+        </svg>
+      </div>
+      <span class="text-sm font-semibold tracking-tight text-slate-200">Addon Catalog</span>
     </div>
+    <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      Sincronizado hoje
+    </div>
+  </header>
 
-    <script>
-        const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
-        const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
-        
-        document.getElementById('install-btn').href = stremioUrl;
+  <main class="max-w-xl mx-auto w-full my-auto">
+    <div class="space-y-6">
+      
+      <div class="space-y-2">
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+          Top Streaming Portugal
+        </h1>
+        <p class="text-base text-slate-400 leading-relaxed">
+          Os 10 títulos mais consumidos em território nacional, atualizados diariamente com base nas tabelas oficiais de reprodução.
+        </p>
+      </div>
 
-        function copyManifestUrl() {
-            navigator.clipboard.writeText(manifestUrl);
-            const btn = document.getElementById('copy-btn');
-            const originalHTML = btn.innerHTML;
-            
-            btn.innerHTML = `
-                <svg viewBox="0 0 24 24" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <span style="color: #10b981;">Copiado com sucesso!</span>
-            `;
-            
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-            }, 1800);
-        }
-    </script>
+      <div class="pt-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-3">Plataformas integradas</span>
+        <div class="flex flex-wrap gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Netflix
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Disney+
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Prime Video
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Max / HBO
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Apple TV+
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> SkyShowtime
+          </span>
+        </div>
+      </div>
+
+      <div class="pt-4 flex flex-col sm:flex-row gap-3">
+        <a id="install-btn" href="#" class="inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-lg text-sm font-semibold text-white bg-stremio hover:bg-stremio-hover active:bg-stremio-active transition-all shadow-lg shadow-stremio/20">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
+          </svg>
+          Instalar Addon
+        </a>
+
+        <button id="copy-btn" onclick="copyManifestUrl()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:bg-slate-800/60 border border-slate-700 transition">
+          <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Copiar Manifesto</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="max-w-xl mx-auto w-full pt-12 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/80">
+    <span>v1.0.3</span>
+    <span>Executado via GitHub Actions</span>
+  </footer>
+
+  <script>
+    const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
+    const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
+    
+    document.getElementById('install-btn').href = stremioUrl;
+
+    function copyManifestUrl() {
+      navigator.clipboard.writeText(manifestUrl);
+      const btn = document.getElementById('copy-btn');
+      const originalHTML = btn.innerHTML;
+      
+      btn.innerHTML = `
+        <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span class="text-emerald-400">Link copiado!</span>
+      `;
+      
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+      }, 1800);
+    }
+  </script>
 </body>
 </html>
 """
