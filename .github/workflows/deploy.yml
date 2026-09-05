@@ -1,6 +1,9 @@
 name: Build and Deploy to Vercel
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     # Corre todos os dias às 09:30 UTC
     - cron: '30 9 * * *'
@@ -30,11 +33,17 @@ jobs:
       - name: Instalar Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Publicar pasta dist para Produção
+      - name: Configurar Vercel Project Link
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          mkdir -p dist/.vercel
+          echo "{\"projectId\":\"$VERCEL_PROJECT_ID\",\"orgId\":\"$VERCEL_ORG_ID\"}" > dist/.vercel/project.json
+
+      - name: Publicar pasta dist para Produção
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
           cd dist
-          vercel deploy --prod --yes --force --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
+          vercel deploy --prod --yes --token=$VERCEL_TOKEN
