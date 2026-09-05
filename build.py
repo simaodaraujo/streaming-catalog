@@ -68,105 +68,174 @@ def create_landing_page():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming Portugal Top 10 - Stremio Addon</title>
+    <title>Top Streaming Portugal — Stremio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f172a;
-            color: #f8fafc;
+            font-family: 'Geist', -apple-system, sans-serif;
+            background: #000000;
+            color: #ededed;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
         }
-        .card {
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 480px;
+
+        .wrapper {
             width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
-        }
-        h1 { margin-top: 0; font-size: 1.75rem; color: #fff; }
-        p { color: #94a3b8; line-height: 1.6; font-size: 0.95rem; }
-        .badges {
+            max-width: 420px;
             display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin: 20px 0;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
+
         .badge {
-            background: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #888;
+            letter-spacing: 0.02em;
+            padding: 4px 12px 4px 8px;
+            border-radius: 99px;
+            border: 1px solid #222;
+            background: #0a0a0a;
+            margin-bottom: 28px;
+        }
+
+        .flag-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: inline-flex;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        p.desc {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.5;
+            font-weight: 400;
+            margin-bottom: 32px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 36px;
+        }
+
+        .tag {
+            font-size: 11px;
+            font-weight: 500;
+            color: #666;
+            background: #0c0c0c;
+            border: 1px solid #1c1c1c;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            letter-spacing: -0.01em;
         }
-        .btn {
-            display: inline-block;
-            background: #7c3aed;
-            color: white;
-            text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1rem;
-            margin-top: 15px;
-            width: 80%;
-            transition: background 0.2s;
-        }
-        .btn:hover { background: #6d28d9; }
-        .copy-box {
-            margin-top: 25px;
-            background: #0f172a;
-            padding: 10px;
-            border-radius: 8px;
+
+        .btn-install {
+            width: 100%;
             display: flex;
             align-items: center;
-            border: 1px solid #334155;
+            justify-content: center;
+            gap: 8px;
+            background: #ededed;
+            color: #000;
+            text-decoration: none;
+            padding: 13px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            margin-bottom: 12px;
         }
-        .copy-box input {
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            width: 100%;
-            outline: none;
-            font-size: 0.85rem;
+
+        .btn-install:hover {
+            background: #ffffff;
+            transform: translateY(-1px);
         }
-        .copy-btn {
-            background: #334155;
+
+        .copy-trigger {
+            background: none;
             border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+            color: #666;
+            font-size: 12px;
             cursor: pointer;
-            font-size: 0.8rem;
+            padding: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.15s ease;
+            font-family: inherit;
         }
-        .copy-btn:hover { background: #475569; }
+
+        .copy-trigger:hover {
+            color: #aaa;
+        }
+
+        .copy-trigger svg {
+            width: 13px;
+            height: 13px;
+            stroke-width: 1.8;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>🇵🇹 Top Streaming Portugal</h1>
-        <p>Top 10 diário dos títulos mais populares em Portugal.</p>
-        <div class="badges">
-            <span class="badge">Netflix</span>
-            <span class="badge">Disney+</span>
-            <span class="badge">Prime Video</span>
-            <span class="badge">HBO</span>
+    <div class="wrapper">
+        <div class="badge">
+            <span class="flag-icon">
+                <svg viewBox="0 0 600 400" width="100%" height="100%">
+                    <rect width="240" height="400" fill="#046A38"/>
+                    <rect x="240" width="360" height="400" fill="#DA291C"/>
+                    <circle cx="240" cy="200" r="80" fill="#FFC72C"/>
+                    <circle cx="240" cy="200" r="50" fill="#DA291C"/>
+                    <rect x="215" y="175" width="50" height="50" rx="6" fill="#FFFFFF"/>
+                </svg>
+            </span>
+            Portugal
         </div>
-        <a id="install-btn" href="#" class="btn">Instalar no Stremio</a>
 
-        <div class="copy-box">
-            <input type="text" id="manifest-url" readonly>
-            <button class="copy-btn" onclick="copyUrl()">Copiar</button>
+        <h1>Top Streaming</h1>
+        <p class="desc">Top 10 diário dos títulos mais vistos em Portugal para o teu Stremio.</p>
+
+        <div class="tags">
+            <span class="tag">Netflix</span>
+            <span class="tag">Disney+</span>
+            <span class="tag">Prime</span>
+            <span class="tag">HBO</span>
         </div>
+
+        <a id="install-btn" href="#" class="btn-install">
+            Instalar no Stremio
+        </a>
+
+        <button id="copy-btn" class="copy-trigger" onclick="copyUrl()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span id="copy-text">Copiar link do manifesto</span>
+        </button>
     </div>
 
     <script>
@@ -174,13 +243,14 @@ def create_landing_page():
         const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
         
         document.getElementById('install-btn').href = stremioUrl;
-        document.getElementById('manifest-url').value = manifestUrl;
 
         function copyUrl() {
-            const input = document.getElementById('manifest-url');
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            alert('URL copiado!');
+            navigator.clipboard.writeText(manifestUrl);
+            const text = document.getElementById('copy-text');
+            text.textContent = 'Copiado para a área de transferência';
+            setTimeout(() => {
+                text.textContent = 'Copiar link do manifesto';
+            }, 2000);
         }
     </script>
 </body>
