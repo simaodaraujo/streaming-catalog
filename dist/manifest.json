@@ -2,7 +2,7 @@
   "id": "org.portugal.streaming.top",
   "version": "1.0.3",
   "name": "Streaming Portugal Populares",
-  "description": "Top 10 diário real da Netflix, Disney+, Prime e HBO em Portugal",
+  "description": "Top 10 diário da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
   "resources": [
     "catalog"
   ],
@@ -10,5 +10,138 @@
     "movie",
     "series"
   ],
-  "catalogs": []
+  "catalogs": [
+    {
+      "type": "movie",
+      "id": "netflix_pt_movies",
+      "name": "Netflix Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "netflix_pt_series",
+      "name": "Netflix Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "disney_pt_movies",
+      "name": "Disney+ Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "disney_pt_series",
+      "name": "Disney+ Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "prime_pt_movies",
+      "name": "Prime Video Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "prime_pt_series",
+      "name": "Prime Video Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "hbo_pt_movies",
+      "name": "HBO Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "hbo_pt_series",
+      "name": "HBO Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "apple_pt_movies",
+      "name": "Apple TV+ Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "apple_pt_series",
+      "name": "Apple TV+ Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "skyshowtime_pt_movies",
+      "name": "SkyShowtime Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "skyshowtime_pt_series",
+      "name": "SkyShowtime Top 10",
+      "extra": [
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
 }

@@ -8,12 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #09090b;
@@ -25,122 +20,22 @@
             padding: 24px;
             -webkit-font-smoothing: antialiased;
         }
-
-        .container {
-            width: 100%;
-            max-width: 380px;
-        }
-
-        .header {
-            margin-bottom: 24px;
-        }
-
-        .meta-line {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .flag {
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            display: inline-block;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .meta-text {
-            font-size: 11px;
-            font-weight: 500;
-            color: #a1a1aa;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        h1 {
-            font-size: 19px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: #ffffff;
-            margin-bottom: 6px;
-        }
-
-        p.desc {
-            font-size: 13px;
-            line-height: 1.5;
-            color: #71717a;
-        }
-
-        .platforms {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 24px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #18181b;
-        }
-
-        .platform {
-            font-size: 11px;
-            color: #a1a1aa;
-            background: #121215;
-            border: 1px solid #27272a;
-            border-radius: 5px;
-            padding: 3px 8px;
-        }
-
-        .actions {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 10px 14px;
-            border-radius: 7px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            transition: opacity 0.15s ease, background 0.15s ease;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: #ffffff;
-            color: #09090b;
-            border: 1px solid #ffffff;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #a1a1aa;
-            border: 1px solid #27272a;
-        }
-
-        .btn-secondary:hover {
-            color: #fafafa;
-            background: #141417;
-        }
-
-        .footer-note {
-            margin-top: 24px;
-            font-size: 11px;
-            color: #52525b;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .container { width: 100%; max-width: 400px; }
+        .header { margin-bottom: 24px; }
+        .meta-line { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .flag { width: 13px; height: 13px; border-radius: 50%; display: inline-block; overflow: hidden; flex-shrink: 0; }
+        .meta-text { font-size: 11px; font-weight: 500; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.04em; }
+        h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #ffffff; margin-bottom: 6px; }
+        p.desc { font-size: 13px; line-height: 1.5; color: #71717a; }
+        .platforms { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #18181b; }
+        .platform { font-size: 11px; color: #a1a1aa; background: #121215; border: 1px solid #27272a; border-radius: 5px; padding: 3px 8px; }
+        .actions { display: flex; flex-direction: column; gap: 8px; }
+        .btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; transition: opacity 0.15s ease, background 0.15s ease; font-family: inherit; }
+        .btn-primary { background: #ffffff; color: #09090b; border: 1px solid #ffffff; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary { background: transparent; color: #a1a1aa; border: 1px solid #27272a; }
+        .btn-secondary:hover { color: #fafafa; background: #141417; }
+        .footer-note { margin-top: 24px; font-size: 11px; color: #52525b; display: flex; align-items: center; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -159,7 +54,7 @@
                 <span class="meta-text">Portugal · Stremio</span>
             </div>
             <h1>Top Streaming</h1>
-            <p class="desc">Top 10 diário real dos filmes e séries mais vistos nos serviços de streaming em Portugal.</p>
+            <p class="desc">Top 10 diário dos filmes e séries mais populares nos serviços de streaming em Portugal.</p>
         </div>
 
         <div class="platforms">
@@ -167,6 +62,8 @@
             <span class="platform">Disney+</span>
             <span class="platform">Prime</span>
             <span class="platform">HBO</span>
+            <span class="platform">Apple TV+</span>
+            <span class="platform">SkyShowtime</span>
         </div>
 
         <div class="actions">
