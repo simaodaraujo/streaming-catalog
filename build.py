@@ -31,14 +31,15 @@ PROVIDERS = [
 ]
 
 def clean_title(title):
-    cleaned = re.sub(r'(?i)\b(season|temporada)\s+\d+\b', '', title)
+    cleaned = re.sub(r'(?i)\b(season|temporada|series)\s+\d+\b', '', title)
     cleaned = re.sub(r'[\(\[].*?[\)\]]', '', cleaned)
-    return cleaned.strip(' :-–—')
+    cleaned = re.sub(r'\s*[-:–—|]\s*$', '', cleaned)
+    return cleaned.strip(' :-–—|')
 
 def get_imdb_id(tmdb_id, media_type):
     url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}/external_ids"
     try:
-        res = session.get(url, params={"api_key": TMDB_API_KEY}, timeout=5)
+        res = session.get(url, params={"api_key": TMDB_API_KEY}, timeout=7)
         if res.status_code == 200:
             return res.json().get("imdb_id")
     except Exception:
@@ -47,39 +48,43 @@ def get_imdb_id(tmdb_id, media_type):
 
 def search_tmdb_title(title, media_type):
     search_type = "movie" if media_type == "movie" else "tv"
-    url = f"https://api.themoviedb.org/3/search/{search_type}"
     query = clean_title(title)
     
-    params = {
-        "api_key": TMDB_API_KEY,
-        "query": query,
-        "language": "pt-PT",
-        "page": 1
-    }
+    url = f"https://api.themoviedb.org/3/search/{search_type}"
+    params = {"api_key": TMDB_API_KEY, "query": query, "language": "pt-PT", "page": 1}
     
     try:
-        res = session.get(url, params=params, timeout=5)
+        res = session.get(url, params=params, timeout=7)
         results = res.json().get("results", []) if res.status_code == 200 else []
         
         if not results:
             params.pop("language", None)
-            res = session.get(url, params=params, timeout=5)
+            res = session.get(url, params=params, timeout=7)
             results = res.json().get("results", []) if res.status_code == 200 else []
+
+        if not results and search_type == "tv":
+            multi_url = "https://api.themoviedb.org/3/search/multi"
+            res = session.get(multi_url, params={"api_key": TMDB_API_KEY, "query": query, "page": 1}, timeout=7)
+            multi_res = res.json().get("results", []) if res.status_code == 200 else []
+            results = [r for r in multi_res if r.get("media_type") in ["tv", "movie"]]
 
         if results:
             best = results[0]
+            actual_type = best.get("media_type", search_type)
             tmdb_id = best["id"]
-            imdb_id = get_imdb_id(tmdb_id, search_type)
+            imdb_id = get_imdb_id(tmdb_id, actual_type)
+            
             if imdb_id:
-                name = best.get("title") if search_type == "movie" else best.get("name")
+                name = best.get("name") if actual_type == "tv" else best.get("title")
                 return {
                     "id": imdb_id,
-                    "type": "movie" if media_type == "movie" else "series",
+                    "type": "series" if actual_type == "tv" else "movie",
                     "name": name or title,
                     "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
                 }
     except Exception as e:
         print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
+        
     return None
 
 def get_tmdb_fallback(tmdb_provider_id, media_type):
@@ -201,6 +206,8 @@ def create_landing_page():
       height: auto;
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
+      user-select: none;
+      -webkit-user-drag: none;
     }}
     p.subtitle {{
       font-size: 14px;
@@ -259,6 +266,53 @@ def create_landing_page():
       color: #f5f5f7;
     }}
     .btn svg {{ width: 20px; height: 20px; }}
+    
+    .recommendations {{
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid #27272a;
+      text-align: left;
+    }}
+    .rec-title {{
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #71717a;
+      margin-bottom: 12px;
+      text-align: center;
+    }}
+    .rec-list {{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }}
+    .rec-item {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #e4e4e7;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }}
+    .rec-item:hover {{
+      background-color: #323238;
+      border-color: #52525b;
+      color: #ffffff;
+    }}
+    .rec-item span.badge {{
+      font-size: 10px;
+      color: #a1a1aa;
+      background: #18181b;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }}
+
     .footer {{
       margin-top: 32px;
       font-size: 12px;
@@ -274,7 +328,7 @@ def create_landing_page():
 </head>
 <body>
   <div class="wrapper">
-    <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" onerror="this.style.display='none'">
+    <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
     
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
 
@@ -325,10 +379,32 @@ def create_landing_page():
       Copiar manifest
     </button>
 
+    <div class="recommendations">
+      <div class="rec-title">Extensões que recomendo</div>
+      <div class="rec-list">
+        <a href="https://real-debrid.com/" target="_blank" rel="noopener" class="rec-item">
+          <span>Real-Debrid</span>
+          <span class="badge">Debrid</span>
+        </a>
+        <a href="https://subdl.strem.top/configure" target="_blank" rel="noopener" class="rec-item">
+          <span>SubDL Subtitles</span>
+          <span class="badge">Legendas</span>
+        </a>
+        <a href="https://opensubtitles-v3.strem.io/" target="_blank" rel="noopener" class="rec-item">
+          <span>OpenSubtitles v3</span>
+          <span class="badge">Legendas</span>
+        </a>
+        <a href="https://stremio-addons.net/addons/imdb-ratings" target="_blank" rel="noopener" class="rec-item">
+          <span>IMDb Ratings</span>
+          <span class="badge">Avaliações</span>
+        </a>
+      </div>
+    </div>
+
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
-      <span class="version">v1.0.6</span>
+      <span class="version">v1.0.7</span>
     </div>
   </div>
 
@@ -435,7 +511,7 @@ def main():
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.6",
+        "version": "1.0.7",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 diário real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": "logo.png",
