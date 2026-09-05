@@ -120,25 +120,28 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
         print(f"  [!] Erro Fallback TMDB: {e}", flush=True)
     return items
 
+from curl_cffi import requests as cffi_requests
+from bs4 import BeautifulSoup
+
 def scrape_flixpatrol(flix_slug):
     movies, series = [], []
     target_url = f"https://flixpatrol.com/top10/{flix_slug}/portugal/today/"
-
-    if not SCRAPER_API_KEY:
-        print(f"  [i] SCRAPER_API_KEY não definida. A saltar scraping direto...", flush=True)
-        return movies, series
-
-    payload = {
-        "api_key": SCRAPER_API_KEY,
-        "url": target_url,
-        "render": "false"
-    }
-
-    print(f"  -> A contactar ScraperAPI para {flix_slug}...", flush=True)
+    
+    print(f"  -> A extrair FlixPatrol diretamente para {flix_slug}...", flush=True)
     try:
-        res = requests.get("https://api.scraperapi.com/", params=payload, timeout=15)
+        # impersonate="chrome124" emula a handshake TLS de um browser real
+        res = cffi_requests.get(
+            target_url,
+            impersonate="chrome124",
+            headers={
+                "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Referer": "https://flixpatrol.com/"
+            },
+            timeout=15
+        )
+        
         if res.status_code != 200:
-            print(f"  [!] ScraperAPI devolveu status HTTP {res.status_code}", flush=True)
+            print(f"  [!] FlixPatrol devolveu HTTP {res.status_code}", flush=True)
             return movies, series
 
         soup = BeautifulSoup(res.text, "html.parser")
@@ -165,7 +168,7 @@ def scrape_flixpatrol(flix_slug):
         print(f"  -> FlixPatrol: {len(movies)} filmes e {len(series)} séries encontrados.", flush=True)
 
     except Exception as e:
-        print(f"  [!] Timeout ou erro no ScraperAPI: {e}", flush=True)
+        print(f"  [!] Erro ao extrair FlixPatrol: {e}", flush=True)
 
     return movies, series
 
