@@ -257,7 +257,7 @@ def create_landing_page():
       background-color: #27272a;
       color: #f5f5f7;
     }}
-    .btn-stremio svg {{ width: 20px; height: 20px; fill: currentColor; }}
+    .btn svg {{ width: 20px; height: 20px; }}
     .footer {{
       margin-top: 32px;
       font-size: 12px;
@@ -310,14 +310,18 @@ def create_landing_page():
     </div>
 
     <a id="install-btn" href="#" class="btn btn-stremio">
-      <svg viewBox="0 0 24 24">
+      <svg viewBox="0 0 24 24" style="fill: currentColor;">
         <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
       </svg>
       Instalar Addon
     </a>
     
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
-      📋 Copiar manifest
+      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+      </svg>
+      Copiar manifest
     </button>
 
     <div class="footer">
@@ -338,7 +342,13 @@ def create_landing_page():
       const btn = document.getElementById('copy-btn');
       btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
       setTimeout(() => {{
-        btn.innerHTML = '📋 Copiar manifest';
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Copiar manifest
+        `;
       }}, 2000);
     }}
 
