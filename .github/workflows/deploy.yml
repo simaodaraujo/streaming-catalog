@@ -30,14 +30,11 @@ jobs:
       - name: Instalar Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Ligar projeto à Vercel
+      - name: Publicar pasta dist para Produção
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-
-      - name: Publicar pasta dist para Produção
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel deploy dist --prod --token=$VERCEL_TOKEN --yes
+        run: |
+          cd dist
+          vercel deploy --prod --yes --force --token=$VERCEL_TOKEN --scope=$VERCEL_ORG_ID
