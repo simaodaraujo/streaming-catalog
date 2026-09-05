@@ -14,10 +14,12 @@ session.mount("https://", adapter)
 session.mount("http://", adapter)
 
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "provider_id": 8, "region": "PT"},
-    {"id": "disney", "name": "Disney+", "provider_id": 337, "region": "PT"},
-    {"id": "prime", "name": "Prime Video", "provider_id": 119, "region": "PT"},
-    {"id": "hbo", "name": "Hbo", "provider_id": 1899, "region": "PT"},
+    {"id": "netflix", "name": "Netflix", "provider_id": 8},
+    {"id": "disney", "name": "Disney+", "provider_id": 337},
+    {"id": "prime", "name": "Prime Video", "provider_id": 119},
+    {"id": "hbo", "name": "HBO", "provider_id": 1899},
+    {"id": "apple", "name": "Apple TV+", "provider_id": 350},
+    {"id": "skyshowtime", "name": "SkyShowtime", "provider_id": 1773}
 ]
 
 def get_imdb_id(tmdb_id, media_type):
@@ -30,11 +32,11 @@ def get_imdb_id(tmdb_id, media_type):
         pass
     return None
 
-def get_tmdb_popular(provider_id, media_type, region="PT"):
+def get_tmdb_popular(provider_id, media_type):
     url = f"https://api.themoviedb.org/3/discover/{media_type}"
     params = {
         "api_key": TMDB_API_KEY,
-        "watch_region": region,
+        "watch_region": "PT",
         "with_watch_providers": provider_id,
         "sort_by": "popularity.desc",
         "language": "pt-PT",
@@ -68,7 +70,7 @@ def create_landing_page():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Streaming — Stremio</title>
+    <title>Top Streaming Portugal — Stremio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -93,7 +95,7 @@ def create_landing_page():
 
         .wrapper {
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -221,13 +223,15 @@ def create_landing_page():
         </div>
 
         <h1>Top Streaming</h1>
-        <p class="desc">Top 10 diário de Filmes e Séries das principais plataformas para o teu Stremio.</p>
+        <p class="desc">Top 10 diário de Filmes e Séries das principais plataformas em Portugal.</p>
 
         <div class="tags">
             <span class="tag">Netflix</span>
             <span class="tag">Disney+</span>
             <span class="tag">Prime</span>
-            <span class="tag">Hbo</span>
+            <span class="tag">HBO</span>
+            <span class="tag">Apple TV+</span>
+            <span class="tag">SkyShowtime</span>
         </div>
 
         <a id="install-btn" href="#" class="btn-install">
@@ -268,8 +272,8 @@ def main():
     manifest_catalogs = []
 
     for prov in PROVIDERS:
-        print(f"A descarregar {prov['name']}...")
-        movies = get_tmdb_popular(prov["provider_id"], "movie", prov["region"])
+        print(f"A descarregar {prov['name']} (Portugal)...")
+        movies = get_tmdb_popular(prov["provider_id"], "movie")
         print(f"  -> Filmes: {len(movies)}")
         if movies:
             cat_id = f"{prov['id']}_pt_movies"
@@ -278,10 +282,11 @@ def main():
             manifest_catalogs.append({
                 "type": "movie",
                 "id": cat_id,
-                "name": f"{prov['name']} top 10 movies"
+                "name": f"{prov['name']} Top 10",
+                "extra": [{"name": "skip", "isRequired": False}]
             })
 
-        series = get_tmdb_popular(prov["provider_id"], "tv", prov["region"])
+        series = get_tmdb_popular(prov["provider_id"], "tv")
         print(f"  -> Séries: {len(series)}")
         if series:
             cat_id = f"{prov['id']}_pt_series"
@@ -290,14 +295,15 @@ def main():
             manifest_catalogs.append({
                 "type": "series",
                 "id": cat_id,
-                "name": f"{prov['name']} top 10 tvshows"
+                "name": f"{prov['name']} Top 10",
+                "extra": [{"name": "skip", "isRequired": False}]
             })
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "name": "Streaming Portugal Populares",
-        "description": "Filmes e Séries populares em Portugal (Netflix, Disney+, Prime, Hbo, Paramount+, Hulu)",
+        "description": "Top 10 diário dos serviços de streaming em Portugal",
         "resources": ["catalog"],
         "types": ["movie", "series"],
         "catalogs": manifest_catalogs
@@ -307,7 +313,7 @@ def main():
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
     create_landing_page()
-    print(f"Finalizado: {len(manifest_catalogs)} catálogos registados.")
+    print(f"Concluído: {len(manifest_catalogs)} catálogos gerados.")
 
 if __name__ == "__main__":
     main()
