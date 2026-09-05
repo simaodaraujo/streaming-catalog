@@ -2,13 +2,15 @@ import os
 import json
 import time
 import requests
+from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
+SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY")
 
 if not TMDB_API_KEY:
-    raise ValueError("TMDB_API_KEY não foi encontrada nas variáveis de ambiente.")
+    raise ValueError("TMDB_API_KEY não configurada.")
 
 session = requests.Session()
 retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
@@ -17,12 +19,12 @@ session.mount("https://", adapter)
 session.mount("http://", adapter)
 
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "tmdb_id": 8},
-    {"id": "disney", "name": "Disney+", "tmdb_id": 337},
-    {"id": "prime", "name": "Prime Video", "tmdb_id": 119},
-    {"id": "hbo", "name": "HBO", "tmdb_id": 1899},
-    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350},
-    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773}
+    {"id": "netflix", "name": "Netflix", "flix_slug": "netflix", "tmdb_id": 8},
+    {"id": "disney", "name": "Disney+", "flix_slug": "disney", "tmdb_id": 337},
+    {"id": "prime", "name": "Prime Video", "flix_slug": "amazon-prime", "tmdb_id": 119},
+    {"id": "hbo", "name": "HBO", "flix_slug": "hbo", "tmdb_id": 1899},
+    {"id": "apple", "name": "Apple TV+", "flix_slug": "apple-tv", "tmdb_id": 350},
+    {"id": "skyshowtime", "name": "SkyShowtime", "flix_slug": "skyshowtime", "tmdb_id": 1773}
 ]
 
 def get_imdb_id(tmdb_id, media_type):
@@ -35,7 +37,36 @@ def get_imdb_id(tmdb_id, media_type):
         pass
     return None
 
-def fetch_top_items(tmdb_provider_id, media_type):
+def search_tmdb_title(title, media_type):
+    search_type = "movie" if media_type == "movie" else "tv"
+    url = f"https://api.themoviedb.org/3/search/{search_type}"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "query": title,
+        "language": "pt-PT",
+        "page": 1
+    }
+    try:
+        res = session.get(url, params=params, timeout=6)
+        if res.status_code == 200:
+            results = res.json().get("results", [])
+            if results:
+                best = results[0]
+                tmdb_id = best["id"]
+                imdb_id = get_imdb_id(tmdb_id, search_type)
+                if imdb_id:
+                    name = best.get("title") if search_type == "movie" else best.get("name")
+                    return {
+                        "id": imdb_id,
+                        "type": "movie" if media_type == "movie" else "series",
+                        "name": name or title,
+                        "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
+                    }
+    except Exception as e:
+        print(f"Erro TMDB ({title}): {e}")
+    return None
+
+def get_tmdb_fallback(tmdb_provider_id, media_type):
     search_type = "movie" if media_type == "movie" else "tv"
     url = f"https://api.themoviedb.org/3/discover/{search_type}"
     params = {
@@ -64,8 +95,54 @@ def fetch_top_items(tmdb_provider_id, media_type):
                         "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}" if item.get("poster_path") else None
                     })
     except Exception as e:
-        print(f"Erro ao obter dados: {e}")
+        print(f"Erro Fallback TMDB: {e}")
     return items
+
+def scrape_flixpatrol(flix_slug):
+    movies, series = [], []
+    target_url = f"https://flixpatrol.com/top10/{flix_slug}/portugal/today/"
+
+    if not SCRAPER_API_KEY:
+        print(f"  [i] SCRAPER_API_KEY não definida. A ignorar scraping de {flix_slug}...")
+        return movies, series
+
+    payload = {
+        "api_key": SCRAPER_API_KEY,
+        "url": target_url,
+        "render": "true"
+    }
+
+    try:
+        res = session.get("https://api.scraperapi.com/", params=payload, timeout=45)
+        if res.status_code != 200:
+            print(f"  [!] ScraperAPI devolveu HTTP {res.status_code} para {flix_slug}")
+            return movies, series
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        tables = soup.find_all("table")
+
+        for idx, table in enumerate(tables):
+            extracted = []
+            for row in table.select("tbody tr") or table.select("tr"):
+                if len(extracted) >= 10:
+                    break
+                for a in row.find_all("a"):
+                    href = a.get("href", "")
+                    text = a.get_text(strip=True)
+                    if "/title/" in href and text and not text.isdigit():
+                        if text not in extracted:
+                            extracted.append(text)
+                        break
+
+            if idx == 0 and not movies:
+                movies = extracted
+            elif idx == 1 and not series:
+                series = extracted
+
+    except Exception as e:
+        print(f"Erro scraping ({flix_slug}): {e}")
+
+    return movies, series
 
 def create_landing_page():
     html_content = """<!DOCTYPE html>
@@ -124,7 +201,7 @@ def create_landing_page():
                 <span class="meta-text">Portugal · Stremio</span>
             </div>
             <h1>Top Streaming</h1>
-            <p class="desc">Top 10 diário dos filmes e séries mais populares nos serviços de streaming em Portugal.</p>
+            <p class="desc">Top 10 diário real dos filmes e séries mais vistos nos serviços de streaming em Portugal.</p>
         </div>
 
         <div class="platforms">
@@ -180,10 +257,21 @@ def main():
     manifest_catalogs = []
 
     for prov in PROVIDERS:
-        print(f"A processar {prov['name']} (Portugal)...")
+        print(f"\nA processar {prov['name']} via FlixPatrol...")
+        movie_titles, series_titles = scrape_flixpatrol(prov["flix_slug"])
 
-        movie_items = fetch_top_items(prov["tmdb_id"], "movie")
-        print(f"  -> Filmes: {len(movie_items)}/10")
+        movie_items = []
+        for title in movie_titles:
+            item = search_tmdb_title(title, "movie")
+            if item:
+                movie_items.append(item)
+            time.sleep(0.04)
+
+        if not movie_items:
+            print(f"  [i] A aplicar fallback TMDB para filmes ({prov['name']})...")
+            movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
+
+        print(f"  -> Filmes registados: {len(movie_items)}/10")
         if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
@@ -195,8 +283,18 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
-        series_items = fetch_top_items(prov["tmdb_id"], "series")
-        print(f"  -> Séries: {len(series_items)}/10")
+        series_items = []
+        for title in series_titles:
+            item = search_tmdb_title(title, "series")
+            if item:
+                series_items.append(item)
+            time.sleep(0.04)
+
+        if not series_items:
+            print(f"  [i] A aplicar fallback TMDB para séries ({prov['name']})...")
+            series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
+
+        print(f"  -> Séries registadas: {len(series_items)}/10")
         if series_items:
             cat_id = f"{prov['id']}_pt_series"
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
@@ -212,7 +310,7 @@ def main():
         "id": "org.portugal.streaming.top",
         "version": "1.0.3",
         "name": "Streaming Portugal Populares",
-        "description": "Top 10 diário da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
+        "description": "Top 10 diário real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "resources": ["catalog"],
         "types": ["movie", "series"],
         "catalogs": manifest_catalogs
