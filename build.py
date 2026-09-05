@@ -228,8 +228,6 @@ def create_landing_page():
             <span class="tag">Disney+</span>
             <span class="tag">Prime</span>
             <span class="tag">Hbo</span>
-            <span class="tag">Paramount+</span>
-            <span class="tag">Hulu</span>
         </div>
 
         <a id="install-btn" href="#" class="btn-install">
