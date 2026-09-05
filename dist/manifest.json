@@ -1,0 +1,55 @@
+{
+  "id": "org.portugal.streaming.top",
+  "version": "1.0.0",
+  "name": "Streaming Portugal Populares",
+  "description": "Filmes e Séries populares em Portugal (Netflix, Disney+, Prime, Max)",
+  "resources": [
+    "catalog"
+  ],
+  "types": [
+    "movie",
+    "series"
+  ],
+  "catalogs": [
+    {
+      "type": "movie",
+      "id": "netflix_pt_movies",
+      "name": "Netflix PT - Filmes"
+    },
+    {
+      "type": "series",
+      "id": "netflix_pt_series",
+      "name": "Netflix PT - Séries"
+    },
+    {
+      "type": "movie",
+      "id": "disney_pt_movies",
+      "name": "Disney+ PT - Filmes"
+    },
+    {
+      "type": "series",
+      "id": "disney_pt_series",
+      "name": "Disney+ PT - Séries"
+    },
+    {
+      "type": "movie",
+      "id": "prime_pt_movies",
+      "name": "Prime Video PT - Filmes"
+    },
+    {
+      "type": "series",
+      "id": "prime_pt_series",
+      "name": "Prime Video PT - Séries"
+    },
+    {
+      "type": "movie",
+      "id": "hbo_pt_movies",
+      "name": "Max (HBO) PT - Filmes"
+    },
+    {
+      "type": "series",
+      "id": "hbo_pt_series",
+      "name": "Max (HBO) PT - Séries"
+    }
+  ]
+}
