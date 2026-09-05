@@ -2,6 +2,7 @@ import os
 import json
 import time
 import requests
+from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -12,14 +13,15 @@ retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 50
 adapter = HTTPAdapter(max_retries=retries)
 session.mount("https://", adapter)
 session.mount("http://", adapter)
+session.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+})
 
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "provider_id": 8},
-    {"id": "disney", "name": "Disney+", "provider_id": 337},
-    {"id": "prime", "name": "Prime Video", "provider_id": 119},
-    {"id": "hbo", "name": "HBO", "provider_id": 1899},
-    {"id": "apple", "name": "Apple TV+", "provider_id": 350},
-    {"id": "skyshowtime", "name": "SkyShowtime", "provider_id": 1773}
+    {"id": "netflix", "name": "Netflix", "flix_slug": "netflix", "tmdb_id": 8},
+    {"id": "disney", "name": "Disney+", "flix_slug": "disney", "tmdb_id": 337},
+    {"id": "prime", "name": "Prime Video", "flix_slug": "amazon-prime", "tmdb_id": 119},
+    {"id": "hbo", "name": "HBO", "flix_slug": "hbo", "tmdb_id": 1899}
 ]
 
 def get_imdb_id(tmdb_id, media_type):
@@ -32,37 +34,62 @@ def get_imdb_id(tmdb_id, media_type):
         pass
     return None
 
-def get_tmdb_popular(provider_id, media_type):
-    url = f"https://api.themoviedb.org/3/discover/{media_type}"
+def search_tmdb_title(title, media_type):
+    search_type = "movie" if media_type == "movie" else "tv"
+    url = f"https://api.themoviedb.org/3/search/{search_type}"
     params = {
         "api_key": TMDB_API_KEY,
-        "watch_region": "PT",
-        "with_watch_providers": provider_id,
-        "sort_by": "popularity.desc",
+        "query": title,
         "language": "pt-PT",
         "page": 1
     }
     try:
-        res = session.get(url, params=params, timeout=10)
+        res = session.get(url, params=params, timeout=6)
         if res.status_code == 200:
             results = res.json().get("results", [])
-            items = []
-            for item in results[:10]:
-                title = item.get("title") if media_type == "movie" else item.get("name")
-                tmdb_id = item["id"]
-                imdb_id = get_imdb_id(tmdb_id, media_type)
-                time.sleep(0.08)
+            if results:
+                best = results[0]
+                tmdb_id = best["id"]
+                imdb_id = get_imdb_id(tmdb_id, search_type)
                 if imdb_id:
-                    items.append({
+                    name = best.get("title") if search_type == "movie" else best.get("name")
+                    return {
                         "id": imdb_id,
                         "type": "movie" if media_type == "movie" else "series",
-                        "name": title,
-                        "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}" if item.get("poster_path") else None
-                    })
-            return items
+                        "name": name or title,
+                        "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
+                    }
     except Exception as e:
-        print(f"Erro TMDB: {e}")
-    return []
+        print(f"Erro na pesquisa TMDB ({title}): {e}")
+    return None
+
+def scrape_flixpatrol(flix_slug):
+    url = f"https://flixpatrol.com/top10/{flix_slug}/portugal/today/"
+    movies, series = [], []
+    try:
+        res = session.get(url, timeout=10)
+        if res.status_code != 200:
+            return movies, series
+
+        soup = BeautifulSoup(res.text, "html.parser")
+        tables = soup.select("table")
+        
+        if len(tables) >= 2:
+            movie_rows = tables[0].select("tbody tr")[:10]
+            for row in movie_rows:
+                title_elem = row.select_one("a")
+                if title_elem:
+                    movies.append(title_elem.text.strip())
+
+            series_rows = tables[1].select("tbody tr")[:10]
+            for row in series_rows:
+                title_elem = row.select_one("a")
+                if title_elem:
+                    series.append(title_elem.text.strip())
+    except Exception as e:
+        print(f"Erro no scraping FlixPatrol ({flix_slug}): {e}")
+
+    return movies, series
 
 def create_landing_page():
     html_content = """<!DOCTYPE html>
@@ -75,12 +102,7 @@ def create_landing_page():
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Geist', -apple-system, sans-serif;
             background: #000000;
@@ -92,16 +114,14 @@ def create_landing_page():
             padding: 24px;
             -webkit-font-smoothing: antialiased;
         }
-
         .wrapper {
             width: 100%;
-            max-width: 460px;
+            max-width: 440px;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
-
         .badge {
             display: inline-flex;
             align-items: center;
@@ -116,7 +136,6 @@ def create_landing_page():
             background: #0a0a0a;
             margin-bottom: 28px;
         }
-
         .flag-icon {
             width: 14px;
             height: 14px;
@@ -124,31 +143,9 @@ def create_landing_page():
             overflow: hidden;
             display: inline-flex;
         }
-
-        h1 {
-            font-size: 26px;
-            font-weight: 600;
-            letter-spacing: -0.03em;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-
-        p.desc {
-            font-size: 14px;
-            color: #888;
-            line-height: 1.5;
-            font-weight: 400;
-            margin-bottom: 32px;
-        }
-
-        .tags {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 36px;
-        }
-
+        h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; color: #fff; margin-bottom: 8px; }
+        p.desc { font-size: 14px; color: #888; line-height: 1.5; font-weight: 400; margin-bottom: 32px; }
+        .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 36px; }
         .tag {
             font-size: 11px;
             font-weight: 500;
@@ -159,7 +156,6 @@ def create_landing_page():
             border-radius: 6px;
             letter-spacing: -0.01em;
         }
-
         .btn-install {
             width: 100%;
             display: flex;
@@ -176,12 +172,7 @@ def create_landing_page():
             transition: all 0.15s ease;
             margin-bottom: 12px;
         }
-
-        .btn-install:hover {
-            background: #ffffff;
-            transform: translateY(-1px);
-        }
-
+        .btn-install:hover { background: #ffffff; transform: translateY(-1px); }
         .copy-trigger {
             background: none;
             border: none;
@@ -195,16 +186,8 @@ def create_landing_page():
             transition: color 0.15s ease;
             font-family: inherit;
         }
-
-        .copy-trigger:hover {
-            color: #aaa;
-        }
-
-        .copy-trigger svg {
-            width: 13px;
-            height: 13px;
-            stroke-width: 1.8;
-        }
+        .copy-trigger:hover { color: #aaa; }
+        .copy-trigger svg { width: 13px; height: 13px; stroke-width: 1.8; }
     </style>
 </head>
 <body>
@@ -223,15 +206,13 @@ def create_landing_page():
         </div>
 
         <h1>Top Streaming</h1>
-        <p class="desc">Top 10 diário de Filmes e Séries das principais plataformas em Portugal.</p>
+        <p class="desc">Top 10 diário real dos mais vistos em Portugal para o teu Stremio.</p>
 
         <div class="tags">
             <span class="tag">Netflix</span>
             <span class="tag">Disney+</span>
             <span class="tag">Prime</span>
             <span class="tag">HBO</span>
-            <span class="tag">Apple TV+</span>
-            <span class="tag">SkyShowtime</span>
         </div>
 
         <a id="install-btn" href="#" class="btn-install">
@@ -272,13 +253,21 @@ def main():
     manifest_catalogs = []
 
     for prov in PROVIDERS:
-        print(f"A descarregar {prov['name']} (Portugal)...")
-        movies = get_tmdb_popular(prov["provider_id"], "movie")
-        print(f"  -> Filmes: {len(movies)}")
-        if movies:
+        print(f"\n--- A processar {prov['name']} via FlixPatrol (PT) ---")
+        movie_titles, series_titles = scrape_flixpatrol(prov["flix_slug"])
+        
+        movie_items = []
+        for title in movie_titles:
+            item = search_tmdb_title(title, "movie")
+            if item:
+                movie_items.append(item)
+            time.sleep(0.08)
+
+        print(f"Filmes encontrados: {len(movie_items)}/10")
+        if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
-                json.dump({"metas": movies}, f, ensure_ascii=False)
+                json.dump({"metas": movie_items}, f, ensure_ascii=False)
             manifest_catalogs.append({
                 "type": "movie",
                 "id": cat_id,
@@ -286,12 +275,18 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
-        series = get_tmdb_popular(prov["provider_id"], "tv")
-        print(f"  -> Séries: {len(series)}")
-        if series:
+        series_items = []
+        for title in series_titles:
+            item = search_tmdb_title(title, "series")
+            if item:
+                series_items.append(item)
+            time.sleep(0.08)
+
+        print(f"Séries encontradas: {len(series_items)}/10")
+        if series_items:
             cat_id = f"{prov['id']}_pt_series"
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
-                json.dump({"metas": series}, f, ensure_ascii=False)
+                json.dump({"metas": series_items}, f, ensure_ascii=False)
             manifest_catalogs.append({
                 "type": "series",
                 "id": cat_id,
@@ -301,9 +296,9 @@ def main():
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "name": "Streaming Portugal Populares",
-        "description": "Top 10 diário dos serviços de streaming em Portugal",
+        "description": "Top 10 diário real da Netflix, Disney+, Prime e HBO em Portugal",
         "resources": ["catalog"],
         "types": ["movie", "series"],
         "catalogs": manifest_catalogs
@@ -313,7 +308,7 @@ def main():
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
     create_landing_page()
-    print(f"Concluído: {len(manifest_catalogs)} catálogos gerados.")
+    print(f"\nFinalizado com sucesso! {len(manifest_catalogs)} catálogos registados.")
 
 if __name__ == "__main__":
     main()
