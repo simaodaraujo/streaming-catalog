@@ -2,7 +2,7 @@ name: Deploy Stremio Addon
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '30 9 * * *'
   workflow_dispatch:
   push:
     branches: [ main ]
