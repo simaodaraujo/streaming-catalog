@@ -2,9 +2,8 @@ name: Deploy Stremio Addon
 
 on:
   schedule:
-    # Executa todos os dias às 06:00 UTC para atualizar os tops
     - cron: '0 6 * * *'
-  workflow_dispatch: # Permite correr manualmente quando quiseres
+  workflow_dispatch:
   push:
     branches: [ main ]
 
@@ -33,6 +32,8 @@ jobs:
         run: pip install requests
 
       - name: Run Builder
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: python build.py
 
       - name: Setup Pages

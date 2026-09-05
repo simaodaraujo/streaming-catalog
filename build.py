@@ -5,9 +5,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-TMDB_API_KEY = "72c63cafe1d6a9c46d4c9ec104883a18"
+TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "72c63cafe1d6a9c46d4c9ec104883a18")
 
-# Sessão com pooling de conexões e retries automáticos
 session = requests.Session()
 retries = Retry(total=3, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
 adapter = HTTPAdapter(max_retries=retries)
@@ -18,7 +17,7 @@ PROVIDERS = [
     {"id": "netflix", "name": "Netflix", "provider_id": 8},
     {"id": "disney", "name": "Disney+", "provider_id": 337},
     {"id": "prime", "name": "Prime Video", "provider_id": 119},
-    {"id": "hbo", "name": "Max (HBO)", "provider_id": 1899}
+    {"id": "hbo", "name": "HBO", "provider_id": 1899}
 ]
 
 def get_imdb_id(tmdb_id, media_type):
@@ -50,8 +49,7 @@ def get_tmdb_popular(provider_id, media_type):
                 title = item.get("title") if media_type == "movie" else item.get("name")
                 tmdb_id = item["id"]
                 imdb_id = get_imdb_id(tmdb_id, media_type)
-                time.sleep(0.08)  # Evita atingir o rate-limit do socket
-                
+                time.sleep(0.08)
                 if imdb_id:
                     items.append({
                         "id": imdb_id,
@@ -61,8 +59,135 @@ def get_tmdb_popular(provider_id, media_type):
                     })
             return items
     except Exception as e:
-        print(f"Erro ao consultar TMDB ({media_type}): {e}")
+        print(f"Erro TMDB: {e}")
     return []
+
+def create_landing_page():
+    html_content = """<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Portugal Top 10 - Stremio Addon</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+        h1 { margin-top: 0; font-size: 1.75rem; color: #fff; }
+        p { color: #94a3b8; line-height: 1.6; font-size: 0.95rem; }
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: #334155;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .btn {
+            display: inline-block;
+            background: #7c3aed;
+            color: white;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 15px;
+            width: 80%;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #6d28d9; }
+        .copy-box {
+            margin-top: 25px;
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #334155;
+        }
+        .copy-box input {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            width: 100%;
+            outline: none;
+            font-size: 0.85rem;
+        }
+        .copy-btn {
+            background: #334155;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .copy-btn:hover { background: #475569; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🇵🇹 Top Streaming Portugal</h1>
+        <p>Top 10 diário dos títulos mais populares em Portugal.</p>
+        <div class="badges">
+            <span class="badge">Netflix</span>
+            <span class="badge">Disney+</span>
+            <span class="badge">Prime Video</span>
+            <span class="badge">HBO</span>
+        </div>
+        <a id="install-btn" href="#" class="btn">Instalar no Stremio</a>
+
+        <div class="copy-box">
+            <input type="text" id="manifest-url" readonly>
+            <button class="copy-btn" onclick="copyUrl()">Copiar</button>
+        </div>
+    </div>
+
+    <script>
+        const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
+        const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
+        
+        document.getElementById('install-btn').href = stremioUrl;
+        document.getElementById('manifest-url').value = manifestUrl;
+
+        function copyUrl() {
+            const input = document.getElementById('manifest-url');
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            alert('URL copiado!');
+        }
+    </script>
+</body>
+</html>
+"""
+    with open("dist/index.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
 
 def main():
     os.makedirs("dist/catalog/movie", exist_ok=True)
@@ -71,9 +196,7 @@ def main():
     manifest_catalogs = []
 
     for prov in PROVIDERS:
-        print(f"A descarregar dados de {prov['name']} (Portugal)...")
-        
-        # Filmes
+        print(f"A descarregar {prov['name']}...")
         movies = get_tmdb_popular(prov["provider_id"], "movie")
         print(f"  -> Filmes: {len(movies)}")
         if movies:
@@ -83,10 +206,9 @@ def main():
             manifest_catalogs.append({
                 "type": "movie",
                 "id": cat_id,
-                "name": f"{prov['name']} PT - Filmes"
+                "name": f"{prov['name']} top 10 movies"
             })
 
-        # Séries
         series = get_tmdb_popular(prov["provider_id"], "tv")
         print(f"  -> Séries: {len(series)}")
         if series:
@@ -96,14 +218,14 @@ def main():
             manifest_catalogs.append({
                 "type": "series",
                 "id": cat_id,
-                "name": f"{prov['name']} PT - Séries"
+                "name": f"{prov['name']} top 10 tvshows"
             })
 
     manifest = {
         "id": "org.portugal.streaming.top",
         "version": "1.0.0",
         "name": "Streaming Portugal Populares",
-        "description": "Filmes e Séries populares em Portugal (Netflix, Disney+, Prime, Max)",
+        "description": "Filmes e Séries populares em Portugal (Netflix, Disney+, Prime, HBO)",
         "resources": ["catalog"],
         "types": ["movie", "series"],
         "catalogs": manifest_catalogs
@@ -112,7 +234,8 @@ def main():
     with open("dist/manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
-    print(f"\nConcluído! {len(manifest_catalogs)} catálogos gerados com sucesso.")
+    create_landing_page()
+    print(f"Finalizado: {len(manifest_catalogs)} catálogos registados.")
 
 if __name__ == "__main__":
     main()
