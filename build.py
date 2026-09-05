@@ -93,289 +93,119 @@ def scrape_flixpatrol(flix_slug):
 
 def create_landing_page():
     html_content = """<!DOCTYPE html>
-<html lang="pt">
+<html lang="pt" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Top Streaming Portugal — Stremio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-base: #090d14;
-            --card-bg: rgba(17, 24, 39, 0.65);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
-            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-base);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.07) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.5) 0px, transparent 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #07090e;
         }
-
-        .container {
-            width: 100%;
-            max-width: 460px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .hero-card {
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 20px;
-            padding: 32px 28px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-            margin-bottom: 24px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            padding: 5px 12px 5px 8px;
-            border-radius: 99px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            background: rgba(255, 255, 255, 0.03);
-            margin-bottom: 20px;
-        }
-
-        .flag-icon {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            overflow: hidden;
-            display: inline-flex;
-        }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: -0.03em;
-            color: #ffffff;
-            margin-bottom: 8px;
-        }
-
-        p.desc {
-            font-size: 13.5px;
-            color: var(--text-secondary);
-            line-height: 1.55;
-            margin-bottom: 24px;
-        }
-
-        .tags {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-
-        .tag {
-            font-size: 11.5px;
-            font-weight: 500;
-            color: #cbd5e1;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 4px 10px;
-            border-radius: 6px;
-        }
-
-        .btn-install {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: #f8fafc;
-            color: #090d14;
-            text-decoration: none;
-            padding: 13px 20px;
-            border-radius: 12px;
-            font-size: 13.5px;
-            font-weight: 600;
-            transition: all 0.15s ease;
-            margin-bottom: 12px;
-        }
-
-        .btn-install:hover {
-            background: #ffffff;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12);
-        }
-
-        .copy-trigger {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            padding: 6px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.15s ease;
-            font-family: inherit;
-        }
-
-        .copy-trigger:hover { color: var(--text-secondary); }
-        .copy-trigger svg { width: 13px; height: 13px; stroke-width: 1.8; }
-
-        .addons-section {
-            width: 100%;
-            text-align: left;
-        }
-
-        .addons-title {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            padding-left: 4px;
-        }
-
-        .addon-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .addon-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: rgba(17, 24, 39, 0.45);
-            border: 1px solid var(--card-border);
-            text-decoration: none;
-            color: inherit;
-            transition: background 0.15s, border-color 0.15s, transform 0.15s;
-        }
-
-        .addon-card:hover {
-            background: rgba(30, 41, 59, 0.5);
-            border-color: rgba(255, 255, 255, 0.15);
-            transform: translateY(-1px);
-        }
-
-        .addon-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .addon-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .addon-desc {
-            font-size: 11.5px;
-            color: var(--text-secondary);
-        }
-
-        .arrow-icon {
-            color: var(--text-muted);
-            width: 14px;
-            height: 14px;
-            stroke-width: 2;
-            flex-shrink: 0;
+        .bg-grid {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 24px 24px;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="hero-card">
-            <div class="badge">
-                <span class="flag-icon">
-                    <svg viewBox="0 0 600 400" width="100%" height="100%">
-                        <rect width="240" height="400" fill="#046A38"/>
-                        <rect x="240" width="360" height="400" fill="#DA291C"/>
-                        <circle cx="240" cy="200" r="80" fill="#FFC72C"/>
-                        <circle cx="240" cy="200" r="50" fill="#DA291C"/>
-                        <rect x="215" y="175" width="50" height="50" rx="6" fill="#FFFFFF"/>
-                    </svg>
+<body class="min-h-screen text-zinc-100 flex flex-col items-center justify-center p-6 sm:p-10 relative selection:bg-indigo-500/20 selection:text-indigo-300">
+    <div class="fixed inset-0 bg-grid pointer-events-none opacity-80"></div>
+    <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[300px] bg-indigo-500/10 blur-[130px] rounded-full pointer-events-none"></div>
+
+    <main class="w-full max-w-[440px] relative z-10 flex flex-col gap-6">
+        <div class="relative bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-xl rounded-2xl p-7 shadow-2xl shadow-black/60">
+            <div class="flex items-center justify-between mb-5">
+                <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-800/80 border border-zinc-700/60 text-zinc-300 tracking-wide">
+                    <span class="w-3.5 h-3.5 rounded-full overflow-hidden flex items-center justify-center border border-white/20">
+                        <svg viewBox="0 0 600 400" class="w-full h-full object-cover">
+                            <rect width="240" height="400" fill="#046A38"/>
+                            <rect x="240" width="360" height="400" fill="#DA291C"/>
+                            <circle cx="240" cy="200" r="80" fill="#FFC72C"/>
+                            <circle cx="240" cy="200" r="50" fill="#DA291C"/>
+                            <rect x="215" y="175" width="50" height="50" rx="6" fill="#FFFFFF"/>
+                        </svg>
+                    </span>
+                    Portugal
                 </span>
-                Portugal
+                <span class="text-[11px] font-mono text-zinc-400 bg-zinc-800/40 px-2 py-0.5 rounded border border-zinc-800">v1.0.2</span>
             </div>
 
-            <h1>Top Streaming</h1>
-            <p class="desc">Top 10 diário real dos filmes e séries mais vistos em Portugal para o teu Stremio.</p>
+            <h1 class="text-2xl font-bold tracking-tight text-white mb-2">Streaming Top 10</h1>
+            <p class="text-sm text-zinc-400 leading-relaxed mb-6 font-normal">
+                Tops oficiais diários de filmes e séries nas plataformas de streaming em Portugal para o teu Stremio.
+            </p>
 
-            <div class="tags">
-                <span class="tag">Netflix</span>
-                <span class="tag">Disney+</span>
-                <span class="tag">Prime</span>
-                <span class="tag">HBO</span>
+            <div class="flex flex-wrap gap-1.5 mb-7">
+                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">Netflix</span>
+                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">Disney+</span>
+                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">Prime Video</span>
+                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">HBO</span>
             </div>
 
-            <a id="install-btn" href="#" class="btn-install">
-                Instalar no Stremio
-            </a>
-
-            <button id="copy-btn" class="copy-trigger" onclick="copyUrl()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                <span id="copy-text">Copiar link do manifesto</span>
-            </button>
-        </div>
-
-        <div class="addons-section">
-            <div class="addons-title">Recomendações para combinar</div>
-            <div class="addon-list">
-                <a href="https://torrentio.strem.fun/configure" target="_blank" class="addon-card">
-                    <div class="addon-info">
-                        <span class="addon-name">Torrentio + Real-Debrid</span>
-                        <span class="addon-desc">Streams rápidos sem buffering via cache Debrid</span>
-                    </div>
-                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
+            <div class="flex flex-col gap-2.5">
+                <a id="install-btn" href="#" class="w-full inline-flex items-center justify-center gap-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm py-3 px-4 rounded-xl transition duration-150 active:scale-[0.99] shadow-sm">
+                    <svg class="w-4 h-4 text-zinc-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                    Instalar no Stremio
                 </a>
-
-                <a href="https://subdl-stremio.vercel.app/" target="_blank" class="addon-card">
-                    <div class="addon-info">
-                        <span class="addon-name">SubDL Subtitles</span>
-                        <span class="addon-desc">Legendas sincronizadas com suporte dedicado PT-PT</span>
-                    </div>
-                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
-                </a>
-
-                <a href="https://stremio-addons.net/ratings" target="_blank" class="addon-card">
-                    <div class="addon-info">
-                        <span class="addon-name">IMDb Ratings</span>
-                        <span class="addon-desc">Notas do IMDb e Rotten Tomatoes visíveis nos posters</span>
-                    </div>
-                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
-                </a>
+                
+                <button id="copy-btn" onclick="copyUrl()" class="w-full inline-flex items-center justify-center gap-2 bg-zinc-800/50 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs py-2.5 px-3 rounded-xl transition duration-150">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    <span id="copy-text">Copiar link do manifesto</span>
+                </button>
             </div>
         </div>
-    </div>
+
+        <div class="flex flex-col gap-2.5">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1">Complementos Recomendados</h2>
+            
+            <div class="flex flex-col gap-2">
+                <a href="https://torrentio.strem.fun/configure" target="_blank" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/60 hover:border-zinc-700 transition duration-150">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-medium text-zinc-200 group-hover:text-white transition">Torrentio + Real-Debrid</span>
+                        <span class="text-xs text-zinc-400">Streams instantâneos sem buffer via cache Debrid</span>
+                    </div>
+                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
+                </a>
+
+                <a href="https://subdl-stremio.vercel.app/" target="_blank" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/60 hover:border-zinc-700 transition duration-150">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-medium text-zinc-200 group-hover:text-white transition">SubDL Subtitles</span>
+                        <span class="text-xs text-zinc-400">Legendas sincronizadas com filtragem nativa PT-PT</span>
+                    </div>
+                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
+                </a>
+
+                <a href="https://stremio-addons.net/ratings" target="_blank" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/60 hover:border-zinc-700 transition duration-150">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-sm font-medium text-zinc-200 group-hover:text-white transition">IMDb Ratings</span>
+                        <span class="text-xs text-zinc-400">Classificações do IMDb e Rotten Tomatoes no catálogo</span>
+                    </div>
+                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <footer class="text-center">
+            <span class="text-[11px] text-zinc-400">Atualizado diariamente às 09:30 UTC</span>
+        </footer>
+    </main>
 
     <script>
         const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
@@ -386,7 +216,7 @@ def create_landing_page():
         function copyUrl() {
             navigator.clipboard.writeText(manifestUrl);
             const text = document.getElementById('copy-text');
-            text.textContent = 'Copiado para a área de transferência';
+            text.textContent = 'Copiado!';
             setTimeout(() => {
                 text.textContent = 'Copiar link do manifesto';
             }, 2000);
