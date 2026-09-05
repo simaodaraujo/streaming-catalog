@@ -1,6 +1,6 @@
 {
   "id": "org.portugal.streaming.top",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "name": "Streaming Portugal Populares",
   "description": "Top 10 diário real da Netflix, Disney+, Prime e HBO em Portugal",
   "resources": [

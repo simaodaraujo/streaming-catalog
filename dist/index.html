@@ -1,117 +1,188 @@
 <!DOCTYPE html>
-<html lang="pt" class="dark">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Top Streaming Portugal — Stremio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: #07090e;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .bg-grid {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-            background-size: 24px 24px;
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #09090b;
+            color: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .meta-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .flag {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            display: inline-block;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .meta-text {
+            font-size: 11px;
+            font-weight: 500;
+            color: #a1a1aa;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        h1 {
+            font-size: 19px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        p.desc {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #71717a;
+        }
+
+        .platforms {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #18181b;
+        }
+
+        .platform {
+            font-size: 11px;
+            color: #a1a1aa;
+            background: #121215;
+            border: 1px solid #27272a;
+            border-radius: 5px;
+            padding: 3px 8px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.15s ease, background 0.15s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #09090b;
+            border: 1px solid #ffffff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #a1a1aa;
+            border: 1px solid #27272a;
+        }
+
+        .btn-secondary:hover {
+            color: #fafafa;
+            background: #141417;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 11px;
+            color: #52525b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
     </style>
 </head>
-<body class="min-h-screen text-zinc-100 flex flex-col items-center justify-center p-6 sm:p-10 relative selection:bg-indigo-500/20 selection:text-indigo-300">
-    <div class="fixed inset-0 bg-grid pointer-events-none opacity-80"></div>
-    <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[300px] bg-indigo-500/10 blur-[130px] rounded-full pointer-events-none"></div>
-
-    <main class="w-full max-w-[440px] relative z-10 flex flex-col gap-6">
-        <div class="relative bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-xl rounded-2xl p-7 shadow-2xl shadow-black/60">
-            <div class="flex items-center justify-between mb-5">
-                <span class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-800/80 border border-zinc-700/60 text-zinc-300 tracking-wide">
-                    <span class="w-3.5 h-3.5 rounded-full overflow-hidden flex items-center justify-center border border-white/20">
-                        <svg viewBox="0 0 600 400" class="w-full h-full object-cover">
-                            <rect width="240" height="400" fill="#046A38"/>
-                            <rect x="240" width="360" height="400" fill="#DA291C"/>
-                            <circle cx="240" cy="200" r="80" fill="#FFC72C"/>
-                            <circle cx="240" cy="200" r="50" fill="#DA291C"/>
-                            <rect x="215" y="175" width="50" height="50" rx="6" fill="#FFFFFF"/>
-                        </svg>
-                    </span>
-                    Portugal
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="meta-line">
+                <span class="flag">
+                    <svg viewBox="0 0 600 400" width="100%" height="100%">
+                        <rect width="240" height="400" fill="#046A38"/>
+                        <rect x="240" width="360" height="400" fill="#DA291C"/>
+                        <circle cx="240" cy="200" r="80" fill="#FFC72C"/>
+                        <circle cx="240" cy="200" r="50" fill="#DA291C"/>
+                        <rect x="215" y="175" width="50" height="50" rx="6" fill="#FFFFFF"/>
+                    </svg>
                 </span>
-                <span class="text-[11px] font-mono text-zinc-400 bg-zinc-800/40 px-2 py-0.5 rounded border border-zinc-800">v1.0.2</span>
+                <span class="meta-text">Portugal · Stremio</span>
             </div>
-
-            <h1 class="text-2xl font-bold tracking-tight text-white mb-2">Streaming Top 10</h1>
-            <p class="text-sm text-zinc-400 leading-relaxed mb-6 font-normal">
-                Tops oficiais diários de filmes e séries nas plataformas de streaming em Portugal para o teu Stremio.
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 mb-7">
-                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">Netflix</span>
-                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">Disney+</span>
-                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">Prime Video</span>
-                <span class="text-xs px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-800 text-zinc-300 font-medium">HBO</span>
-            </div>
-
-            <div class="flex flex-col gap-2.5">
-                <a id="install-btn" href="#" class="w-full inline-flex items-center justify-center gap-2 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-sm py-3 px-4 rounded-xl transition duration-150 active:scale-[0.99] shadow-sm">
-                    <svg class="w-4 h-4 text-zinc-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                    Instalar no Stremio
-                </a>
-                
-                <button id="copy-btn" onclick="copyUrl()" class="w-full inline-flex items-center justify-center gap-2 bg-zinc-800/50 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-400 hover:text-zinc-200 text-xs py-2.5 px-3 rounded-xl transition duration-150">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
-                    <span id="copy-text">Copiar link do manifesto</span>
-                </button>
-            </div>
+            <h1>Top Streaming</h1>
+            <p class="desc">Top 10 diário real dos filmes e séries mais vistos nos serviços de streaming em Portugal.</p>
         </div>
 
-        <div class="flex flex-col gap-2.5">
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-400 px-1">Complementos Recomendados</h2>
-            
-            <div class="flex flex-col gap-2">
-                <a href="https://torrentio.strem.fun/configure" target="_blank" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/60 hover:border-zinc-700 transition duration-150">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-sm font-medium text-zinc-200 group-hover:text-white transition">Torrentio + Real-Debrid</span>
-                        <span class="text-xs text-zinc-400">Streams instantâneos sem buffer via cache Debrid</span>
-                    </div>
-                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
-                </a>
-
-                <a href="https://subdl-stremio.vercel.app/" target="_blank" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/60 hover:border-zinc-700 transition duration-150">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-sm font-medium text-zinc-200 group-hover:text-white transition">SubDL Subtitles</span>
-                        <span class="text-xs text-zinc-400">Legendas sincronizadas com filtragem nativa PT-PT</span>
-                    </div>
-                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
-                </a>
-
-                <a href="https://stremio-addons.net/ratings" target="_blank" class="group flex items-center justify-between p-3.5 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800/60 hover:border-zinc-700 transition duration-150">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-sm font-medium text-zinc-200 group-hover:text-white transition">IMDb Ratings</span>
-                        <span class="text-xs text-zinc-400">Classificações do IMDb e Rotten Tomatoes no catálogo</span>
-                    </div>
-                    <svg class="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition duration-150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V8H8"/></svg>
-                </a>
-            </div>
+        <div class="platforms">
+            <span class="platform">Netflix</span>
+            <span class="platform">Disney+</span>
+            <span class="platform">Prime</span>
+            <span class="platform">HBO</span>
         </div>
 
-        <footer class="text-center">
-            <span class="text-[11px] text-zinc-400">Atualizado diariamente às 09:30 UTC</span>
-        </footer>
-    </main>
+        <div class="actions">
+            <a id="install-btn" href="#" class="btn btn-primary">
+                Instalar no Stremio
+            </a>
+            <button id="copy-btn" class="btn btn-secondary" onclick="copyManifestUrl()">
+                Copiar manifesto
+            </button>
+        </div>
+
+        <div class="footer-note">
+            <span>v1.0.3</span>
+            <span>Atualização diária (09:30 UTC)</span>
+        </div>
+    </div>
 
     <script>
         const manifestUrl = window.location.origin + window.location.pathname.replace(/\/?$/, '/') + 'manifest.json';
@@ -119,13 +190,14 @@
         
         document.getElementById('install-btn').href = stremioUrl;
 
-        function copyUrl() {
+        function copyManifestUrl() {
             navigator.clipboard.writeText(manifestUrl);
-            const text = document.getElementById('copy-text');
-            text.textContent = 'Copiado!';
+            const btn = document.getElementById('copy-btn');
+            const original = btn.textContent;
+            btn.textContent = 'Copiado';
             setTimeout(() => {
-                text.textContent = 'Copiar link do manifesto';
-            }, 2000);
+                btn.textContent = original;
+            }, 1800);
         }
     </script>
 </body>
