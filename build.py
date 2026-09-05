@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import re
 import requests
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
@@ -27,6 +28,11 @@ PROVIDERS = [
     {"id": "skyshowtime", "name": "SkyShowtime", "flix_slug": "skyshowtime", "tmdb_id": 1773}
 ]
 
+def clean_title(title):
+    cleaned = re.sub(r'(?i)\b(season|temporada)\s+\d+\b', '', title)
+    cleaned = re.sub(r'[\(\[].*?[\)\]]', '', cleaned)
+    return cleaned.strip(' :-–—')
+
 def get_imdb_id(tmdb_id, media_type):
     url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}/external_ids"
     try:
@@ -40,28 +46,37 @@ def get_imdb_id(tmdb_id, media_type):
 def search_tmdb_title(title, media_type):
     search_type = "movie" if media_type == "movie" else "tv"
     url = f"https://api.themoviedb.org/3/search/{search_type}"
+    query = clean_title(title)
+    
     params = {
         "api_key": TMDB_API_KEY,
-        "query": title,
+        "query": query,
         "language": "pt-PT",
         "page": 1
     }
+    
     try:
         res = session.get(url, params=params, timeout=5)
-        if res.status_code == 200:
-            results = res.json().get("results", [])
-            if results:
-                best = results[0]
-                tmdb_id = best["id"]
-                imdb_id = get_imdb_id(tmdb_id, search_type)
-                if imdb_id:
-                    name = best.get("title") if search_type == "movie" else best.get("name")
-                    return {
-                        "id": imdb_id,
-                        "type": "movie" if media_type == "movie" else "series",
-                        "name": name or title,
-                        "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
-                    }
+        results = res.json().get("results", []) if res.status_code == 200 else []
+        
+        # Pesquisa em cascata: se não encontrar em pt-PT, remove o idioma e procura globalmente
+        if not results:
+            params.pop("language", None)
+            res = session.get(url, params=params, timeout=5)
+            results = res.json().get("results", []) if res.status_code == 200 else []
+
+        if results:
+            best = results[0]
+            tmdb_id = best["id"]
+            imdb_id = get_imdb_id(tmdb_id, search_type)
+            if imdb_id:
+                name = best.get("title") if search_type == "movie" else best.get("name")
+                return {
+                    "id": imdb_id,
+                    "type": "movie" if media_type == "movie" else "series",
+                    "name": name or title,
+                    "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
+                }
     except Exception as e:
         print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
     return None
@@ -150,112 +165,167 @@ def scrape_flixpatrol(flix_slug):
 
 def create_landing_page():
     html_content = """<!DOCTYPE html>
-<html lang="pt" class="h-full bg-slate-900 text-slate-100 antialiased">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Top Streaming Portugal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            stremio: {
-              DEFAULT: '#7B5BF5',
-              hover: '#6D4AEB',
-              active: '#5F3BDD',
-              subtle: '#2E225A',
-            }
-          }
-        }
-      }
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #1c1c1e; /* Fundo suave, menos agressivo */
+      color: #f5f5f7;
+      font-family: 'Inter', -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
     }
-  </script>
+    .wrapper {
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon-container {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 16px;
+      background: rgba(123, 91, 245, 0.12);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #7b5bf5;
+    }
+    .icon-container svg { width: 24px; height: 24px; fill: currentColor; }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #a1a1aa;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #27272a; /* Tag como estava antes */
+      border: 1px solid #3f3f46;
+      color: #d4d4d8;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    .tag svg { height: 12px; width: auto; opacity: 0.9; }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+    }
+    .btn-stremio {
+      background-color: #7b5bf5; /* Roxo Stremio oficial */
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+    .btn-stremio:hover { background-color: #6a4ce0; }
+    .btn-outline {
+      background-color: transparent;
+      color: #a1a1aa;
+      border: 1px solid #3f3f46;
+    }
+    .btn-outline:hover {
+      background-color: #27272a;
+      color: #f5f5f7;
+    }
+    .btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .footer {
+      margin-top: 32px;
+      font-size: 12px;
+      color: #52525b;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+  </style>
 </head>
-<body class="min-h-full flex flex-col justify-between p-6 sm:p-12 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 font-sans">
-  
-  <header class="max-w-xl mx-auto w-full flex items-center justify-between pb-8">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-lg bg-stremio/20 border border-stremio/40 flex items-center justify-center text-stremio">
-        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-          <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
-        </svg>
-      </div>
-      <span class="text-sm font-semibold tracking-tight text-slate-200">Addon Catalog</span>
+<body>
+  <div class="wrapper">
+    <div class="icon-container">
+      <svg viewBox="0 0 24 24">
+        <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
+      </svg>
     </div>
-    <div class="flex items-center gap-2 text-xs text-slate-400 font-medium">
-      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-      Sincronizado hoje
+    
+    <h1>Top Streaming Portugal</h1>
+    <p class="subtitle">O catálogo realista diário das principais<br>plataformas em território nacional.</p>
+
+    <div class="tags">
+      <div class="tag">
+        <svg viewBox="0 0 24 24" fill="#E50914"><path d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
+        Netflix
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 24 24" fill="#0063e5"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 16H11V10H13V16ZM13 8H11V6H13V8Z"/></svg>
+        Disney+
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 24 24" fill="#00a8e1"><path d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
+        Prime Video
+      </div>
+      <div class="tag">
+        <strong style="color:#fff; font-size:10px;">HBO</strong>
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 384 512" fill="#fff"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+        Apple TV+
+      </div>
+      <div class="tag">
+        <strong style="color:#00ff7f; font-size:10px;">★</strong>
+        SkyShowtime
+      </div>
     </div>
-  </header>
 
-  <main class="max-w-xl mx-auto w-full my-auto">
-    <div class="space-y-6">
-      
-      <div class="space-y-2">
-        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-          Top Streaming Portugal
-        </h1>
-        <p class="text-base text-slate-400 leading-relaxed">
-          Os 10 títulos mais consumidos em território nacional, atualizados diariamente com base nas tabelas oficiais de reprodução.
-        </p>
-      </div>
+    <a id="install-btn" href="#" class="btn btn-stremio">
+      Instalar Addon
+    </a>
+    
+    <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
+      Copiar Manifesto
+    </button>
 
-      <div class="pt-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-3">Plataformas integradas</span>
-        <div class="flex flex-wrap gap-2">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Netflix
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Disney+
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Prime Video
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Max / HBO
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Apple TV+
-          </span>
-          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> SkyShowtime
-          </span>
-        </div>
-      </div>
-
-      <div class="pt-4 flex flex-col sm:flex-row gap-3">
-        <a id="install-btn" href="#" class="inline-flex items-center justify-center gap-2.5 px-5 py-3 rounded-lg text-sm font-semibold text-white bg-stremio hover:bg-stremio-hover active:bg-stremio-active transition-all shadow-lg shadow-stremio/20">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
-          </svg>
-          Instalar Addon
-        </a>
-
-        <button id="copy-btn" onclick="copyManifestUrl()" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 active:bg-slate-800/60 border border-slate-700 transition">
-          <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          <span>Copiar Manifesto</span>
-        </button>
-      </div>
-
+    <div class="footer">
+      <span>Atualizado Hoje</span>
+      <span>v1.0.4</span>
     </div>
-  </main>
-
-  <footer class="max-w-xl mx-auto w-full pt-12 flex items-center justify-between text-xs text-slate-500 border-t border-slate-800/80">
-    <span>v1.0.3</span>
-    <span>Executado via GitHub Actions</span>
-  </footer>
+  </div>
 
   <script>
     const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
@@ -266,18 +336,10 @@ def create_landing_page():
     function copyManifestUrl() {
       navigator.clipboard.writeText(manifestUrl);
       const btn = document.getElementById('copy-btn');
-      const originalHTML = btn.innerHTML;
-      
-      btn.innerHTML = `
-        <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span class="text-emerald-400">Link copiado!</span>
-      `;
-      
+      btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
       setTimeout(() => {
-        btn.innerHTML = originalHTML;
-      }, 1800);
+        btn.innerHTML = 'Copiar Manifesto';
+      }, 2000);
     }
   </script>
 </body>
@@ -296,16 +358,17 @@ def main():
         print(f"\n--- A processar {prov['name']} ---", flush=True)
         movie_titles, series_titles = scrape_flixpatrol(prov["flix_slug"])
 
-        # Filmes
+        # Filmes (Apenas itens reias, sem injeções artificiais)
         movie_items = []
         for title in movie_titles:
             item = search_tmdb_title(title, "movie")
-            if item:
+            if item and not any(m["id"] == item["id"] for m in movie_items):
                 movie_items.append(item)
             time.sleep(0.03)
 
+        # O fallback só é ativado se o FlixPatrol falhar totalmente (0 itens encontrados)
         if not movie_items:
-            print(f"  [i] A usar fallback TMDB (Filmes)...", flush=True)
+            print(f"  [i] Erro crasso na fonte. A usar fallback TMDB (Filmes)...", flush=True)
             movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
 
         print(f"  -> Filmes guardados: {len(movie_items)}/10", flush=True)
@@ -320,16 +383,17 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
-        # Séries
+        # Séries (Apenas itens reias, sem injeções artificiais)
         series_items = []
         for title in series_titles:
             item = search_tmdb_title(title, "series")
-            if item:
+            if item and not any(s["id"] == item["id"] for s in series_items):
                 series_items.append(item)
             time.sleep(0.03)
 
+        # O fallback só é ativado se o FlixPatrol falhar totalmente (0 itens encontrados)
         if not series_items:
-            print(f"  [i] A usar fallback TMDB (Séries)...", flush=True)
+            print(f"  [i] Erro crasso na fonte. A usar fallback TMDB (Séries)...", flush=True)
             series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
 
         print(f"  -> Séries guardadas: {len(series_items)}/10", flush=True)
@@ -346,7 +410,7 @@ def main():
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.3",
+        "version": "1.0.4",
         "name": "Streaming Portugal Populares",
         "description": "Top 10 diário real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "resources": ["catalog"],
