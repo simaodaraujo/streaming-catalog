@@ -257,7 +257,7 @@ def create_landing_page():
       background-color: #27272a;
       color: #f5f5f7;
     }}
-    .btn svg {{ width: 20px; height: 20px; fill: currentColor; }}
+    .btn-stremio svg {{ width: 20px; height: 20px; fill: currentColor; }}
     .footer {{
       margin-top: 32px;
       font-size: 12px;
@@ -265,9 +265,10 @@ def create_landing_page():
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }}
-    .version {{ color: #3f3f46; }}
+    .schedule {{ color: #71717a; }}
+    .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
   </style>
 </head>
 <body>
@@ -282,7 +283,10 @@ def create_landing_page():
         Netflix
       </div>
       <div class="tag">
-        <svg viewBox="0 0 24 24" style="color: #0063e5;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 16H11V10H13V16ZM13 8H11V6H13V8Z"/></svg>
+        <svg viewBox="0 0 24 24" style="color: #0063e5;">
+           <path d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
+           <path d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
+        </svg>
         Disney+
       </div>
       <div class="tag">
@@ -290,7 +294,9 @@ def create_landing_page():
         Prime Video
       </div>
       <div class="tag">
-        <svg viewBox="0 0 40 18" style="color: #ffffff;"><path d="M0 0h4v6.5h8V0h4v18h-4v-7.5H4V18H0V0zm22.5 0c5 0 8.5 3 8.5 9s-3.5 9-8.5 9H17V0h5.5zm-1.5 14c2.5 0 4-1.5 4-5s-1.5-5-4-5h-1v10h1zm17.5-14c4.5 0 8 3.5 8 9s-3.5 9-8 9-8-3.5-8-9 3.5-9 8-9zm0 14c2.5 0 4-2 4-5s-1.5-5-4-5-4 2-4 5 1.5 5 4 5z"/></svg>
+        <svg viewBox="0 0 24 24" style="color: #ffffff;">
+           <path d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
+        </svg>
         HBO
       </div>
       <div class="tag">
@@ -311,12 +317,13 @@ def create_landing_page():
     </a>
     
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
-      Copiar link do Manifesto
+      📋 Copiar manifest
     </button>
 
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
-      <span class="version">v1.0.5</span>
+      <span class="schedule">Atualiza todos os dias às 09h30</span>
+      <span class="version">v1.0.6</span>
     </div>
   </div>
 
@@ -331,7 +338,7 @@ def create_landing_page():
       const btn = document.getElementById('copy-btn');
       btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
       setTimeout(() => {{
-        btn.innerHTML = 'Copiar link do Manifesto';
+        btn.innerHTML = '📋 Copiar manifest';
       }}, 2000);
     }}
 
@@ -348,7 +355,7 @@ def create_landing_page():
     }}
     
     updateTime();
-    setInterval(updateTime, 60000); // Atualiza os minutos sem precisar recarregar a página
+    setInterval(updateTime, 60000);
   </script>
 </body>
 </html>
@@ -360,7 +367,6 @@ def main():
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
 
-    # Copia a logo automaticamente para a pasta dist para ser lida pelo Stremio e pelo HTML
     if os.path.exists("img/logo.png"):
         shutil.copy("img/logo.png", "dist/logo.png")
 
@@ -418,7 +424,7 @@ def main():
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.5",
+        "version": "1.0.6",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 diário real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": "logo.png",
