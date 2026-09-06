@@ -27,7 +27,7 @@ jobs:
       - name: Executar script de extração e build
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
+          SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY || secrets.SCRAPERAPI_KEY }}
         run: python build.py
 
       - name: Instalar Vercel CLI

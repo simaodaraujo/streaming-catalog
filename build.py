@@ -293,13 +293,15 @@ def get_flixpatrol_top10(platform_slug, media_type):
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
     try:
         if not SCRAPER_API_KEY:
+            print("  [!] SCRAPER_API_KEY não configurada; não foi possível consultar FlixPatrol.", flush=True)
             return []
 
         response = None
         try:
           response = session.get(
             "https://api.scraperapi.com/",
-            params={"api_key": SCRAPER_API_KEY, "url": url, "render": "false"},
+            # A ScraperAPI exige que o URL de destino seja o último parâmetro.
+            params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
             headers=HEADERS,
             timeout=30,
           )
@@ -308,11 +310,18 @@ def get_flixpatrol_top10(platform_slug, media_type):
         if response is not None and response.status_code != 200:
           print(f"  [!] ScraperAPI respondeu HTTP {response.status_code} sem render ({platform_slug})", flush=True)
         titles = parse_flixpatrol_titles(response.text, media_type) if response is not None and response.status_code == 200 else []
+        if response is not None and response.status_code == 200 and not titles:
+          print(f"  [!] ScraperAPI respondeu sem a secção Top 10 ({platform_slug}, {media_type})", flush=True)
         if not titles:
           try:
             rendered = session.get(
               "https://api.scraperapi.com/",
-              params={"api_key": SCRAPER_API_KEY, "url": url, "render": "true"},
+              params={
+                "api_key": SCRAPER_API_KEY,
+                "render": "true",
+                "wait_for_selector": "h3",
+                "url": url,
+              },
               headers=HEADERS,
               timeout=75,
             )
@@ -472,6 +481,18 @@ def load_history():
                     return json.load(f)
             except Exception:
                 pass
+    # O GitHub Actions começa num checkout limpo. Recupera o histórico do último
+    # deploy para as setas compararem com o ranking do dia anterior.
+    if session and BASE_URL:
+        try:
+            res = session.get(f"{BASE_URL}/history.json", timeout=10)
+            if res.status_code == 200:
+                history = res.json()
+                if isinstance(history, dict):
+                    print("[i] Histórico de rankings recuperado do último deploy.", flush=True)
+                    return history
+        except Exception as e:
+            print(f"[!] Não foi possível recuperar o histórico publicado: {e}", flush=True)
     return {}
 
 
