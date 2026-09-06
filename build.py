@@ -4,7 +4,8 @@ import time
 import re
 import shutil
 import requests
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -19,20 +20,39 @@ adapter = HTTPAdapter(max_retries=retries)
 session.mount("https://", adapter)
 session.mount("http://", adapter)
 
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+# 'flixpatrol' é o slug usado em flixpatrol.com/top10/<slug>/<pais>/
+# Confirma estes slugs abrindo https://flixpatrol.com/top10/ no browser, porque
+# a FlixPatrol pode mudá-los sem aviso.
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "is_netflix": True},
-    {"id": "disney", "name": "Disney+", "tmdb_id": 337, "is_netflix": False},
-    {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "is_netflix": False},
-    {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "is_netflix": False},
-    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "is_netflix": False},
-    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "is_netflix": False}
+    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "netflix"},
+    {"id": "disney", "name": "Disney+", "tmdb_id": 337, "source": "flixpatrol", "flixpatrol": "disney"},
+    {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "source": "flixpatrol", "flixpatrol": "amazon-prime"},
+    {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "source": "flixpatrol", "flixpatrol": "hbo-max"},
+    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "source": "flixpatrol", "flixpatrol": "apple-tv"},
+    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "source": "flixpatrol", "flixpatrol": "skyshowtime"},
 ]
+
+NETFLIX_COUNTRY_SLUG = "portugal"
+FLIXPATROL_COUNTRY_SLUG = "portugal"
+
+# Cache: se já correu hoje, não volta a bater na FlixPatrol — evita pedidos
+# repetidos caso o script seja despoletado mais do que uma vez por dia.
+CACHE_DIR = "cache"
+FLIXPATROL_CACHE_FILE = os.path.join(CACHE_DIR, "flixpatrol_cache.json")
+
+# Atraso entre pedidos a cada plataforma da FlixPatrol, para sermos "educados"
+# e não martelar o site deles com pedidos seguidos.
+FLIXPATROL_DELAY_SECONDS = 4
+
 
 def clean_title(title):
     cleaned = re.sub(r'(?i)\b(season|temporada|series)\s+\d+\b', '', title)
     cleaned = re.sub(r'[\(\[].*?[\)\]]', '', cleaned)
     cleaned = re.sub(r'\s*[-:–—|]\s*$', '', cleaned)
     return cleaned.strip(' :-–—|')
+
 
 def get_imdb_id(tmdb_id, media_type):
     url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}/external_ids"
@@ -44,17 +64,18 @@ def get_imdb_id(tmdb_id, media_type):
         pass
     return None
 
+
 def search_tmdb_title(title, media_type):
     search_type = "movie" if media_type == "movie" else "tv"
     query = clean_title(title)
-    
+
     url = f"https://api.themoviedb.org/3/search/{search_type}"
     params = {"api_key": TMDB_API_KEY, "query": query, "language": "pt-PT", "page": 1}
-    
+
     try:
         res = session.get(url, params=params, timeout=7)
         results = res.json().get("results", []) if res.status_code == 200 else []
-        
+
         if not results:
             params.pop("language", None)
             res = session.get(url, params=params, timeout=7)
@@ -71,7 +92,7 @@ def search_tmdb_title(title, media_type):
             actual_type = best.get("media_type", search_type)
             tmdb_id = best["id"]
             imdb_id = get_imdb_id(tmdb_id, actual_type)
-            
+
             if imdb_id:
                 name = best.get("name") if actual_type == "tv" else best.get("title")
                 return {
@@ -82,45 +103,152 @@ def search_tmdb_title(title, media_type):
                 }
     except Exception as e:
         print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
-        
+
     return None
+
+
+# ---------------------------------------------------------------------------
+# NETFLIX — fonte 100% oficial (top10.netflix.com), publicada pela própria
+# Netflix e destinada a consulta pública. Atualiza-se semanalmente (à terça,
+# com dados de segunda a domingo da semana anterior) — não é diária.
+# ---------------------------------------------------------------------------
+def _last_sunday(reference=None):
+    ref = reference or date.today()
+    # weekday(): Monday=0 ... Sunday=6
+    days_since_sunday = (ref.weekday() + 1) % 7
+    return ref - timedelta(days=days_since_sunday)
+
 
 def get_netflix_official_top10(media_type):
     """
-    Vai buscar diretamente o Top 10 oficial e público da Netflix para Portugal.
-    media_type: 'films' (filmes) ou 'shows' (séries)
+    media_type: 'films' ou 'tv'
+    Tenta as últimas 3 semanas publicadas (a lista da semana atual só sai
+    à terça-feira, por isso pode ainda não existir).
     """
-    url = "https://www.netflix.com/tudum/top10/portugal"
-    # A Netflix fornece os dados num JSON embutido na página ou podemos usar a API pública de top10 deles
-    api_url = f"https://www.netflix.com/tudum/top10/data/portugal?week="
-    
-    # Alternativa mais direta e limpa via endpoint de dados do Tudum da Netflix:
-    try:
-        # Vamos buscar a página principal do Tudum Portugal para extrair os dados atuais
-        res = session.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
-        if res.status_code == 200:
-            soup = BeautifulSoup(res.text, "html.parser")
-            # O site do tudum carrega os dados numa tag script com o JSON state ou numa tabela
-            # Vamos usar uma abordagem segura via requests ao endpoint de JSON da Netflix se disponível, 
-            # ou ler diretamente a tabela HTML do Tudum Portugal:
-            tables = soup.find_all("table")
-            titles = []
-            
-            # Identificar a tabela correta (Filmes vs Séries)
-            target_table_idx = 0 if media_type == "films" else 1
-            if len(tables) > target_table_idx:
-                rows = tables[target_table_idx].select("tbody tr")
-                for row in rows[:10]:
-                    cols = row.find_all("td")
-                    if len(cols) >= 2:
-                        title_text = cols[1].get_text(strip=True)
-                        if title_text:
-                            titles.append(title_text)
-            return titles
-    except Exception as e:
-        print(f"  [!] Erro ao obter Top 10 oficial da Netflix: {e}", flush=True)
-        
+    candidate_sunday = _last_sunday()
+
+    for _ in range(3):
+        date_str = candidate_sunday.isoformat()
+        url = f"https://top10.netflix.com/{NETFLIX_COUNTRY_SLUG}/{media_type}/{date_str}"
+        try:
+            res = session.get(url, headers=HEADERS, timeout=10)
+            if res.status_code == 200:
+                soup = BeautifulSoup(res.text, "html.parser")
+                table = soup.find("table")
+                titles = []
+                if table:
+                    rows = table.select("tbody tr") or table.find_all("tr")[1:]
+                    for row in rows[:10]:
+                        cols = row.find_all("td")
+                        if cols:
+                            title_text = cols[0].get_text(strip=True)
+                            if title_text:
+                                titles.append(title_text)
+                if titles:
+                    print(f"  [i] Netflix Top 10 ({media_type}) da semana de {date_str}", flush=True)
+                    return titles
+        except Exception as e:
+            print(f"  [!] Erro ao obter Top 10 oficial da Netflix ({date_str}): {e}", flush=True)
+
+        candidate_sunday -= timedelta(days=7)
+
     return []
+
+
+# ---------------------------------------------------------------------------
+# OUTRAS PLATAFORMAS — via FlixPatrol (flixpatrol.com/top10/<slug>/<pais>/)
+# Estes charts vêm, segundo a própria FlixPatrol, diretamente dos rankings
+# oficiais publicados por cada plataforma (Disney+, Amazon, etc.), mas:
+#   - Isto é raspagem de HTML público, não uma API — pode partir a qualquer
+#     momento se a FlixPatrol mudar a página.
+#   - Usamos cache diário + atraso entre pedidos para sermos o mais
+#     "educados" possível e não martelar o site deles.
+#   - A FlixPatrol vende acesso via API paga; se este projeto crescer muito,
+#     vale a pena considerar assinar em vez de continuar a raspar.
+# ---------------------------------------------------------------------------
+def _load_flixpatrol_cache():
+    if os.path.exists(FLIXPATROL_CACHE_FILE):
+        try:
+            with open(FLIXPATROL_CACHE_FILE, "r", encoding="utf-8") as f:
+                cache = json.load(f)
+            if cache.get("date") == date.today().isoformat():
+                return cache.get("data", {})
+        except Exception:
+            pass
+    return None
+
+
+def _save_flixpatrol_cache(data):
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    with open(FLIXPATROL_CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump({"date": date.today().isoformat(), "data": data}, f, ensure_ascii=False)
+
+
+def get_flixpatrol_top10(flixpatrol_slug, section_keyword):
+    """
+    section_keyword: 'Movies' ou 'TV Shows' — usado para encontrar a secção
+    certa dentro da página (a FlixPatrol mostra Filmes e Séries na mesma página).
+    """
+    url = f"https://flixpatrol.com/top10/{flixpatrol_slug}/{FLIXPATROL_COUNTRY_SLUG}/"
+    try:
+        res = session.get(url, headers=HEADERS, timeout=10)
+        if res.status_code != 200:
+            print(f"  [!] FlixPatrol devolveu {res.status_code} para {flixpatrol_slug}", flush=True)
+            return []
+
+        soup = BeautifulSoup(res.text, "html.parser")
+
+        heading = None
+        for tag in soup.find_all(["h2", "h3", "div", "span"]):
+            text = tag.get_text(strip=True)
+            if text.lower().startswith("top 10") and section_keyword.lower() in text.lower():
+                heading = tag
+                break
+
+        titles = []
+        if heading:
+            table = heading.find_next("table")
+            if table:
+                for row in table.select("tbody tr")[:10]:
+                    cell = row.find("td")
+                    if cell:
+                        text = cell.get_text(strip=True)
+                        text = re.sub(r'^\d+\.?\s*', '', text)  # remove ranking numérico à frente
+                        if text:
+                            titles.append(text)
+
+        if not titles:
+            print(f"  [i] Não consegui extrair '{section_keyword}' de {flixpatrol_slug} "
+                  f"(a estrutura da página pode ter mudado)", flush=True)
+
+        return titles
+    except Exception as e:
+        print(f"  [!] Erro FlixPatrol ({flixpatrol_slug}): {e}", flush=True)
+        return []
+
+
+def get_flixpatrol_titles_cached(flixpatrol_slug):
+    """
+    Devolve {'movies': [...], 'tv': [...]} para o slug indicado.
+    Usa cache diário para não bater duas vezes no mesmo dia, e um atraso
+    entre pedidos reais para não sobrecarregar a FlixPatrol.
+    """
+    cache = _load_flixpatrol_cache() or {}
+
+    if flixpatrol_slug in cache:
+        print(f"  [i] A usar cache de hoje para {flixpatrol_slug}", flush=True)
+        return cache[flixpatrol_slug]
+
+    movies = get_flixpatrol_top10(flixpatrol_slug, "Movies")
+    time.sleep(FLIXPATROL_DELAY_SECONDS)
+    tv = get_flixpatrol_top10(flixpatrol_slug, "TV Shows")
+    time.sleep(FLIXPATROL_DELAY_SECONDS)
+
+    cache[flixpatrol_slug] = {"movies": movies, "tv": tv}
+    _save_flixpatrol_cache(cache)
+
+    return cache[flixpatrol_slug]
+
 
 def get_tmdb_fallback(tmdb_provider_id, media_type):
     search_type = "movie" if media_type == "movie" else "tv"
@@ -155,9 +283,20 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
         print(f"  [!] Erro Fallback TMDB: {e}", flush=True)
     return items
 
+
+def resolve_titles_to_items(titles, media_type):
+    items = []
+    for title in titles:
+        item = search_tmdb_title(title, media_type)
+        if item and not any(existing["id"] == item["id"] for existing in items):
+            items.append(item)
+        time.sleep(0.03)
+    return items
+
+
 def create_landing_page():
     now_iso = datetime.utcnow().isoformat() + "Z"
-    
+
     html_content = f"""<!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -252,7 +391,7 @@ def create_landing_page():
       color: #f5f5f7;
     }}
     .btn svg {{ width: 20px; height: 20px; }}
-    
+
     .recommendations {{
       margin-top: 36px;
       padding-top: 24px;
@@ -315,7 +454,7 @@ def create_landing_page():
 <body>
   <div class="wrapper">
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
-    
+
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
 
     <div class="tags">
@@ -356,7 +495,7 @@ def create_landing_page():
       </svg>
       Instalar Addon
     </a>
-    
+
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
       <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
@@ -390,14 +529,14 @@ def create_landing_page():
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
-      <span class="version">v1.0.7</span>
+      <span class="version">v1.0.8</span>
     </div>
   </div>
 
   <script>
     const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
     const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
-    
+
     document.getElementById('install-btn').href = stremioUrl;
 
     function copyManifestUrl() {{
@@ -426,7 +565,7 @@ def create_landing_page():
       else if (diffHrs < 24) el.textContent = `Atualizado há ${{diffHrs}} hora${{diffHrs > 1 ? 's' : ''}}`;
       else el.textContent = `Atualizado há ${{Math.floor(diffHrs/24)}} dia${{Math.floor(diffHrs/24) > 1 ? 's' : ''}}`;
     }}
-    
+
     updateTime();
     setInterval(updateTime, 60000);
   </script>
@@ -435,6 +574,7 @@ def create_landing_page():
 """
     with open("dist/index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
+
 
 def main():
     os.makedirs("dist/catalog/movie", exist_ok=True)
@@ -448,20 +588,20 @@ def main():
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
 
-        # 1. Obter Filmes
-        if prov["is_netflix"]:
+        if prov["source"] == "netflix":
             print("  -> A recolher Top 10 oficial da Netflix (Filmes)...", flush=True)
-            netflix_titles = get_netflix_official_top10("films")
-            movie_items = []
-            for title in netflix_titles:
-                item = search_tmdb_title(title, "movie")
-                if item and not any(m["id"] == item["id"] for m in movie_items):
-                    movie_items.append(item)
-                time.sleep(0.03)
-            if not movie_items:
-                print("  [i] Falha no oficial da Netflix, a usar fallback TMDB...", flush=True)
-                movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
+            movie_titles = get_netflix_official_top10("films")
+            print("  -> A recolher Top 10 oficial da Netflix (Séries)...", flush=True)
+            series_titles = get_netflix_official_top10("tv")
         else:
+            print(f"  -> A recolher Top 10 real via FlixPatrol...", flush=True)
+            fp_data = get_flixpatrol_titles_cached(prov["flixpatrol"])
+            movie_titles = fp_data.get("movies", [])
+            series_titles = fp_data.get("tv", [])
+
+        movie_items = resolve_titles_to_items(movie_titles, "movie")
+        if not movie_items:
+            print("  [i] Sem dados reais, a usar fallback TMDB (popularidade)...", flush=True)
             movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
 
         print(f"  -> Filmes guardados: {len(movie_items)}/10", flush=True)
@@ -476,20 +616,9 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
-        # 2. Obter Séries
-        if prov["is_netflix"]:
-            print("  -> A recolher Top 10 oficial da Netflix (Séries)...", flush=True)
-            netflix_titles = get_netflix_official_top10("shows")
-            series_items = []
-            for title in netflix_titles:
-                item = search_tmdb_title(title, "series")
-                if item and not any(s["id"] == item["id"] for s in series_items):
-                    series_items.append(item)
-                time.sleep(0.03)
-            if not series_items:
-                print("  [i] Falha no oficial da Netflix, a usar fallback TMDB...", flush=True)
-                series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
-        else:
+        series_items = resolve_titles_to_items(series_titles, "series")
+        if not series_items:
+            print("  [i] Sem dados reais, a usar fallback TMDB (popularidade)...", flush=True)
             series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
 
         print(f"  -> Séries guardadas: {len(series_items)}/10", flush=True)
@@ -506,9 +635,9 @@ def main():
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.7",
+        "version": "1.0.8",
         "name": "TOP 10 Portugal (Filmes & Séries)",
-        "description": "Top 10 diário real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
+        "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": "logo.png",
         "resources": ["catalog"],
         "types": ["movie", "series"],
@@ -520,6 +649,7 @@ def main():
 
     create_landing_page()
     print(f"\nFinalizado com sucesso! {len(manifest_catalogs)} catálogos registados.", flush=True)
+
 
 if __name__ == "__main__":
     main()
