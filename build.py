@@ -537,8 +537,8 @@ def draw_rank_badge(poster_bytes, rank, variation):
             accent_color = (248, 113, 113, 255)     # Vermelho claro
             outline_color = (248, 113, 113, 210)
             fill_color = (30, 10, 14, 240)
-        elif variation == 'NOVO':
-            var_text = "★ NOVO"
+        elif variation in ('NOVO', 'ENTRADA'):
+            var_text = "★ ENTRADA"
             accent_color = (250, 204, 21, 255)      # Dourado vivo
             outline_color = (250, 204, 21, 210)
             fill_color = (24, 18, 4, 240)
@@ -651,7 +651,7 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
         old_rank = history_dict.get(item_id) if history_dict else None
 
         if old_rank is None:
-            variation = "NOVO"
+            variation = "ENTRADA"
         else:
             diff = old_rank - rank
             if diff > 0:
