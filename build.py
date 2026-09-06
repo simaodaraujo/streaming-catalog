@@ -920,6 +920,13 @@ def create_landing_page(featured_items=None):
       padding: 2px 6px;
       border-radius: 4px;
     }}
+    .referral-note {{
+      display: block;
+      margin-top: 2px;
+      color: #71717a;
+      font-size: 10px;
+      font-weight: 400;
+    }}
 
     .footer {{
       margin-top: 32px;
@@ -1014,9 +1021,9 @@ def create_landing_page(featured_items=None):
     <div class="recommendations">
       <div class="rec-title">Extensões que recomendo</div>
       <div class="rec-list">
-        <a href="https://real-debrid.com/" target="_blank" rel="noopener" class="rec-item">
-          <span>Real-Debrid</span>
-          <span class="badge">Debrid</span>
+        <a href="http://real-debrid.com/?id=10970377" target="_blank" rel="noopener sponsored" class="rec-item">
+          <span>Real-Debrid <small class="referral-note">O teu apoio através deste link ajuda o projeto.</small></span>
+          <span class="badge">Apoiar</span>
         </a>
         <a href="https://subdl.strem.top/configure" target="_blank" rel="noopener" class="rec-item">
           <span>SubDL Subtitles</span>
