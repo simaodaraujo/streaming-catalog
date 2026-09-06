@@ -40,7 +40,6 @@ TMDB_GENRES = {
     10765: "Sci-Fi e Fantasia", 10766: "Novela", 10767: "Talk Show", 10768: "Guerra e Política"
 }
 
-# Tenta carregar .env se não estiver no ambiente (para execução/teste local)
 if not TMDB_API_KEY and os.path.exists(".env"):
     try:
         with open(".env", "r", encoding="utf-8") as f:
@@ -69,7 +68,7 @@ else:
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# Plataformas de streaming em Portugal.
+# Plataformas de streaming em Portugal
 PROVIDERS = [
   {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "flix_slug": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
   {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney", "jw_pkg": "dnp", "color": "#0063e5"},
@@ -225,10 +224,6 @@ def search_imdb_title(title, media_type):
         print(f"  [!] Erro IMDb ao procurar '{title}': {e}", flush=True)
     return None
 
-
-# ---------------------------------------------------------------------------
-# NETFLIX - fonte 100% oficial e publica (top10.netflix.com)
-# ---------------------------------------------------------------------------
 def _last_published_sunday(reference=None):
     ref = reference or date.today()
     w = ref.weekday()
@@ -1353,7 +1348,7 @@ def main():
         "version": "1.1.0",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
-        "logo": "logo.png",
+        "logo": "https://top-streaming-pt.vercel.app/logo.png",
         "resources": [
             "catalog"
         ],
