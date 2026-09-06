@@ -56,10 +56,9 @@ else:
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 # Plataformas de streaming em Portugal:
-# - Netflix: fonte oficial semanal (top10.netflix.com)
-# - Disney+, Prime, HBO, Apple TV+, SkyShowtime: rankings reais de Portugal via JustWatch (100% gratuito e sem bloqueios)
+# Todas usam rankings diários reais de Portugal via JustWatch (100% gratuito e sem bloqueios)
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
+    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "justwatch", "jw_pkg": "nfx", "color": "#E50914"},
     {"id": "disney", "name": "Disney+", "tmdb_id": 337, "source": "justwatch", "jw_pkg": "dnp", "color": "#0063e5"},
     {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "source": "justwatch", "jw_pkg": "prv", "color": "#00a8e1"},
     {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "source": "justwatch", "jw_pkg": "hbm", "color": "#a855f7"},
@@ -414,14 +413,17 @@ def apply_badges_to_catalog(items, cat_id, history_dict):
                 res = session.get(original_poster, timeout=8)
                 if res.status_code == 200:
                     badged_bytes = draw_rank_badge(res.content, rank, variation)
-                    with open(poster_path, "wb") as f:
-                        f.write(badged_bytes)
-                    if BASE_URL:
-                        item_copy["poster"] = f"{BASE_URL}/posters/{poster_filename}"
-                    else:
-                        item_copy["poster"] = f"/posters/{poster_filename}"
+                    if badged_bytes and len(badged_bytes) > 0:
+                        with open(poster_path, "wb") as f:
+                            f.write(badged_bytes)
+                        if BASE_URL:
+                            item_copy["poster"] = f"{BASE_URL}/posters/{poster_filename}"
+                        else:
+                            item_copy["poster"] = f"/posters/{poster_filename}"
+                    # Se o badge falhou, mantém o poster TMDB original
             except Exception as e:
                 print(f"  [!] Aviso: Não foi possível aplicar badge em '{item_copy.get('name')}': {e}", flush=True)
+                # Mantém o poster TMDB original em caso de erro
 
         updated_items.append(item_copy)
 
@@ -967,6 +969,22 @@ def main():
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
     os.makedirs("dist/posters", exist_ok=True)
+
+    # Gerar vercel.json com CORS headers para o Stremio conseguir ler os catálogos
+    vercel_config = {
+        "headers": [
+            {
+                "source": "/(.*)",
+                "headers": [
+                    {"key": "Access-Control-Allow-Origin", "value": "*"},
+                    {"key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS"}
+                ]
+            }
+        ]
+    }
+    with open("dist/vercel.json", "w", encoding="utf-8") as f:
+        json.dump(vercel_config, f, indent=2)
+    print("[i] vercel.json com CORS headers gerado.", flush=True)
 
     if os.path.exists("img/logo.png"):
         shutil.copy("img/logo.png", "dist/logo.png")
