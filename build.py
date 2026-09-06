@@ -64,7 +64,7 @@ PROVIDERS = [
   {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "flix_slug": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
   {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney", "jw_pkg": "dnp", "color": "#0063e5"},
   {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "flix_slug": "amazon-prime", "jw_pkg": "prv", "color": "#00a8e1"},
-  {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "flix_slug": "hbo", "jw_pkg": "hbm", "color": "#a855f7"},
+  {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "flix_slug": "hbo-max", "jw_pkg": "hbm", "color": "#a855f7"},
   {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "flix_slug": "apple-tv", "jw_pkg": "atp", "color": "#ffffff"},
   {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "flix_slug": "skyshowtime", "jw_pkg": "sst", "color": "#00ff7f"},
 ]
@@ -152,6 +152,46 @@ def search_tmdb_title(title, media_type):
         print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
 
     print(f"  [!] TMDB não resolveu '{title}' como {media_type}", flush=True)
+    return None
+
+
+def search_imdb_title(title, media_type):
+    """Resolve títulos muito recentes que ainda não chegaram ao TMDB."""
+    if not session:
+        return None
+
+    query = clean_title(title)
+    query_slug = re.sub(r"[^a-z0-9]+", "_", query.casefold()).strip("_")
+    if not query_slug:
+        return None
+
+    expected_types = {"feature", "movie"} if media_type == "movie" else {"tvSeries", "tvMiniSeries"}
+    normalized_query = re.sub(r"\W+", "", query.casefold())
+    try:
+        res = session.get(
+            f"https://v3.sg.media-imdb.com/suggestion/{query_slug[0]}/{query_slug}.json",
+            headers=HEADERS,
+            timeout=7,
+        )
+        results = res.json().get("d", []) if res.status_code == 200 else []
+        for result in results:
+            candidate = result.get("l", "")
+            normalized_candidate = re.sub(r"\W+", "", candidate.casefold())
+            if normalized_candidate != normalized_query or result.get("qid") not in expected_types:
+                continue
+            imdb_id = result.get("id", "")
+            if not re.fullmatch(r"tt\d+", imdb_id):
+                continue
+            image = result.get("i", {})
+            print(f"  [i] IMDb resolveu '{title}' ({imdb_id})", flush=True)
+            return {
+                "id": imdb_id,
+                "type": "movie" if media_type == "movie" else "series",
+                "name": candidate or title,
+                "poster": image.get("imageUrl"),
+            }
+    except Exception as e:
+        print(f"  [!] Erro IMDb ao procurar '{title}': {e}", flush=True)
     return None
 
 
@@ -382,6 +422,8 @@ def resolve_titles_to_items(titles, media_type):
     items = []
     for title in titles:
         item = search_tmdb_title(title, media_type)
+        if not item:
+            item = search_imdb_title(title, media_type)
         if item and not any(existing["id"] == item["id"] for existing in items):
             items.append(item)
         elif not item:
