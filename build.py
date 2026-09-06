@@ -97,27 +97,42 @@ def search_tmdb_title(title, media_type):
     if not TMDB_API_KEY:
         return None
     search_type = "movie" if media_type == "movie" else "tv"
-    query = clean_title(title)
-
-    url = f"https://api.themoviedb.org/3/search/{search_type}"
-    params = {"api_key": TMDB_API_KEY, "query": query, "language": "pt-PT", "page": 1}
+    queries = []
+    for candidate in (title, clean_title(title)):
+        if candidate and candidate.casefold() not in {query.casefold() for query in queries}:
+            queries.append(candidate)
 
     try:
-        res = session.get(url, params=params, timeout=7)
-        results = res.json().get("results", []) if res.status_code == 200 else []
+        results = []
+        for query in queries:
+            for language in ("pt-PT", "en-US", None):
+                params = {"api_key": TMDB_API_KEY, "query": query, "page": 1}
+                if language:
+                    params["language"] = language
+                res = session.get(
+                    f"https://api.themoviedb.org/3/search/{search_type}",
+                    params=params,
+                    timeout=7,
+                )
+                results = res.json().get("results", []) if res.status_code == 200 else []
+                if results:
+                    break
+            if results:
+                break
 
-        if not results:
-            params.pop("language", None)
-            res = session.get(url, params=params, timeout=7)
-            results = res.json().get("results", []) if res.status_code == 200 else []
-
-        # Se não encontrou, tenta o outro tipo (ex: minissérie listada como movie ou tv)
+        # Se não encontrou, tenta o outro tipo (ex: minissérie listada como movie ou tv).
         if not results:
             other_type = "tv" if search_type == "movie" else "movie"
-            res = session.get(f"https://api.themoviedb.org/3/search/{other_type}", params={"api_key": TMDB_API_KEY, "query": query, "page": 1}, timeout=7)
-            results = res.json().get("results", []) if res.status_code == 200 else []
-            if results:
-                search_type = other_type
+            for query in queries:
+                res = session.get(
+                    f"https://api.themoviedb.org/3/search/{other_type}",
+                    params={"api_key": TMDB_API_KEY, "query": query, "language": "en-US", "page": 1},
+                    timeout=7,
+                )
+                results = res.json().get("results", []) if res.status_code == 200 else []
+                if results:
+                    search_type = other_type
+                    break
 
         if results:
             best = results[0]
@@ -136,6 +151,7 @@ def search_tmdb_title(title, media_type):
     except Exception as e:
         print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
 
+    print(f"  [!] TMDB não resolveu '{title}' como {media_type}", flush=True)
     return None
 
 
@@ -237,35 +253,37 @@ def get_justwatch_top10(package_code, media_type):
 
 
 def parse_flixpatrol_titles(html, media_type):
-  """Extrai títulos de uma página FlixPatrol, separando filmes e séries."""
-  soup = BeautifulSoup(html, "html.parser")
-  titles = []
-  fallback_titles = []
-  seen = set()
-  fallback_seen = set()
-  section_terms = {
-    "movie": ("movie", "movies", "filme", "filmes"),
-    "series": ("tv", "show", "shows", "series", "série", "séries"),
-  }
-  for link in soup.select("a[href]"):
-    href = link.get("href", "")
-    text = re.sub(r"\s+", " ", link.get_text(" ", strip=True)).strip()
-    if "/title/" not in href or not text or len(text) < 2:
-      continue
-    if text.lower() in {"more", "details", "watch now", "trailer"}:
-      continue
-    key = text.casefold()
-    if key not in fallback_seen:
-      fallback_seen.add(key)
-      fallback_titles.append(text)
-    headings = link.find_all_previous(["h1", "h2", "h3", "h4"], limit=1)
-    heading = headings[0].get_text(" ", strip=True).casefold() if headings else ""
-    if any(term in heading for term in section_terms.get(media_type, ())) and key not in seen:
-      seen.add(key)
-      titles.append(text)
-    if len(titles) >= 10:
-      break
-  return titles or fallback_titles[:10]
+    """Extrai apenas a secção principal de filmes ou séries do FlixPatrol."""
+    soup = BeautifulSoup(html, "html.parser")
+    section_terms = {
+        "movie": ("top 10 movies", "top ranked movies"),
+        "series": ("top 10 tv shows", "top ranked tv shows"),
+    }
+    heading = next(
+        (
+            tag for tag in soup.find_all(["h2", "h3", "h4"])
+            if any(term in tag.get_text(" ", strip=True).casefold() for term in section_terms[media_type])
+        ),
+        None,
+    )
+    if not heading:
+        return []
+
+    titles = []
+    seen = set()
+    for element in heading.find_all_next():
+        if element is not heading and element.name in {"h2", "h3", "h4"}:
+            break
+        if element.name != "a" or "/title/" not in element.get("href", ""):
+            continue
+        title = re.sub(r"\s+", " ", element.get_text(" ", strip=True)).strip()
+        if len(title) < 2 or title.casefold() in seen:
+            continue
+        seen.add(title.casefold())
+        titles.append(title)
+        if len(titles) == 10:
+            break
+    return titles
 
 
 def get_flixpatrol_top10(platform_slug, media_type):
@@ -287,6 +305,8 @@ def get_flixpatrol_top10(platform_slug, media_type):
           )
         except Exception as exc:
           print(f"  [!] FlixPatrol proxy sem render falhou: {exc}", flush=True)
+        if response is not None and response.status_code != 200:
+          print(f"  [!] ScraperAPI respondeu HTTP {response.status_code} sem render ({platform_slug})", flush=True)
         titles = parse_flixpatrol_titles(response.text, media_type) if response is not None and response.status_code == 200 else []
         if not titles:
           try:
@@ -300,6 +320,8 @@ def get_flixpatrol_top10(platform_slug, media_type):
               titles = parse_flixpatrol_titles(rendered.text, media_type)
               if titles:
                 print(f"  [i] FlixPatrol renderizado ({platform_slug}, {media_type})", flush=True)
+            else:
+              print(f"  [!] ScraperAPI respondeu HTTP {rendered.status_code} com render ({platform_slug})", flush=True)
           except Exception as exc:
             print(f"  [!] FlixPatrol proxy renderizado falhou: {exc}", flush=True)
         if titles:
@@ -353,6 +375,8 @@ def resolve_titles_to_items(titles, media_type):
         item = search_tmdb_title(title, media_type)
         if item and not any(existing["id"] == item["id"] for existing in items):
             items.append(item)
+        elif not item:
+            print(f"  [!] Título descartado do catálogo {media_type}: {title}", flush=True)
         time.sleep(0.03)
     return items
 
@@ -587,7 +611,7 @@ def create_landing_page(featured_items=None):
           '          </article>\n'
         )
       if row_cards:
-        rows_html.append(f'        <div class="peek-track peek-track-{row_index}">\n{row_cards}        </div>')
+        rows_html.append(f'        <div class="peek-track peek-track-{row_index}">\n{row_cards}{row_cards}        </div>')
     rows_html = "\n".join(rows_html)
 
     html_content = f"""<!DOCTYPE html>
@@ -613,7 +637,7 @@ def create_landing_page(featured_items=None):
       -webkit-font-smoothing: antialiased;
     }}
     .wrapper {{
-      max-width: 480px;
+      max-width: 900px;
       width: 100%;
       text-align: center;
     }}
@@ -722,25 +746,28 @@ def create_landing_page(featured_items=None):
     .peek-marquee {{
       position: relative;
       overflow: hidden;
-      padding: 8px 0 10px;
-      margin: 0 -24px;
+      padding: 10px 0 14px;
+      margin: 0 -12px;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
       mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
     }}
     .peek-gallery-drift {{
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-auto-rows: 78px;
-      gap: 6px;
-      animation: gallery-drift 34s ease-in-out infinite alternate;
-      will-change: transform;
-    }}
-    @keyframes gallery-drift {{
-      from {{ transform: translateX(-5px); }}
-      to {{ transform: translateX(5px); }}
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }}
     .peek-track {{
-      display: contents;
+      display: flex;
+      width: max-content;
+      gap: 8px;
+      animation: gallery-drift 120s linear infinite;
+      will-change: transform;
+    }}
+    .peek-track-1 {{ animation-duration: 135s; animation-direction: reverse; }}
+    .peek-track-2 {{ animation-duration: 150s; }}
+    @keyframes gallery-drift {{
+      from {{ transform: translateX(0); }}
+      to {{ transform: translateX(calc(-50% - 4px)); }}
     }}
     .peek-card {{
       position: relative;
@@ -750,13 +777,10 @@ def create_landing_page(featured_items=None):
       overflow: hidden;
       text-align: left;
     }}
-    .peek-card:nth-child(1), .peek-card:nth-child(6) {{ grid-column: span 2; grid-row: span 2; }}
-    .peek-card:nth-child(3), .peek-card:nth-child(9) {{ grid-row: span 2; }}
-    .peek-card:nth-child(4) {{ grid-column: span 2; }}
     .peek-poster-box {{
       position: relative;
-      height: 100%;
-      width: 100%;
+      width: 108px;
+      height: 162px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -888,13 +912,12 @@ def create_landing_page(featured_items=None):
     .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
     @media (max-width: 520px) {{
       .peek-marquee {{
-        padding-left: 2px;
-        padding-right: 2px;
+        margin: 0 -8px;
+        padding-top: 6px;
       }}
-      .peek-gallery-drift {{
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: 68px;
-        gap: 5px;
+      .peek-poster-box {{
+        width: 82px;
+        height: 123px;
       }}
     }}
   </style>
@@ -949,7 +972,7 @@ def create_landing_page(featured_items=None):
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
       </svg>
-      Copiar manifest
+      Copiar Manifest
     </button>
 
     <!-- Sneak Peek Section -->

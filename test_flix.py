@@ -82,6 +82,29 @@ def test_netflix_dates():
     ok("lógica das datas da Netflix")
 
 
+def test_flixpatrol_parser():
+    namespace = {}
+    with open(BUILD_SCRIPT, "r", encoding="utf-8") as f:
+        exec(compile(f.read(), BUILD_SCRIPT, "exec"), namespace)
+
+    page = """
+    <h3>TOP 10 Movies</h3>
+    <a href="/title/the-whisper-man/">The Whisper Man</a>
+    <a href="/title/the-secret-woman/">The Secret Woman</a>
+    <h3>TOP 10 TV Shows</h3>
+    <a href="/title/the-gentlemen/">The Gentlemen</a>
+    <a href="/title/beauty-in-black/">Beauty in Black</a>
+    <h3>TOP 10 Kids Movies</h3>
+    <a href="/title/shrek/">Shrek</a>
+    """
+    parse = namespace["parse_flixpatrol_titles"]
+    if parse(page, "movie") != ["The Whisper Man", "The Secret Woman"]:
+        fail("parser FlixPatrol não isolou a secção de filmes")
+    if parse(page, "series") != ["The Gentlemen", "Beauty in Black"]:
+        fail("parser FlixPatrol não isolou a secção de séries")
+    ok("parser FlixPatrol: filmes e séries separados")
+
+
 def run_build():
     env = os.environ.copy()
     if not env.get("TMDB_API_KEY") and os.path.exists(".env"):
@@ -184,6 +207,7 @@ def main():
     print("=== Validação Top 10 Streams PT ===")
     test_syntax()
     test_netflix_dates()
+    test_flixpatrol_parser()
     run_build()
     validate_dist()
     git_diff_check()

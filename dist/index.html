@@ -21,7 +21,7 @@
       -webkit-font-smoothing: antialiased;
     }
     .wrapper {
-      max-width: 480px;
+      max-width: 900px;
       width: 100%;
       text-align: center;
     }
@@ -130,25 +130,28 @@
     .peek-marquee {
       position: relative;
       overflow: hidden;
-      padding: 8px 0 10px;
-      margin: 0 -24px;
+      padding: 10px 0 14px;
+      margin: 0 -12px;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
       mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
     }
     .peek-gallery-drift {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-auto-rows: 78px;
-      gap: 6px;
-      animation: gallery-drift 34s ease-in-out infinite alternate;
-      will-change: transform;
-    }
-    @keyframes gallery-drift {
-      from { transform: translateX(-5px); }
-      to { transform: translateX(5px); }
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     .peek-track {
-      display: contents;
+      display: flex;
+      width: max-content;
+      gap: 8px;
+      animation: gallery-drift 120s linear infinite;
+      will-change: transform;
+    }
+    .peek-track-1 { animation-duration: 135s; animation-direction: reverse; }
+    .peek-track-2 { animation-duration: 150s; }
+    @keyframes gallery-drift {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(-50% - 4px)); }
     }
     .peek-card {
       position: relative;
@@ -158,13 +161,10 @@
       overflow: hidden;
       text-align: left;
     }
-    .peek-card:nth-child(1), .peek-card:nth-child(6) { grid-column: span 2; grid-row: span 2; }
-    .peek-card:nth-child(3), .peek-card:nth-child(9) { grid-row: span 2; }
-    .peek-card:nth-child(4) { grid-column: span 2; }
     .peek-poster-box {
       position: relative;
-      height: 100%;
-      width: 100%;
+      width: 108px;
+      height: 162px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -296,13 +296,12 @@
     .version { color: #3f3f46; font-size: 11px; margin-top: 4px; }
     @media (max-width: 520px) {
       .peek-marquee {
-        padding-left: 2px;
-        padding-right: 2px;
+        margin: 0 -8px;
+        padding-top: 6px;
       }
-      .peek-gallery-drift {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: 68px;
-        gap: 5px;
+      .peek-poster-box {
+        width: 82px;
+        height: 123px;
       }
     }
   </style>
@@ -430,8 +429,128 @@
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/netflix_pt_movies_1.jpg" alt="Cara a Cara com El Chapo" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/842yFtWhxgs26LFpVdbGUCWatuV.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
+              <div class="peek-card-title" title="Cara a Cara com El Chapo">Cara a Cara com El Chapo</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/disney_pt_movies_1.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/8qBccgSj0Ru9Odm1Mjv82cxDr7l.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
+              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/zPlBUyu9rWhVrdiRfSClwMkmQiT.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
+              <div class="peek-card-title" title="The Runner">The Runner</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/xSnM4ahmz692msbMTBsfBWHvR3M.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
+              <div class="peek-card-title" title="Os Condenados de Shawshank">Os Condenados de Shawshank</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/apple_pt_movies_1.jpg" alt="Mayday" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
+              <div class="peek-card-title" title="Mayday">Mayday</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/skyshowtime_pt_movies_1.jpg" alt="Avatar Aang - O Último Airbender" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/aS3WoFJ3w64QNKTl3GM6qSpjbTK.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Avatar Aang - O Último Airbender">Avatar Aang - O Último Airbender</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
         </div>
         <div class="peek-track peek-track-1">
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/imNaqOt1HoaGVRZ1INPPrsJjDGc.jpg" alt="O Homem dos Sussurros" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/imNaqOt1HoaGVRZ1INPPrsJjDGc.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
+              <div class="peek-card-title" title="O Homem dos Sussurros">O Homem dos Sussurros</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/ijeFLSlOsjREte7eBNvm2gcuBqV.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/ijeFLSlOsjREte7eBNvm2gcuBqV.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
+              <div class="peek-card-title" title="Os Vingadores">Os Vingadores</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/aUP8lmnCvOUiG0n1ciXaeFEou3j.jpg" alt="The Last Sunrise" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/aUP8lmnCvOUiG0n1ciXaeFEou3j.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
+              <div class="peek-card-title" title="The Last Sunrise">The Last Sunrise</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/8qBccgSj0Ru9Odm1Mjv82cxDr7l.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/8qBccgSj0Ru9Odm1Mjv82cxDr7l.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
+              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/hDBCVfGvQXfKpmzjMG3y3HkIKhP.jpg" alt="F1 - O Filme" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/hDBCVfGvQXfKpmzjMG3y3HkIKhP.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
+              <div class="peek-card-title" title="F1 - O Filme">F1 - O Filme</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/uP46DujkD3nwcisOjz9a0Xw0Knj.jpg" alt="O Padrinho" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/uP46DujkD3nwcisOjz9a0Xw0Knj.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Padrinho">O Padrinho</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
           <article class="peek-card">
             <div class="peek-poster-box">
               <img src="https://image.tmdb.org/t/p/w500/imNaqOt1HoaGVRZ1INPPrsJjDGc.jpg" alt="O Homem dos Sussurros" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/imNaqOt1HoaGVRZ1INPPrsJjDGc.jpg'">
@@ -554,6 +673,66 @@
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/hCHei97aPYCCsh4vicz9X0wmdFV.jpg" alt="गांधारी" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/hCHei97aPYCCsh4vicz9X0wmdFV.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
+              <div class="peek-card-title" title="गांधारी">गांधारी</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/d6jUbQj4E4R5MJlFYfdzANEZbkL.jpg" alt="Vingadores: Guerra do Infinito" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/d6jUbQj4E4R5MJlFYfdzANEZbkL.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
+              <div class="peek-card-title" title="Vingadores: Guerra do Infinito">Vingadores: Guerra do Infinito</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/rcKqtKHORlEE1GfxgPyl6dgitUw.jpg" alt="Projeto Hail Mary" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/rcKqtKHORlEE1GfxgPyl6dgitUw.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
+              <div class="peek-card-title" title="Projeto Hail Mary">Projeto Hail Mary</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/6ricSDD83BClJsFdGB6x7cM0MFQ.jpg" alt="Interstellar" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/6ricSDD83BClJsFdGB6x7cM0MFQ.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
+              <div class="peek-card-title" title="Interstellar">Interstellar</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/i4gfmaEbeiZg299uIB1ONY3fHHX.jpg" alt="O Desfiladeiro" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/i4gfmaEbeiZg299uIB1ONY3fHHX.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
+              <div class="peek-card-title" title="O Desfiladeiro">O Desfiladeiro</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/a3k0o2b8EIgTW5FkF43UpFCVVeF.jpg" alt="Mundo Jurássico - Renascimento" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/a3k0o2b8EIgTW5FkF43UpFCVVeF.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Mundo Jurássico - Renascimento">Mundo Jurássico - Renascimento</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
         </div>
         </div>
       </div>
@@ -582,7 +761,7 @@
     </div>
 
     <div class="footer">
-      <span id="time-ago" data-time="2026-09-06T03:36:58.834429Z">Atualizado recentemente</span>
+      <span id="time-ago" data-time="2026-09-06T04:03:36.019308Z">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
       <span class="version">v1.0.8</span>
     </div>
