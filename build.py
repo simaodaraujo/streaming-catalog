@@ -236,13 +236,53 @@ def get_justwatch_top10(package_code, media_type):
     return []
 
 
-def get_flixpatrol_top10(platform_slug, media_type):
-    """Recolhe o ranking PT do FlixPatrol através do proxy ScraperAPI."""
-    if not SCRAPER_API_KEY or not session or not BeautifulSoup:
-      return []
+def parse_flixpatrol_titles(html, media_type):
+  """Extrai títulos de uma página FlixPatrol, separando filmes e séries."""
+  soup = BeautifulSoup(html, "html.parser")
+  titles = []
+  fallback_titles = []
+  seen = set()
+  fallback_seen = set()
+  section_terms = {
+    "movie": ("movie", "movies", "filme", "filmes"),
+    "series": ("tv", "show", "shows", "series", "série", "séries"),
+  }
+  for link in soup.select("a[href]"):
+    href = link.get("href", "")
+    text = re.sub(r"\s+", " ", link.get_text(" ", strip=True)).strip()
+    if "/title/" not in href or not text or len(text) < 2:
+      continue
+    if text.lower() in {"more", "details", "watch now", "trailer"}:
+      continue
+    key = text.casefold()
+    if key not in fallback_seen:
+      fallback_seen.add(key)
+      fallback_titles.append(text)
+    headings = link.find_all_previous(["h1", "h2", "h3", "h4"], limit=1)
+    heading = headings[0].get_text(" ", strip=True).casefold() if headings else ""
+    if any(term in heading for term in section_terms.get(media_type, ())) and key not in seen:
+      seen.add(key)
+      titles.append(text)
+    if len(titles) >= 10:
+      break
+  return titles or fallback_titles[:10]
 
+
+def get_flixpatrol_top10(platform_slug, media_type):
+    """Tenta scraping direto e usa ScraperAPI apenas como fallback."""
+    if not session or not BeautifulSoup:
+        return []
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
     try:
+        direct = session.get(url, headers=HEADERS, timeout=15)
+        if direct.status_code == 200:
+            titles = parse_flixpatrol_titles(direct.text, media_type)
+            if titles:
+                print(f"  [i] FlixPatrol direto ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
+                return titles
+        if not SCRAPER_API_KEY:
+            return []
+
         response = session.get(
             "https://api.scraperapi.com/",
             params={"api_key": SCRAPER_API_KEY, "url": url, "render": "false"},
@@ -250,43 +290,22 @@ def get_flixpatrol_top10(platform_slug, media_type):
             timeout=30,
         )
         if response.status_code != 200:
-            print(f"  [!] FlixPatrol ({platform_slug}) respondeu HTTP {response.status_code}", flush=True)
+            print(f"  [!] FlixPatrol direto/proxy respondeu HTTP {response.status_code}", flush=True)
             return []
-
-        soup = BeautifulSoup(response.text, "html.parser")
-        titles = []
-        fallback_titles = []
-        seen = set()
-        fallback_seen = set()
-        section_terms = {
-            "movie": ("movie", "movies", "filme", "filmes"),
-            "series": ("tv", "show", "shows", "series", "série", "séries"),
-        }
-        for link in soup.select("a[href]"):
-            href = link.get("href", "")
-            text = re.sub(r"\s+", " ", link.get_text(" ", strip=True)).strip()
-            if "/title/" not in href or not text or len(text) < 2:
-                continue
-            if text.lower() in {"more", "details", "watch now", "trailer"}:
-                continue
-            key = text.casefold()
-            if key not in fallback_seen:
-                fallback_seen.add(key)
-                fallback_titles.append(text)
-            headings = link.find_all_previous(["h1", "h2", "h3", "h4"], limit=1)
-            heading = headings[0].get_text(" ", strip=True).casefold() if headings else ""
-            matches_section = any(term in heading for term in section_terms.get(media_type, ()))
-            if matches_section and key not in seen:
-                seen.add(key)
-                titles.append(text)
-            if len(titles) >= 10:
-                break
-
+        titles = parse_flixpatrol_titles(response.text, media_type)
         if not titles:
-            titles = fallback_titles[:10]
-
+          rendered = session.get(
+            "https://api.scraperapi.com/",
+            params={"api_key": SCRAPER_API_KEY, "url": url, "render": "true"},
+            headers=HEADERS,
+            timeout=45,
+          )
+          if rendered.status_code == 200:
+            titles = parse_flixpatrol_titles(rendered.text, media_type)
+            if titles:
+              print(f"  [i] FlixPatrol renderizado ({platform_slug}, {media_type})", flush=True)
         if titles:
-            print(f"  [i] FlixPatrol Portugal ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
+            print(f"  [i] FlixPatrol via ScraperAPI ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
         return titles
     except Exception as exc:
         print(f"  [!] Erro FlixPatrol ({platform_slug}): {exc}", flush=True)
@@ -705,13 +724,22 @@ def create_landing_page(featured_items=None):
     .peek-marquee {{
       position: relative;
       overflow: hidden;
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 6px;
-      padding: 6px 0 8px;
+      padding: 8px 0 10px;
       margin: 0 -24px;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
       mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+    }}
+    .peek-gallery-drift {{
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-auto-rows: 48px;
+      gap: 6px;
+      animation: gallery-drift 34s ease-in-out infinite alternate;
+      will-change: transform;
+    }}
+    @keyframes gallery-drift {{
+      from {{ transform: translateX(-5px); }}
+      to {{ transform: translateX(5px); }}
     }}
     .peek-track {{
       display: contents;
@@ -724,9 +752,12 @@ def create_landing_page(featured_items=None):
       overflow: hidden;
       text-align: left;
     }}
+    .peek-card:nth-child(1), .peek-card:nth-child(6) {{ grid-column: span 2; grid-row: span 2; }}
+    .peek-card:nth-child(3), .peek-card:nth-child(9) {{ grid-row: span 2; }}
+    .peek-card:nth-child(4) {{ grid-column: span 2; }}
     .peek-poster-box {{
       position: relative;
-      aspect-ratio: 4/5;
+      height: 100%;
       width: 100%;
       background: #202024;
       overflow: hidden;
@@ -855,7 +886,12 @@ def create_landing_page(featured_items=None):
     .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
     @media (max-width: 520px) {{
       .peek-marquee {{
+        padding-left: 2px;
+        padding-right: 2px;
+      }}
+      .peek-gallery-drift {{
         grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-auto-rows: 42px;
         gap: 5px;
       }}
     }}
@@ -922,7 +958,9 @@ def create_landing_page(featured_items=None):
       </div>
 
       <div class="peek-marquee" aria-label="Títulos em destaque">
-{rows_html}
+        <div class="peek-gallery-drift">
+      {rows_html}
+        </div>
       </div>
     </div>
 
