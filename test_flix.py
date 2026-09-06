@@ -1,58 +1,195 @@
-from curl_cffi import requests as cffi_requests
-from bs4 import BeautifulSoup
+#!/usr/bin/env python3
+"""
+Teste/validador do build do Top 10 Streams PT.
 
-def test_netflix_scraping():
-    url = "https://www.netflix.com/tudum/top10/portugal"
-    print(f"[*] A aceder a via curl_cffi: {url}")
-    
-    headers = {
-        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Referer": "https://www.netflix.com/"
+Uso:
+    python test_flix.py
+    ou
+    python test_build.py
+
+O script:
+1. valida a sintaxe do build (build_top10.py);
+2. testa a lógica das datas da Netflix sem fazer pedidos à rede;
+3. executa o build real (se TMDB_API_KEY estiver definida);
+4. valida manifest.json, catálogos e referências aos ficheiros;
+5. executa `git diff --check` se estiver dentro de um repositório.
+"""
+
+import json
+import os
+import subprocess
+import sys
+from datetime import date
+
+import py_compile
+
+
+# Se executado fora do venv e as dependências (requests/bs4) não estiverem no python global,
+# reexecuta automaticamente usando o python do venv local.
+VENV_PYTHON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "venv", "Scripts", "python.exe")
+if os.path.isfile(VENV_PYTHON) and sys.executable.lower() != os.path.abspath(VENV_PYTHON).lower():
+    try:
+        import requests  # noqa: F401
+    except ImportError:
+        res = subprocess.run([VENV_PYTHON, os.path.abspath(__file__)] + sys.argv[1:])
+        sys.exit(res.returncode)
+
+BUILD_SCRIPT = "build.py"
+
+
+def fail(message):
+    print(f"[FAIL] {message}")
+    raise SystemExit(1)
+
+
+def ok(message):
+    print(f"[ OK ] {message}")
+
+
+def test_syntax():
+    try:
+        py_compile.compile(BUILD_SCRIPT, doraise=True)
+    except py_compile.PyCompileError as exc:
+        fail(f"sintaxe inválida: {exc}")
+    ok("sintaxe Python")
+
+
+def test_netflix_dates():
+    namespace = {}
+    with open(BUILD_SCRIPT, "r", encoding="utf-8") as f:
+        source = f.read()
+
+    # Executa apenas os imports/definições do ficheiro, sem chamar main().
+    exec(compile(source, BUILD_SCRIPT, "exec"), namespace)
+
+    fn = namespace.get("_last_published_sunday")
+    if not fn:
+        fail("função '_last_published_sunday' não encontrada no build_top10.py")
+
+    cases = {
+        date(2026, 9, 6): date(2026, 8, 30),  # domingo
+        date(2026, 9, 7): date(2026, 8, 30),  # segunda
+        date(2026, 9, 8): date(2026, 9, 6),   # terça
+        date(2026, 9, 9): date(2026, 9, 6),   # quarta
+        date(2026, 9, 12): date(2026, 9, 6),  # sábado
     }
 
-    try:
-        res = cffi_requests.get(url, impersonate="chrome124", headers=headers, timeout=15)
-        print(f"[*] Código de resposta HTTP: {res.status_code}")
-        
-        if res.status_code != 200:
-            print("[!] Falha ao aceder à página da Netflix.")
-            return
+    for reference, expected in cases.items():
+        actual = fn(reference)
+        if actual != expected:
+            fail(f"Netflix: para {reference}, esperado {expected}, obtido {actual}")
 
-        soup = BeautifulSoup(res.text, "html.parser")
-        tables = soup.find_all("table")
-        print(f"[*] Tabelas encontradas na página: {len(tables)}")
+    ok("lógica das datas da Netflix")
 
-        for idx, table in enumerate(tables):
-            tipo = f"TABELA {idx + 1}"
-            print(f"\n--- {tipo} ---")
-            
-            rows = table.select("tbody tr") or table.select("tr")
-            extracted = []
-            
-            for row in rows:
-                # Tenta primeiro extrair de links (onde está o nome do título)
-                found = False
-                for a in row.find_all("a"):
-                    text = a.get_text(strip=True)
-                    if text and not text.isdigit() and text not in extracted:
-                        extracted.append(text)
-                        found = true = True
+
+def run_build():
+    env = os.environ.copy()
+    if not env.get("TMDB_API_KEY") and os.path.exists(".env"):
+        try:
+            with open(".env", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("TMDB_API_KEY="):
+                        env["TMDB_API_KEY"] = line.split("=", 1)[1].strip().strip('"').strip("'")
                         break
-                
-                # Se não houver link, procura nas colunas de texto puro
-                if not found:
-                    cols = row.find_all("td")
-                    for col in cols:
-                        text = col.get_text(strip=True)
-                        if text and not text.isdigit() and len(text) > 2 and text not in extracted:
-                            extracted.append(text)
-                            break
+        except Exception:
+            pass
 
-            for i, title in enumerate(extracted[:10], 1):
-                print(f"  {i}. {title}")
+    if not env.get("TMDB_API_KEY"):
+        if os.path.isfile(os.path.join("dist", "manifest.json")):
+            print("[SKIP] TMDB_API_KEY não definida no ambiente; a validar pasta dist/ existente")
+            return
+        fail("TMDB_API_KEY não está definida; o build real precisa da variável de ambiente.")
 
-    except Exception as e:
-        print(f"[!] Erro durante o teste: {e}")
+    python_bin = VENV_PYTHON if os.path.isfile(VENV_PYTHON) else sys.executable
+    result = subprocess.run(
+        [python_bin, BUILD_SCRIPT],
+        text=True,
+        env=env,
+    )
+    if result.returncode != 0:
+        fail(f"build terminou com exit code {result.returncode}")
+
+    ok("build real")
+
+
+def validate_dist():
+    manifest_path = os.path.join("dist", "manifest.json")
+    if not os.path.isfile(manifest_path):
+        fail("dist/manifest.json não foi criado")
+
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    required = {"id", "version", "name", "description", "resources", "types", "catalogs"}
+    missing = required - manifest.keys()
+    if missing:
+        fail(f"manifest.json sem campos: {', '.join(sorted(missing))}")
+
+    catalogs = manifest["catalogs"]
+    if not catalogs:
+        fail("manifest.json não tem catálogos")
+
+    for catalog in catalogs:
+        for key in ("type", "id", "name"):
+            if key not in catalog:
+                fail(f"catálogo inválido: falta '{key}'")
+
+        catalog_path = os.path.join("dist", "catalog", catalog["type"], f'{catalog["id"]}.json')
+        if not os.path.isfile(catalog_path):
+            fail(f"catálogo registado no manifest mas inexistente: {catalog_path}")
+
+        with open(catalog_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        metas = data.get("metas")
+        if not isinstance(metas, list):
+            fail(f"{catalog_path}: 'metas' não é uma lista")
+
+        if not metas:
+            fail(f"{catalog_path}: catálogo vazio")
+
+        if len(metas) > 10:
+            fail(f"{catalog_path}: tem {len(metas)} itens; máximo esperado é 10")
+
+        for item in metas:
+            for key in ("id", "type", "name"):
+                if not item.get(key):
+                    fail(f"{catalog_path}: item sem '{key}'")
+
+    if not os.path.isfile(os.path.join("dist", "index.html")):
+        fail("dist/index.html não foi criado")
+
+    ok(f"manifest + {len(catalogs)} catálogos + landing page")
+
+
+def git_diff_check():
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--check"],
+            text=True,
+            capture_output=True,
+        )
+    except FileNotFoundError:
+        print("[SKIP] git não está instalado")
+        return
+
+    if result.returncode != 0:
+        fail(f"git diff --check encontrou problemas:\n{result.stdout}{result.stderr}")
+
+    ok("git diff --check")
+
+
+def main():
+    print("=== Validação Top 10 Streams PT ===")
+    test_syntax()
+    test_netflix_dates()
+    run_build()
+    validate_dist()
+    git_diff_check()
+    print("\nTudo OK. Agora é seguro fazer o `git add`.")
+    return 0
+
 
 if __name__ == "__main__":
-    test_netflix_scraping()
+    raise SystemExit(main())

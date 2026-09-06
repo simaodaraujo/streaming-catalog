@@ -1,0 +1,26 @@
+# Ambiente Virtual
+venv/
+.venv/
+env/
+
+# Ficheiros e scripts de build de teste local
+build_top10.py
+test_build.py
+build_*.py
+
+# Cache e ficheiros temporários
+__pycache__/
+*.py[cod]
+*$py.class
+cache/
+
+# Variáveis de ambiente locais
+.env
+.env.*
+*.local
+
+# SO e IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -3,28 +3,46 @@ import json
 import time
 import re
 import shutil
-import requests
 from datetime import datetime, date, timedelta
-from bs4 import BeautifulSoup
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
-TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
+try:
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    from bs4 import BeautifulSoup
+except ImportError:
+    requests = None
+    HTTPAdapter = None
+    Retry = None
+    BeautifulSoup = None
 
-if not TMDB_API_KEY:
-    raise ValueError("TMDB_API_KEY não foi encontrada nas variáveis de ambiente.")
+TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
 
-session = requests.Session()
-retries = Retry(total=2, backoff_factor=0.3, status_forcelist=[429, 500, 502, 503, 504])
-adapter = HTTPAdapter(max_retries=retries)
-session.mount("https://", adapter)
-session.mount("http://", adapter)
+# Tenta carregar .env se não estiver no ambiente (para execução/teste local)
+if not TMDB_API_KEY and os.path.exists(".env"):
+    try:
+        with open(".env", "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("TMDB_API_KEY="):
+                    TMDB_API_KEY = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    os.environ["TMDB_API_KEY"] = TMDB_API_KEY
+                    break
+    except Exception:
+        pass
+
+if requests:
+    session = requests.Session()
+    retries = Retry(total=2, backoff_factor=0.3, status_forcelist=[429, 500, 502, 503, 504])
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+else:
+    session = None
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
 # 'flixpatrol' é o slug usado em flixpatrol.com/top10/<slug>/<pais>/
-# Confirma estes slugs abrindo https://flixpatrol.com/top10/ no browser, porque
-# a FlixPatrol pode mudá-los sem aviso.
 PROVIDERS = [
     {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "netflix"},
     {"id": "disney", "name": "Disney+", "tmdb_id": 337, "source": "flixpatrol", "flixpatrol": "disney"},
@@ -37,13 +55,11 @@ PROVIDERS = [
 NETFLIX_COUNTRY_SLUG = "portugal"
 FLIXPATROL_COUNTRY_SLUG = "portugal"
 
-# Cache: se já correu hoje, não volta a bater na FlixPatrol — evita pedidos
-# repetidos caso o script seja despoletado mais do que uma vez por dia.
+# Cache: se já correu hoje, não volta a bater na FlixPatrol
 CACHE_DIR = "cache"
 FLIXPATROL_CACHE_FILE = os.path.join(CACHE_DIR, "flixpatrol_cache.json")
 
-# Atraso entre pedidos a cada plataforma da FlixPatrol, para sermos "educados"
-# e não martelar o site deles com pedidos seguidos.
+# Atraso entre pedidos a cada plataforma da FlixPatrol
 FLIXPATROL_DELAY_SECONDS = 4
 
 
@@ -55,6 +71,8 @@ def clean_title(title):
 
 
 def get_imdb_id(tmdb_id, media_type):
+    if not TMDB_API_KEY:
+        return None
     url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}/external_ids"
     try:
         res = session.get(url, params={"api_key": TMDB_API_KEY}, timeout=7)
@@ -66,6 +84,8 @@ def get_imdb_id(tmdb_id, media_type):
 
 
 def search_tmdb_title(title, media_type):
+    if not TMDB_API_KEY:
+        return None
     search_type = "movie" if media_type == "movie" else "tv"
     query = clean_title(title)
 
@@ -108,15 +128,25 @@ def search_tmdb_title(title, media_type):
 
 
 # ---------------------------------------------------------------------------
-# NETFLIX — fonte 100% oficial (top10.netflix.com), publicada pela própria
-# Netflix e destinada a consulta pública. Atualiza-se semanalmente (à terça,
-# com dados de segunda a domingo da semana anterior) — não é diária.
+# NETFLIX — fonte oficial (top10.netflix.com)
+# Atualiza-se semanalmente (à terça, com dados de segunda a domingo anterior).
 # ---------------------------------------------------------------------------
-def _last_sunday(reference=None):
+def _last_published_sunday(reference=None):
     ref = reference or date.today()
-    # weekday(): Monday=0 ... Sunday=6
-    days_since_sunday = (ref.weekday() + 1) % 7
-    return ref - timedelta(days=days_since_sunday)
+    # A Netflix publica os dados semanais à terça-feira.
+    # Antes de terça (domingo ou segunda), a última lista disponível é a da semana anterior.
+    # weekday(): Monday=0, Tuesday=1, ..., Sunday=6
+    w = ref.weekday()
+    if w == 6:       # Domingo
+        days = 7
+    elif w == 0:     # Segunda
+        days = 8
+    else:            # Terça a Sábado (1 a 5)
+        days = w + 1
+    return ref - timedelta(days=days)
+
+
+_last_sunday = _last_published_sunday
 
 
 def get_netflix_official_top10(media_type):
@@ -125,7 +155,7 @@ def get_netflix_official_top10(media_type):
     Tenta as últimas 3 semanas publicadas (a lista da semana atual só sai
     à terça-feira, por isso pode ainda não existir).
     """
-    candidate_sunday = _last_sunday()
+    candidate_sunday = _last_published_sunday()
 
     for _ in range(3):
         date_str = candidate_sunday.isoformat()
@@ -157,14 +187,6 @@ def get_netflix_official_top10(media_type):
 
 # ---------------------------------------------------------------------------
 # OUTRAS PLATAFORMAS — via FlixPatrol (flixpatrol.com/top10/<slug>/<pais>/)
-# Estes charts vêm, segundo a própria FlixPatrol, diretamente dos rankings
-# oficiais publicados por cada plataforma (Disney+, Amazon, etc.), mas:
-#   - Isto é raspagem de HTML público, não uma API — pode partir a qualquer
-#     momento se a FlixPatrol mudar a página.
-#   - Usamos cache diário + atraso entre pedidos para sermos o mais
-#     "educados" possível e não martelar o site deles.
-#   - A FlixPatrol vende acesso via API paga; se este projeto crescer muito,
-#     vale a pena considerar assinar em vez de continuar a raspar.
 # ---------------------------------------------------------------------------
 def _load_flixpatrol_cache():
     if os.path.exists(FLIXPATROL_CACHE_FILE):
@@ -186,8 +208,7 @@ def _save_flixpatrol_cache(data):
 
 def get_flixpatrol_top10(flixpatrol_slug, section_keyword):
     """
-    section_keyword: 'Movies' ou 'TV Shows' — usado para encontrar a secção
-    certa dentro da página (a FlixPatrol mostra Filmes e Séries na mesma página).
+    section_keyword: 'Movies' ou 'TV Shows'
     """
     url = f"https://flixpatrol.com/top10/{flixpatrol_slug}/{FLIXPATROL_COUNTRY_SLUG}/"
     try:
@@ -213,7 +234,7 @@ def get_flixpatrol_top10(flixpatrol_slug, section_keyword):
                     cell = row.find("td")
                     if cell:
                         text = cell.get_text(strip=True)
-                        text = re.sub(r'^\d+\.?\s*', '', text)  # remove ranking numérico à frente
+                        text = re.sub(r'^\d+\.?\s*', '', text)
                         if text:
                             titles.append(text)
 
@@ -228,11 +249,6 @@ def get_flixpatrol_top10(flixpatrol_slug, section_keyword):
 
 
 def get_flixpatrol_titles_cached(flixpatrol_slug):
-    """
-    Devolve {'movies': [...], 'tv': [...]} para o slug indicado.
-    Usa cache diário para não bater duas vezes no mesmo dia, e um atraso
-    entre pedidos reais para não sobrecarregar a FlixPatrol.
-    """
     cache = _load_flixpatrol_cache() or {}
 
     if flixpatrol_slug in cache:
@@ -251,6 +267,8 @@ def get_flixpatrol_titles_cached(flixpatrol_slug):
 
 
 def get_tmdb_fallback(tmdb_provider_id, media_type):
+    if not TMDB_API_KEY:
+        return []
     search_type = "movie" if media_type == "movie" else "tv"
     url = f"https://api.themoviedb.org/3/discover/{search_type}"
     params = {
@@ -577,6 +595,9 @@ def create_landing_page():
 
 
 def main():
+    if not TMDB_API_KEY:
+        raise ValueError("TMDB_API_KEY não foi encontrada nas variáveis de ambiente.")
+
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
 
