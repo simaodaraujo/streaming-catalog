@@ -449,7 +449,10 @@ def get_badge_font(size, bold=False):
 
 
 def draw_rank_badge(poster_bytes, rank, variation):
-    """Desenha uma pílula minimalista com a variação de ranking."""
+    """
+    Desenha uma pílula bem visível no canto superior esquerdo com o ranking e a variação.
+    Otimizado para ser nítido e legível mesmo nas miniaturas e no ecrã de TV do Stremio.
+    """
     if not Image or not ImageDraw or not ImageFont:
         return poster_bytes
 
@@ -461,54 +464,83 @@ def draw_rank_badge(poster_bytes, rank, variation):
         draw = ImageDraw.Draw(overlay)
 
         scale = w / 500.0
-        margin_x = int(26 * scale)
-        margin_y = int(24 * scale)
-        badge_h = max(24, int(29 * scale))
+        margin_x = int(22 * scale)
+        margin_y = int(22 * scale)
+        badge_h = max(38, int(46 * scale))
         radius = badge_h // 2
 
+        # Configura texto, cores e ícone conforme a variação
         if variation.startswith('+'):
-            var_text = f"↑ {variation[1:]}"
-            var_color = (74, 222, 128, 255)
-            outline_color = (74, 222, 128, 110)
-            fill_color = (12, 24, 16, 235)
+            var_text = f"▲ +{variation[1:]}"
+            accent_color = (74, 222, 128, 255)       # Verde vivo
+            outline_color = (74, 222, 128, 200)
+            fill_color = (10, 26, 16, 245)
         elif variation.startswith('-'):
-            var_text = f"↓ {variation[1:]}"
-            var_color = (248, 113, 113, 255)
-            outline_color = (248, 113, 113, 110)
-            fill_color = (26, 12, 14, 235)
+            var_text = f"▼ {variation[1:]}"
+            accent_color = (248, 113, 113, 255)     # Vermelho claro
+            outline_color = (248, 113, 113, 200)
+            fill_color = (30, 10, 14, 245)
         elif variation == 'NOVO':
-            var_text = "NOVO"
-            var_color = (250, 204, 21, 255)
-            outline_color = (250, 204, 21, 110)
-            fill_color = (26, 22, 10, 235)
+            var_text = "★ NOVO"
+            accent_color = (250, 204, 21, 255)      # Dourado vivo
+            outline_color = (250, 204, 21, 200)
+            fill_color = (32, 24, 6, 245)
         else:
-            var_text = "–"
-            var_color = (203, 213, 225, 255)
-            outline_color = (203, 213, 225, 65)
-            fill_color = (15, 17, 23, 235)
+            var_text = "● ="
+            accent_color = (226, 232, 240, 255)     # Prateado suave
+            outline_color = (148, 163, 184, 180)
+            fill_color = (15, 23, 42, 245)
 
-        font_badge = get_badge_font(max(11, int(13.5 * scale)), bold=True)
+        font_size = max(18, int(22 * scale))
+        font_badge = get_badge_font(font_size, bold=True)
         text_bbox = draw.textbbox((0, 0), var_text, font=font_badge)
         text_w = text_bbox[2] - text_bbox[0]
-        pad_x = int(13 * scale) if var_text == "–" else int(10 * scale)
-        badge_w = max(badge_h, text_w + (2 * pad_x))
+        text_h = text_bbox[3] - text_bbox[1]
+
+        pad_x = int(18 * scale)
+        badge_w = max(int(badge_h * 1.5), text_w + (2 * pad_x))
+
+        # Desenhar sombra suave em volta do badge para garantir legibilidade em capas claras
+        shadow_offset = max(2, int(3 * scale))
+        shadow_box = [
+            margin_x + shadow_offset,
+            margin_y + shadow_offset,
+            margin_x + badge_w + shadow_offset,
+            margin_y + badge_h + shadow_offset
+        ]
+        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 120))
+
+        # Pílula principal com rebordo de alto contraste
         box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
+        border_w = max(2, int(2.2 * scale))
         draw.rounded_rectangle(
-          box,
-          radius=radius,
-          fill=fill_color,
-          outline=outline_color,
-          width=max(1, int(1.2 * scale))
+            box,
+            radius=radius,
+            fill=fill_color,
+            outline=outline_color,
+            width=border_w
         )
+
+        # Desenhar o texto centralizado na pílula
         try:
-          draw.text((margin_x + badge_w / 2, margin_y + badge_h / 2), var_text, font=font_badge, fill=var_color, anchor="mm")
+            draw.text(
+                (margin_x + badge_w / 2, margin_y + badge_h / 2),
+                var_text,
+                font=font_badge,
+                fill=accent_color,
+                anchor="mm"
+            )
         except TypeError:
-          text_h = text_bbox[3] - text_bbox[1]
-          draw.text((margin_x + (badge_w - text_w) / 2, margin_y + (badge_h - text_h) / 2), var_text, font=font_badge, fill=var_color)
+            draw.text(
+                (margin_x + (badge_w - text_w) / 2, margin_y + (badge_h - text_h) / 2),
+                var_text,
+                font=font_badge,
+                fill=accent_color
+            )
 
         final_img = Image.alpha_composite(img, overlay).convert("RGB")
         output = io.BytesIO()
-        final_img.save(output, format="JPEG", quality=88)
+        final_img.save(output, format="JPEG", quality=90)
         return output.getvalue()
     except Exception as e:
         print(f"  [!] Erro ao desenhar badge: {e}", flush=True)
@@ -549,9 +581,10 @@ def save_history(history):
         print(f"  [!] Erro ao guardar histórico de rankings: {e}", flush=True)
 
 
-def apply_badges_to_catalog(items, cat_id, history_dict):
+def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streaming"):
     """
-    Calcula variações de ranking, desenha badges nos posters e guarda em dist/posters.
+    Calcula variações de ranking, desenha badges nos posters, guarda em dist/posters,
+    e enriquece os metadados (tags de género e sinopse) com informação de ranking e subida/queda.
     """
     os.makedirs("dist/posters", exist_ok=True)
     new_cat_history = {}
@@ -564,17 +597,42 @@ def apply_badges_to_catalog(items, cat_id, history_dict):
 
         if old_rank is None:
             variation = "NOVO"
+            trend_text = "Estreia no Top 10"
+            trend_tag = "⭐ Estreia"
         else:
             diff = old_rank - rank
             if diff > 0:
                 variation = f"+{diff}"
+                trend_text = f"Subiu {diff} {'posição' if diff == 1 else 'posições'} (Ontem: #{old_rank})"
+                trend_tag = f"▲ +{diff}"
             elif diff < 0:
                 variation = f"{diff}"
+                abs_diff = abs(diff)
+                trend_text = f"Caiu {abs_diff} {'posição' if abs_diff == 1 else 'posições'} (Ontem: #{old_rank})"
+                trend_tag = f"▼ {abs_diff}"
             else:
                 variation = "="
+                trend_text = f"Manteve a posição (Ontem: #{old_rank})"
+                trend_tag = "● Manteve"
 
         if item_id:
             new_cat_history[item_id] = rank
+
+        # Enriquecer tags / géneros no Stremio com badges destacados
+        rank_tag = f"🏆 #{rank} {provider_name} PT"
+        existing_genres = item_copy.get("genres") or []
+        extra_tags = [rank_tag, trend_tag]
+        # Coloca as nossas tags primeiro para serem exibidas em grande destaque
+        item_copy["genres"] = [t for t in extra_tags if t not in existing_genres] + [g for g in existing_genres if g not in extra_tags]
+
+        # Enriquecer o topo da sinopse / descrição exibida ao clicar no filme
+        info_header = (
+            f"🏆 #{rank} no TOP 10 Portugal ({provider_name})\n"
+            f"📊 {trend_text}\n"
+            f"──────────────────────────────\n"
+        )
+        existing_desc = (item_copy.get("description") or "").strip()
+        item_copy["description"] = f"{info_header}\n{existing_desc}" if existing_desc else info_header.strip()
 
         original_poster = item_copy.get("poster")
         if original_poster and Image and session:
@@ -1306,7 +1364,7 @@ def main():
         print(f"  -> Filmes encontrados: {len(movie_items)}/10", flush=True)
         if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
-            movie_items, cat_hist = apply_badges_to_catalog(movie_items, cat_id, history.get(cat_id, {}))
+            movie_items, cat_hist = apply_badges_to_catalog(movie_items, cat_id, history.get(cat_id, {}), prov["name"])
             new_history[cat_id] = cat_hist
             for rank, item in enumerate(movie_items, 1):
               featured_items.append({
@@ -1335,7 +1393,7 @@ def main():
         print(f"  -> Séries encontradas: {len(series_items)}/10", flush=True)
         if series_items:
             cat_id = f"{prov['id']}_pt_series"
-            series_items, cat_hist = apply_badges_to_catalog(series_items, cat_id, history.get(cat_id, {}))
+            series_items, cat_hist = apply_badges_to_catalog(series_items, cat_id, history.get(cat_id, {}), prov["name"])
             new_history[cat_id] = cat_hist
             for rank, item in enumerate(series_items, 1):
               featured_items.append({
