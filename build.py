@@ -550,7 +550,7 @@ def create_landing_page(featured_items=None):
     rows_html = []
     for row_index in range(3):
       row_cards = ""
-      for item in mixed_items[row_index::3]:
+      for item in mixed_items[:18][row_index * 6:(row_index + 1) * 6]:
         color = item.get("color", "#7b5bf5")
         platform = item.get("platform", "Streaming")
         title = item.get("title", "")
@@ -570,7 +570,7 @@ def create_landing_page(featured_items=None):
           '          </article>\n'
         )
       if row_cards:
-        rows_html.append(f'        <div class="peek-track peek-track-{row_index}">\n{row_cards}{row_cards}        </div>')
+        rows_html.append(f'        <div class="peek-track peek-track-{row_index}">\n{row_cards}        </div>')
     rows_html = "\n".join(rows_html)
 
     html_content = f"""<!DOCTYPE html>
@@ -705,48 +705,28 @@ def create_landing_page(featured_items=None):
     .peek-marquee {{
       position: relative;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 8px 0 26px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+      padding: 6px 0 8px;
       margin: 0 -24px;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-      mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+      mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
     }}
     .peek-track {{
-      display: flex;
-      align-items: flex-start;
-      width: max-content;
-      gap: 10px;
-      animation: poster-marquee 120s linear infinite;
-      will-change: transform;
-    }}
-    .peek-track-1 {{
-      animation-duration: 140s;
-      animation-direction: reverse;
-    }}
-    .peek-track-2 {{
-      animation-duration: 105s;
-    }}
-    .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
-    @keyframes poster-marquee {{
-      from {{ transform: translateX(0); }}
-      to {{ transform: translateX(calc(-50% - 5px)); }}
+      display: contents;
     }}
     .peek-card {{
       position: relative;
-      width: 112px;
-      flex: 0 0 112px;
+      width: auto;
       background: transparent;
-      border-radius: 8px;
+      border-radius: 5px;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
       text-align: left;
     }}
     .peek-poster-box {{
       position: relative;
-      aspect-ratio: 2/3;
+      aspect-ratio: 4/5;
       width: 100%;
       background: #202024;
       overflow: hidden;
@@ -758,8 +738,7 @@ def create_landing_page(featured_items=None):
       display: block;
     }}
     .peek-card-info {{
-      padding: 8px 6px;
-      background: #18181b;
+      display: none;
     }}
     .peek-card-platform {{
       font-size: 9px;
@@ -874,18 +853,11 @@ def create_landing_page(featured_items=None):
     }}
     .schedule {{ color: #71717a; }}
     .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
-    .source-credit {{
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #71717a;
-      font-size: 10px;
-      margin-top: 4px;
-    }}
-    .source-credit img {{
-      width: 68px;
-      height: auto;
-      opacity: 0.8;
+    @media (max-width: 520px) {{
+      .peek-marquee {{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+      }}
     }}
   </style>
 </head>
@@ -979,7 +951,6 @@ def create_landing_page(featured_items=None):
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
-      <span class="source-credit">Fonte dos rankings: <a href="https://flixpatrol.com/top10/streaming/portugal/" target="_blank" rel="noopener"><img src="https://flixpatrol.com/favicon.ico" alt="FlixPatrol"> FlixPatrol</a></span>
       <span class="version">v1.0.8</span>
     </div>
   </div>
