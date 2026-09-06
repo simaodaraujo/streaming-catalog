@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt11198330",
+    "type": "series",
+    "name": "House of the Dragon",
+    "genres": [
+      "🏆 #10 HBO PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_series_10.jpg",
+    "description": "🏆 #10 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt11198330"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt10986410",
+    "type": "series",
+    "name": "Ted Lasso",
+    "genres": [
+      "🏆 #2 Apple TV+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/apple_pt_series_2.jpg",
+    "description": "🏆 #2 no TOP 10 Portugal (Apple TV+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt10986410"
+    }
+  }
+}

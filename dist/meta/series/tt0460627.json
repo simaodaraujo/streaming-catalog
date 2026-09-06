@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt0460627",
+    "type": "series",
+    "name": "Ossos",
+    "genres": [
+      "🏆 #9 Disney+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/disney_pt_series_9.jpg",
+    "description": "🏆 #9 no TOP 10 Portugal (Disney+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0460627"
+    }
+  }
+}

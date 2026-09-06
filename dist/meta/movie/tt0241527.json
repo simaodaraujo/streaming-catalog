@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt0241527",
+    "type": "movie",
+    "name": "Harry Potter e a Pedra Filosofal",
+    "genres": [
+      "🏆 #6 HBO PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_6.jpg",
+    "description": "🏆 #6 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0241527"
+    }
+  }
+}

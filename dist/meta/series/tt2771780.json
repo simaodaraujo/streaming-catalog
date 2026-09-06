@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "id": "tt2771780",
+    "type": "series",
+    "name": "Teen Titans, Ação!",
+    "genres": [
+      "🏆 #4 HBO PT",
+      "⭐ Estreia",
+      "🏆 #5 Netflix PT"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_series_4.jpg",
+    "description": "🏆 #4 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n🏆 #5 no TOP 10 Portugal (Netflix)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt2771780"
+    }
+  }
+}

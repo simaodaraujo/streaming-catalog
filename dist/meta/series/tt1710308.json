@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt1710308",
+    "type": "series",
+    "name": "Regular Show",
+    "genres": [
+      "🏆 #8 HBO PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_series_8.jpg",
+    "description": "🏆 #8 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt1710308"
+    }
+  }
+}

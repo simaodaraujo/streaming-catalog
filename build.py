@@ -18,17 +18,27 @@ except ImportError:
     BeautifulSoup = None
 
 try:
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw, ImageFont, ImageOps
 except ImportError:
     Image = None
     ImageDraw = None
     ImageFont = None
+    ImageOps = None
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
 SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "https://top-streaming-pt.vercel.app").rstrip("/")
 HISTORY_FILE = "dist/history.json"
 LOCAL_HISTORY = "history.json"
+
+TMDB_GENRES = {
+    28: "Ação", 12: "Aventura", 16: "Animação", 35: "Comédia", 80: "Crime",
+    99: "Documentário", 18: "Drama", 10751: "Família", 14: "Fantasia", 36: "História",
+    27: "Terror", 10402: "Música", 9648: "Mistério", 10749: "Romance", 878: "Ficção científica",
+    10770: "Cinema TV", 53: "Thriller", 10752: "Guerra", 37: "Faroeste",
+    10759: "Ação e Aventura", 10762: "Infantil", 10763: "Notícias", 10764: "Reality",
+    10765: "Sci-Fi e Fantasia", 10766: "Novela", 10767: "Talk Show", 10768: "Guerra e Política"
+}
 
 # Tenta carregar .env se não estiver no ambiente (para execução/teste local)
 if not TMDB_API_KEY and os.path.exists(".env"):
@@ -142,11 +152,28 @@ def search_tmdb_title(title, media_type):
 
             if imdb_id:
                 name = best.get("name") if actual_type == "tv" else best.get("title")
+                genre_ids = best.get("genre_ids", [])
+                genres = [TMDB_GENRES[gid] for gid in genre_ids if gid in TMDB_GENRES]
+                year_str = (best.get("release_date") or best.get("first_air_date") or "")[:4]
+                vote_avg = best.get("vote_average")
+                rating_str = str(round(vote_avg, 1)) if vote_avg and vote_avg > 0 else None
+                backdrop_path = best.get("backdrop_path")
+                background = f"https://image.tmdb.org/t/p/original{backdrop_path}" if backdrop_path else None
+                poster_path = best.get("poster_path")
+                poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+                overview = (best.get("overview") or "").strip()
+
                 return {
                     "id": imdb_id,
                     "type": "series" if actual_type == "tv" else "movie",
                     "name": name or title,
-                    "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
+                    "poster": poster_url,
+                    "background": background,
+                    "overview": overview,
+                    "genres": genres,
+                    "releaseInfo": year_str if year_str else None,
+                    "imdbRating": rating_str,
+                    "tmdb_id": tmdb_id,
                 }
     except Exception as e:
         print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
@@ -183,12 +210,16 @@ def search_imdb_title(title, media_type):
             if not re.fullmatch(r"tt\d+", imdb_id):
                 continue
             image = result.get("i", {})
+            year_val = result.get("y")
             print(f"  [i] IMDb resolveu '{title}' ({imdb_id})", flush=True)
             return {
                 "id": imdb_id,
                 "type": "movie" if media_type == "movie" else "series",
                 "name": candidate or title,
                 "poster": image.get("imageUrl"),
+                "releaseInfo": str(year_val) if year_val else None,
+                "overview": "",
+                "genres": [],
             }
     except Exception as e:
         print(f"  [!] Erro IMDb ao procurar '{title}': {e}", flush=True)
@@ -407,11 +438,28 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
                 time.sleep(0.03)
                 if imdb_id:
                     name = item.get("title") if search_type == "movie" else item.get("name")
+                    genre_ids = item.get("genre_ids", [])
+                    genres = [TMDB_GENRES[gid] for gid in genre_ids if gid in TMDB_GENRES]
+                    year_str = (item.get("release_date") or item.get("first_air_date") or "")[:4]
+                    vote_avg = item.get("vote_average")
+                    rating_str = str(round(vote_avg, 1)) if vote_avg and vote_avg > 0 else None
+                    backdrop_path = item.get("backdrop_path")
+                    background = f"https://image.tmdb.org/t/p/original{backdrop_path}" if backdrop_path else None
+                    poster_path = item.get("poster_path")
+                    poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+                    overview = (item.get("overview") or "").strip()
+
                     items.append({
                         "id": imdb_id,
                         "type": "movie" if media_type == "movie" else "series",
                         "name": name,
-                        "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}" if item.get("poster_path") else None
+                        "poster": poster_url,
+                        "background": background,
+                        "overview": overview,
+                        "genres": genres,
+                        "releaseInfo": year_str if year_str else None,
+                        "imdbRating": rating_str,
+                        "tmdb_id": tmdb_id,
                     })
     except Exception as e:
         print(f"  [!] Erro Fallback TMDB: {e}", flush=True)
@@ -450,78 +498,88 @@ def get_badge_font(size, bold=False):
 
 def draw_rank_badge(poster_bytes, rank, variation):
     """
-    Desenha uma pílula bem visível no canto superior esquerdo com o ranking e a variação.
-    Otimizado para ser nítido e legível mesmo nas miniaturas e no ecrã de TV do Stremio.
+    Desenha uma pílula bem visível no canto superior esquerdo com a indicação de subida/queda/estreia.
+    Padroniza todos os posters para o rácio 2:3 exato (600x900px), garantindo posição
+    100% idêntica e milimétrica do badge em qualquer filme ou série.
     """
     if not Image or not ImageDraw or not ImageFont:
         return poster_bytes
 
     try:
-        img = Image.open(io.BytesIO(poster_bytes)).convert("RGBA")
-        w, h = img.size
+        raw_img = Image.open(io.BytesIO(poster_bytes))
+        if raw_img.mode != "RGB":
+            raw_img = raw_img.convert("RGB")
 
-        overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        # 1. Normalizar dimensões para o formato padrão Stremio 2:3 (600x900)
+        # ImageOps.fit corta/redimensiona proporcionalmente mantendo o centro
+        TARGET_W, TARGET_H = 600, 900
+        try:
+            if ImageOps:
+                img = ImageOps.fit(raw_img, (TARGET_W, TARGET_H), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
+            else:
+                img = raw_img.resize((TARGET_W, TARGET_H), Image.Resampling.LANCZOS)
+        except Exception:
+            img = raw_img.resize((TARGET_W, TARGET_H), Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.ANTIALIAS)
+
+        overlay = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
 
-        scale = w / 500.0
-        margin_x = int(22 * scale)
-        margin_y = int(22 * scale)
-        badge_h = max(38, int(46 * scale))
-        radius = badge_h // 2
+        # 2. Posição e dimensões exatas e fixas em todos os posters
+        margin_x = 24
+        margin_y = 24
+        badge_h = 46
+        radius = badge_h // 2  # 23px
 
-        # Configura texto, cores e ícone conforme a variação
+        # 3. Configura texto e paleta cromática conforme a variação
         if variation.startswith('+'):
             var_text = f"▲ +{variation[1:]}"
             accent_color = (74, 222, 128, 255)       # Verde vivo
-            outline_color = (74, 222, 128, 200)
-            fill_color = (10, 26, 16, 245)
+            outline_color = (74, 222, 128, 210)
+            fill_color = (8, 26, 15, 240)
         elif variation.startswith('-'):
             var_text = f"▼ {variation[1:]}"
             accent_color = (248, 113, 113, 255)     # Vermelho claro
-            outline_color = (248, 113, 113, 200)
-            fill_color = (30, 10, 14, 245)
+            outline_color = (248, 113, 113, 210)
+            fill_color = (30, 10, 14, 240)
         elif variation == 'NOVO':
             var_text = "★ NOVO"
             accent_color = (250, 204, 21, 255)      # Dourado vivo
-            outline_color = (250, 204, 21, 200)
-            fill_color = (32, 24, 6, 245)
+            outline_color = (250, 204, 21, 210)
+            fill_color = (24, 18, 4, 240)
         else:
             var_text = "● ="
             accent_color = (226, 232, 240, 255)     # Prateado suave
             outline_color = (148, 163, 184, 180)
-            fill_color = (15, 23, 42, 245)
+            fill_color = (15, 23, 42, 240)
 
-        font_size = max(18, int(22 * scale))
-        font_badge = get_badge_font(font_size, bold=True)
+        font_badge = get_badge_font(21, bold=True)
         text_bbox = draw.textbbox((0, 0), var_text, font=font_badge)
         text_w = text_bbox[2] - text_bbox[0]
         text_h = text_bbox[3] - text_bbox[1]
 
-        pad_x = int(18 * scale)
-        badge_w = max(int(badge_h * 1.5), text_w + (2 * pad_x))
+        pad_x = 16
+        badge_w = max(70, text_w + (2 * pad_x))
 
-        # Desenhar sombra suave em volta do badge para garantir legibilidade em capas claras
-        shadow_offset = max(2, int(3 * scale))
+        # 4. Sombra suave para contraste máximo em capas claras
         shadow_box = [
-            margin_x + shadow_offset,
-            margin_y + shadow_offset,
-            margin_x + badge_w + shadow_offset,
-            margin_y + badge_h + shadow_offset
+            margin_x + 2,
+            margin_y + 3,
+            margin_x + badge_w + 2,
+            margin_y + badge_h + 3
         ]
-        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 120))
+        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 140))
 
-        # Pílula principal com rebordo de alto contraste
+        # 5. Pílula principal com rebordo translúcido colorido
         box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
-        border_w = max(2, int(2.2 * scale))
         draw.rounded_rectangle(
             box,
             radius=radius,
             fill=fill_color,
             outline=outline_color,
-            width=border_w
+            width=2
         )
 
-        # Desenhar o texto centralizado na pílula
+        # 6. Desenhar texto perfeitamente centrado
         try:
             draw.text(
                 (margin_x + badge_w / 2, margin_y + badge_h / 2),
@@ -538,9 +596,10 @@ def draw_rank_badge(poster_bytes, rank, variation):
                 fill=accent_color
             )
 
-        final_img = Image.alpha_composite(img, overlay).convert("RGB")
+        img_rgba = img.convert("RGBA")
+        final_img = Image.alpha_composite(img_rgba, overlay).convert("RGB")
         output = io.BytesIO()
-        final_img.save(output, format="JPEG", quality=90)
+        final_img.save(output, format="JPEG", quality=92, optimize=True)
         return output.getvalue()
     except Exception as e:
         print(f"  [!] Erro ao desenhar badge: {e}", flush=True)
@@ -618,6 +677,16 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
         if item_id:
             new_cat_history[item_id] = rank
 
+        # Guarda dados de ranking estruturados para criação dos endpoints /meta
+        item_copy["_ranking_info"] = {
+            "provider": provider_name,
+            "rank": rank,
+            "variation": variation,
+            "trend_text": trend_text,
+            "trend_tag": trend_tag,
+            "cat_id": cat_id,
+        }
+
         # Enriquecer tags / géneros no Stremio com badges destacados
         rank_tag = f"🏆 #{rank} {provider_name} PT"
         existing_genres = item_copy.get("genres") or []
@@ -625,14 +694,16 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
         # Coloca as nossas tags primeiro para serem exibidas em grande destaque
         item_copy["genres"] = [t for t in extra_tags if t not in existing_genres] + [g for g in existing_genres if g not in extra_tags]
 
-        # Enriquecer o topo da sinopse / descrição exibida ao clicar no filme
+        # Enriquecer a descrição / sinopse exibida ao clicar no filme
         info_header = (
             f"🏆 #{rank} no TOP 10 Portugal ({provider_name})\n"
             f"📊 {trend_text}\n"
             f"──────────────────────────────\n"
         )
-        existing_desc = (item_copy.get("description") or "").strip()
-        item_copy["description"] = f"{info_header}\n{existing_desc}" if existing_desc else info_header.strip()
+        overview = (item_copy.get("overview") or item_copy.get("description") or "").strip()
+        if "──────────────────────────────" in overview:
+            overview = overview.split("──────────────────────────────", 1)[1].strip()
+        item_copy["description"] = f"{info_header}\n{overview}" if overview else info_header.strip()
 
         original_poster = item_copy.get("poster")
         if original_poster and Image and session:
@@ -649,10 +720,8 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
                             item_copy["poster"] = f"{BASE_URL}/posters/{poster_filename}"
                         else:
                             item_copy["poster"] = f"/posters/{poster_filename}"
-                    # Se o badge falhou, mantém o poster TMDB original
             except Exception as e:
                 print(f"  [!] Aviso: Não foi possível aplicar badge em '{item_copy.get('name')}': {e}", flush=True)
-                # Mantém o poster TMDB original em caso de erro
 
         updated_items.append(item_copy)
 
@@ -1202,9 +1271,11 @@ def main():
 
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
+    os.makedirs("dist/meta/movie", exist_ok=True)
+    os.makedirs("dist/meta/series", exist_ok=True)
     os.makedirs("dist/posters", exist_ok=True)
 
-    # Gerar vercel.json com CORS headers para o Stremio conseguir ler os catálogos
+    # Gerar vercel.json com CORS headers para o Stremio conseguir ler os catálogos e metas
     vercel_config = {
         "headers": [
             {
@@ -1227,6 +1298,7 @@ def main():
     new_history = {}
     manifest_catalogs = []
     featured_items = []
+    all_meta_entries = {}
 
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
@@ -1263,9 +1335,14 @@ def main():
                 "poster": f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
+              all_meta_entries.setdefault(("movie", item["id"]), []).append(item)
+
+            clean_movie_items = []
+            for it in movie_items:
+                clean_movie_items.append({k: v for k, v in it.items() if not k.startswith("_") and v is not None})
 
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
-                json.dump({"metas": movie_items}, f, ensure_ascii=False)
+                json.dump({"metas": clean_movie_items}, f, ensure_ascii=False)
             manifest_catalogs.append({
                 "type": "movie",
                 "id": cat_id,
@@ -1292,9 +1369,14 @@ def main():
                 "poster": f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
+              all_meta_entries.setdefault(("series", item["id"]), []).append(item)
+
+            clean_series_items = []
+            for it in series_items:
+                clean_series_items.append({k: v for k, v in it.items() if not k.startswith("_") and v is not None})
 
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
-                json.dump({"metas": series_items}, f, ensure_ascii=False)
+                json.dump({"metas": clean_series_items}, f, ensure_ascii=False)
             manifest_catalogs.append({
                 "type": "series",
                 "id": cat_id,
@@ -1302,16 +1384,82 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
+    # Gerar endpoints de metadados /meta/movie/{id}.json e /meta/series/{id}.json
+    # Isso garante que ao clicar num filme ou série no Stremio, a descrição,
+    # rankings, badges e tags da extensão apareçam em grande destaque.
+    for (m_type, item_id), appearances in all_meta_entries.items():
+        base = appearances[0]
+        header_lines = []
+        extra_tags = []
+        for app in appearances:
+            r_info = app.get("_ranking_info", {})
+            provider = r_info.get("provider", "Streaming")
+            rank = r_info.get("rank", 1)
+            trend_text = r_info.get("trend_text", "")
+            trend_tag = r_info.get("trend_tag", "")
+            header_lines.append(f"🏆 #{rank} no TOP 10 Portugal ({provider})")
+            if trend_text:
+                header_lines.append(f"📊 {trend_text}")
+            extra_tags.append(f"🏆 #{rank} {provider} PT")
+            if trend_tag:
+                extra_tags.append(trend_tag)
+
+        header_lines.append("──────────────────────────────")
+        overview = (base.get("overview") or base.get("description") or "").strip()
+        if "──────────────────────────────" in overview:
+            overview = overview.split("──────────────────────────────", 1)[1].strip()
+
+        combined_desc = "\n".join(header_lines) + (f"\n{overview}" if overview else "")
+
+        all_genres = []
+        for t in extra_tags:
+            if t not in all_genres:
+                all_genres.append(t)
+        for g in base.get("genres", []):
+            if g not in all_genres and not any(g.startswith(pfx) for pfx in ("🏆", "▲", "▼", "⭐", "●")):
+                all_genres.append(g)
+
+        meta_payload = {
+            "id": item_id,
+            "type": m_type,
+            "name": base.get("name"),
+            "genres": all_genres,
+            "poster": base.get("poster"),
+            "background": base.get("background"),
+            "description": combined_desc,
+            "releaseInfo": base.get("releaseInfo"),
+            "imdbRating": base.get("imdbRating"),
+            "behaviorHints": {
+                "defaultVideoId": item_id
+            }
+        }
+        meta_payload = {k: v for k, v in meta_payload.items() if v is not None}
+
+        meta_file_path = f"dist/meta/{m_type}/{item_id}.json"
+        with open(meta_file_path, "w", encoding="utf-8") as f:
+            json.dump({"meta": meta_payload}, f, ensure_ascii=False, indent=2)
+
+    print(f"[i] Gerados {len(all_meta_entries)} ficheiros de metadados (/meta).", flush=True)
+
     save_history(new_history)
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.8",
+        "version": "1.0.9",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": "logo.png",
-        "resources": ["catalog"],
-        "types": ["movie", "series"],
+        "resources": [
+            "catalog",
+            "meta"
+        ],
+        "types": [
+            "movie",
+            "series"
+        ],
+        "idPrefixes": [
+            "tt"
+        ],
         "catalogs": manifest_catalogs
     }
 

@@ -1,10 +1,11 @@
 {
   "id": "org.portugal.streaming.top",
-  "version": "1.0.3",
-  "name": "Streaming Portugal Populares",
+  "version": "1.0.9",
+  "name": "TOP 10 Portugal (Filmes & Séries)",
   "description": "Top 10 diário real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
   "resources": [
-    "catalog"
+    "catalog",
+    "meta"
   ],
   "types": [
     "movie",
@@ -143,5 +144,8 @@
         }
       ]
     }
+  ],
+  "idPrefixes": [
+    "tt"
   ]
 }

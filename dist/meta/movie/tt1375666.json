@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "id": "tt1375666",
+    "type": "movie",
+    "name": "A Origem",
+    "genres": [
+      "🏆 #5 HBO PT",
+      "⭐ Estreia",
+      "🏆 #7 Prime Video PT"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_5.jpg",
+    "description": "🏆 #5 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n🏆 #7 no TOP 10 Portugal (Prime Video)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt1375666"
+    }
+  }
+}

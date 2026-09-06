@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt14688458",
+    "type": "series",
+    "name": "O Silo",
+    "genres": [
+      "🏆 #1 Apple TV+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg",
+    "description": "🏆 #1 no TOP 10 Portugal (Apple TV+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt14688458"
+    }
+  }
+}

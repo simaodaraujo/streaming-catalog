@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt9288030",
+    "type": "series",
+    "name": "Reacher",
+    "genres": [
+      "🏆 #1 Prime Video PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/prime_pt_series_1.jpg",
+    "description": "🏆 #1 no TOP 10 Portugal (Prime Video)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt9288030"
+    }
+  }
+}

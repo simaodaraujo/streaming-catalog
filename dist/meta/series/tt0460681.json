@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "id": "tt0460681",
+    "type": "series",
+    "name": "Sobrenatural",
+    "genres": [
+      "🏆 #2 HBO PT",
+      "⭐ Estreia",
+      "🏆 #4 Prime Video PT"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_series_2.jpg",
+    "description": "🏆 #2 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n🏆 #4 no TOP 10 Portugal (Prime Video)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0460681"
+    }
+  }
+}

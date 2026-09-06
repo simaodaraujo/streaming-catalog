@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt5537002",
+    "type": "movie",
+    "name": "Assassinos da Lua das Flores",
+    "genres": [
+      "🏆 #4 Apple TV+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/apple_pt_movies_4.jpg",
+    "description": "🏆 #4 no TOP 10 Portugal (Apple TV+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt5537002"
+    }
+  }
+}

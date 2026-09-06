@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "id": "tt1586680",
+    "type": "series",
+    "name": "No Limite",
+    "genres": [
+      "🏆 #6 HBO PT",
+      "⭐ Estreia",
+      "🏆 #7 Netflix PT",
+      "🏆 #8 Prime Video PT"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_series_6.jpg",
+    "description": "🏆 #6 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n🏆 #7 no TOP 10 Portugal (Netflix)\n📊 Estreia no Top 10\n🏆 #8 no TOP 10 Portugal (Prime Video)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt1586680"
+    }
+  }
+}

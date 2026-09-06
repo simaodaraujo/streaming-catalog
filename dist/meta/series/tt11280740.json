@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt11280740",
+    "type": "series",
+    "name": "Separação",
+    "genres": [
+      "🏆 #5 Apple TV+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/apple_pt_series_5.jpg",
+    "description": "🏆 #5 no TOP 10 Portugal (Apple TV+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt11280740"
+    }
+  }
+}

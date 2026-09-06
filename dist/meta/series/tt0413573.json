@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt0413573",
+    "type": "series",
+    "name": "Anatomia de Grey",
+    "genres": [
+      "🏆 #6 Disney+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/disney_pt_series_6.jpg",
+    "description": "🏆 #6 no TOP 10 Portugal (Disney+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0413573"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt10366460",
+    "type": "movie",
+    "name": "No Ritmo do Coração",
+    "genres": [
+      "🏆 #6 Apple TV+ PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/apple_pt_movies_6.jpg",
+    "description": "🏆 #6 no TOP 10 Portugal (Apple TV+)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt10366460"
+    }
+  }
+}

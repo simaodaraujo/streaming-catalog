@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "id": "tt0098844",
+    "type": "series",
+    "name": "Lei & Ordem",
+    "genres": [
+      "🏆 #6 Prime Video PT",
+      "⭐ Estreia",
+      "🏆 #4 SkyShowtime PT"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/prime_pt_series_6.jpg",
+    "description": "🏆 #6 no TOP 10 Portugal (Prime Video)\n📊 Estreia no Top 10\n🏆 #4 no TOP 10 Portugal (SkyShowtime)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0098844"
+    }
+  }
+}

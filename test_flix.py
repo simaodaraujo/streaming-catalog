@@ -181,6 +181,22 @@ def validate_dist():
     if not os.path.isfile(os.path.join("dist", "index.html")):
         fail("dist/index.html não foi criado")
 
+    if "meta" in manifest.get("resources", []):
+        meta_count = 0
+        for m_type in ("movie", "series"):
+            meta_dir = os.path.join("dist", "meta", m_type)
+            if os.path.isdir(meta_dir):
+                for mf in os.listdir(meta_dir):
+                    if mf.endswith(".json"):
+                        with open(os.path.join(meta_dir, mf), "r", encoding="utf-8") as f:
+                            m_data = json.load(f)
+                        if "meta" not in m_data or not m_data["meta"].get("id"):
+                            fail(f"meta inválido: {mf}")
+                        meta_count += 1
+        if meta_count == 0:
+            fail("nenhum endpoint /meta encontrado em dist/meta")
+        ok(f"{meta_count} endpoints /meta validados")
+
     ok(f"manifest + {len(catalogs)} catálogos + landing page")
 
 

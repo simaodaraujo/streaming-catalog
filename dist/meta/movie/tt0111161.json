@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt0111161",
+    "type": "movie",
+    "name": "Os Condenados de Shawshank",
+    "genres": [
+      "🏆 #1 HBO PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_1.jpg",
+    "description": "🏆 #1 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0111161"
+    }
+  }
+}

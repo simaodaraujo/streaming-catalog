@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "id": "tt0944947",
+    "type": "series",
+    "name": "A Guerra dos Tronos",
+    "genres": [
+      "🏆 #1 HBO PT",
+      "⭐ Estreia"
+    ],
+    "poster": "https://top-streaming-pt.vercel.app/posters/hbo_pt_series_1.jpg",
+    "description": "🏆 #1 no TOP 10 Portugal (HBO)\n📊 Estreia no Top 10\n──────────────────────────────",
+    "behaviorHints": {
+      "defaultVideoId": "tt0944947"
+    }
+  }
+}
