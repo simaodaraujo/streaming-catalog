@@ -33,17 +33,37 @@ jobs:
       - name: Instalar Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Configurar Vercel Project Link
+      - name: Preparar deploy prebuilt
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          mkdir -p dist/.vercel
-          echo "{\"projectId\":\"$VERCEL_PROJECT_ID\",\"orgId\":\"$VERCEL_ORG_ID\"}" > dist/.vercel/project.json
+          # Criar estrutura .vercel/output para deploy prebuilt (ficheiros estáticos puros)
+          mkdir -p .vercel/output/static
+          cp -r dist/* .vercel/output/static/
 
-      - name: Publicar pasta dist para Produção
+          # Config que garante ficheiros estáticos sem framework detection
+          cat > .vercel/output/config.json << 'EOF'
+          {
+            "version": 3,
+            "routes": [
+              {
+                "src": "/(.*)",
+                "headers": {
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS"
+                },
+                "continue": true
+              }
+            ]
+          }
+          EOF
+
+          # Project link
+          mkdir -p .vercel
+          echo "{\"projectId\":\"$VERCEL_PROJECT_ID\",\"orgId\":\"$VERCEL_ORG_ID\"}" > .vercel/project.json
+
+      - name: Publicar para Produção (prebuilt)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          cd dist
-          vercel deploy --prod --yes --token=$VERCEL_TOKEN
+        run: vercel deploy --prebuilt --prod --yes --token=$VERCEL_TOKEN
