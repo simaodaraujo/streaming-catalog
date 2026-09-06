@@ -25,7 +25,7 @@ except ImportError:
     ImageFont = None
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
-BASE_URL = os.environ.get("BASE_URL", "https://streaming-catalog.vercel.app").rstrip("/")
+BASE_URL = os.environ.get("BASE_URL", "https://top-streaming-pt.vercel.app").rstrip("/")
 HISTORY_FILE = "dist/history.json"
 LOCAL_HISTORY = "history.json"
 
