@@ -4,6 +4,7 @@ import time
 import re
 import io
 import shutil
+import itertools
 from datetime import datetime, date, timedelta
 
 try:
@@ -807,26 +808,162 @@ def create_landing_page(featured_items=None):
       margin-bottom: 24px;
       line-height: 1.5;
     }}
-    .tags {{
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 28px;
+
+    /* CONFIGURATION CARD */
+    .config-card {{
+      background: #242429;
+      border: 1px solid #383842;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      text-align: left;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }}
-    .tag {{
-      display: inline-flex;
+    .config-header {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }}
+    .config-title-wrap {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    .config-badge {{
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #c084fc;
+      background: rgba(192, 132, 252, 0.15);
+      border: 1px solid rgba(192, 132, 252, 0.3);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }}
+    .config-title {{
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+    }}
+    .config-actions {{
+      display: flex;
       align-items: center;
       gap: 6px;
-      background-color: #27272a;
-      border: 1px solid #3f3f46;
-      color: #d4d4d8;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 8px;
     }}
-    .tag svg {{ height: 12px; width: auto; opacity: 0.9; fill: currentColor; }}
+    .btn-text-action {{
+      background: transparent;
+      border: none;
+      color: #9381ff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }}
+    .btn-text-action:hover {{
+      color: #b8acff;
+      text-decoration: underline;
+    }}
+    .action-sep {{
+      color: #52525b;
+      font-size: 10px;
+    }}
+    .config-subtitle {{
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-bottom: 14px;
+    }}
+    .platform-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }}
+    .platform-toggle {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #18181b;
+      border: 1.5px solid #3f3f46;
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #71717a;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.18s ease;
+      position: relative;
+    }}
+    .platform-toggle:hover {{
+      border-color: #52525b;
+      background: #202025;
+      color: #d4d4d8;
+    }}
+    .platform-toggle.active {{
+      background: #222030;
+      border-color: var(--p-color, #7b5bf5);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(123, 91, 245, 0.18);
+    }}
+    .platform-toggle .toggle-icon {{
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }}
+    .platform-toggle .toggle-icon svg {{
+      width: 100%;
+      height: 100%;
+      max-height: 16px;
+    }}
+    .platform-toggle .toggle-name {{
+      font-size: 12px;
+      font-weight: 600;
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }}
+    .platform-toggle .toggle-check {{
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid #52525b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }}
+    .platform-toggle.active .toggle-check {{
+      background: var(--p-color, #7b5bf5);
+      border-color: var(--p-color, #7b5bf5);
+      color: #ffffff;
+    }}
+    .platform-toggle .toggle-check svg {{
+      width: 11px;
+      height: 11px;
+      stroke-width: 3;
+      display: none;
+    }}
+    .platform-toggle.active .toggle-check svg {{
+      display: block;
+    }}
+    .config-status {{
+      font-size: 11px;
+      color: #a1a1aa;
+      text-align: right;
+    }}
+    .config-status.error {{
+      color: #ef4444;
+      font-weight: 600;
+      text-align: center;
+    }}
+
     .btn {{
       display: flex;
       align-items: center;
@@ -844,6 +981,11 @@ def create_landing_page(featured_items=None):
       cursor: pointer;
       transition: all 0.15s ease;
       border: none;
+    }}
+    .btn.disabled {{
+      opacity: 0.4;
+      pointer-events: none;
+      cursor: not-allowed;
     }}
     .btn-stremio {{
       background-color: #7b5bf5;
@@ -1079,6 +1221,9 @@ def create_landing_page(featured_items=None):
         width: 82px;
         height: 123px;
       }}
+      .platform-grid {{
+        grid-template-columns: repeat(2, 1fr);
+      }}
     }}
   </style>
 </head>
@@ -1088,36 +1233,89 @@ def create_landing_page(featured_items=None):
 
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
 
-    <div class="tags">
-      <div class="tag">
-        <svg viewBox="0 0 24 24" style="color: #E50914;"><path d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
-        Netflix
+    <!-- Interactive Platform Configurator -->
+    <div class="config-card">
+      <div class="config-header">
+        <div class="config-title-wrap">
+          <span class="config-badge">Personalização</span>
+          <h3 class="config-title">Escolhe as tuas plataformas</h3>
+        </div>
+        <div class="config-actions">
+          <button type="button" class="btn-text-action" onclick="selectAllProviders(true)">Todas</button>
+          <span class="action-sep">•</span>
+          <button type="button" class="btn-text-action" onclick="selectAllProviders(false)">Limpar</button>
+        </div>
       </div>
-      <div class="tag">
-        <svg viewBox="0 0 24 24" style="color: #0063e5;">
-           <path d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
-           <path d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
-        </svg>
-        Disney+
+      <p class="config-subtitle">Seleciona as plataformas que queres ver no Stremio:</p>
+
+      <div class="platform-grid" id="platform-grid">
+        <div class="platform-toggle active" data-provider="netflix" style="--p-color: #E50914;" onclick="toggleProvider(this)">
+          <div class="toggle-icon">
+            <svg viewBox="0 0 24 24" style="color: #E50914;"><path fill="currentColor" d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
+          </div>
+          <span class="toggle-name">Netflix</span>
+          <div class="toggle-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-provider="disney" style="--p-color: #0063e5;" onclick="toggleProvider(this)">
+          <div class="toggle-icon">
+            <svg viewBox="0 0 24 24" style="color: #0063e5;">
+              <path fill="currentColor" d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
+              <path fill="currentColor" d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
+            </svg>
+          </div>
+          <span class="toggle-name">Disney+</span>
+          <div class="toggle-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-provider="prime" style="--p-color: #00a8e1;" onclick="toggleProvider(this)">
+          <div class="toggle-icon">
+            <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path fill="currentColor" d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
+          </div>
+          <span class="toggle-name">Prime Video</span>
+          <div class="toggle-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-provider="hbo" style="--p-color: #a855f7;" onclick="toggleProvider(this)">
+          <div class="toggle-icon">
+            <svg viewBox="0 0 24 24" style="color: #a855f7;">
+              <path fill="currentColor" d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
+            </svg>
+          </div>
+          <span class="toggle-name">HBO</span>
+          <div class="toggle-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-provider="apple" style="--p-color: #ffffff;" onclick="toggleProvider(this)">
+          <div class="toggle-icon">
+            <svg viewBox="0 0 384 512" style="color: #ffffff;"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+          </div>
+          <span class="toggle-name">Apple TV+</span>
+          <div class="toggle-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+
+        <div class="platform-toggle active" data-provider="skyshowtime" style="--p-color: #00ff7f;" onclick="toggleProvider(this)">
+          <div class="toggle-icon">
+            <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <span class="toggle-name">SkyShowtime</span>
+          <div class="toggle-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
       </div>
-      <div class="tag">
-        <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
-        Prime Video
-      </div>
-      <div class="tag">
-        <svg viewBox="0 0 24 24" style="color: #ffffff;">
-           <path d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
-        </svg>
-        HBO
-      </div>
-      <div class="tag">
-        <svg viewBox="0 0 384 512" style="color: #ffffff;"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-        Apple TV+
-      </div>
-      <div class="tag">
-        <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        SkyShowtime
-      </div>
+
+      <div class="config-status" id="config-status">Todas as 6 plataformas selecionadas</div>
     </div>
 
     <a id="install-btn" href="#" class="btn btn-stremio">
@@ -1174,23 +1372,71 @@ def create_landing_page(featured_items=None):
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 12h30 UTC</span>
-      <span class="version">v1.0.8</span>
+      <span class="version">v1.1.0</span>
     </div>
   </div>
 
   <script>
-    const manifestUrl = window.location.origin + window.location.pathname.replace(/\\/?$/, '/') + 'manifest.json';
-    const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
+    const ALL_PROVIDERS = ['apple', 'disney', 'hbo', 'netflix', 'prime', 'skyshowtime'];
+    let currentManifestUrl = '';
 
-    document.getElementById('install-btn').href = stremioUrl;
+    function getBaseHostUrl() {{
+      return window.location.origin;
+    }}
 
-    function openStremioLink(e) {{
-      e.preventDefault();
-      window.location.href = stremioUrl;
+    function toggleProvider(element) {{
+      element.classList.toggle('active');
+      updateManifestUrls();
+    }}
+
+    function selectAllProviders(select) {{
+      document.querySelectorAll('.platform-toggle').forEach(el => {{
+        if (select) {{
+          el.classList.add('active');
+        }} else {{
+          el.classList.remove('active');
+        }}
+      }});
+      updateManifestUrls();
+    }}
+
+    function updateManifestUrls() {{
+      const activeToggles = Array.from(document.querySelectorAll('.platform-toggle.active'));
+      const selected = activeToggles.map(el => el.getAttribute('data-provider')).sort();
+      const statusEl = document.getElementById('config-status');
+      const installBtn = document.getElementById('install-btn');
+      const copyBtn = document.getElementById('copy-btn');
+      const origin = getBaseHostUrl();
+
+      if (selected.length === 0) {{
+        statusEl.textContent = '⚠️ Seleciona pelo menos 1 plataforma para instalar.';
+        statusEl.className = 'config-status error';
+        installBtn.classList.add('disabled');
+        installBtn.removeAttribute('href');
+        copyBtn.classList.add('disabled');
+        currentManifestUrl = '';
+        return;
+      }}
+
+      installBtn.classList.remove('disabled');
+      copyBtn.classList.remove('disabled');
+      statusEl.className = 'config-status';
+
+      if (selected.length === ALL_PROVIDERS.length) {{
+        statusEl.textContent = 'Todas as 6 plataformas selecionadas';
+        currentManifestUrl = origin + '/manifest.json';
+      }} else {{
+        statusEl.textContent = `${{selected.length}} de ${{ALL_PROVIDERS.length}} plataformas selecionadas`;
+        currentManifestUrl = origin + '/c/' + selected.join(',') + '/manifest.json';
+      }}
+
+      const stremioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'stremio://');
+      installBtn.href = stremioUrl;
     }}
 
     function copyManifestUrl() {{
-      navigator.clipboard.writeText(manifestUrl);
+      if (!currentManifestUrl) return;
+      navigator.clipboard.writeText(currentManifestUrl);
       const btn = document.getElementById('copy-btn');
       btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
       setTimeout(() => {{
@@ -1199,7 +1445,7 @@ def create_landing_page(featured_items=None):
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
           </svg>
-          Copiar manifest
+          Copiar Manifest
         `;
       }}, 2000);
     }}
@@ -1216,6 +1462,28 @@ def create_landing_page(featured_items=None):
       else el.textContent = `Atualizado há ${{Math.floor(diffHrs/24)}} dia${{Math.floor(diffHrs/24) > 1 ? 's' : ''}}`;
     }}
 
+    function initFromUrl() {{
+      const path = window.location.pathname;
+      const match = path.match(/\\/c\\/([^\\/]+)/);
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryP = urlParams.get('p') || urlParams.get('platforms');
+
+      const configStr = match ? match[1] : queryP;
+      if (configStr) {{
+        const allowed = configStr.toLowerCase().split(',');
+        document.querySelectorAll('.platform-toggle').forEach(el => {{
+          const prov = el.getAttribute('data-provider');
+          if (allowed.includes(prov)) {{
+            el.classList.add('active');
+          }} else {{
+            el.classList.remove('active');
+          }}
+        }});
+      }}
+      updateManifestUrls();
+    }}
+
+    initFromUrl();
     updateTime();
     setInterval(updateTime, 60000);
   </script>
@@ -1223,6 +1491,10 @@ def create_landing_page(featured_items=None):
 </html>
 """
     with open("dist/index.html", "w", encoding="utf-8") as f:
+        f.write(html_content)
+
+    # Criar também dist/configure.html para garantir compatibilidade se acedido diretamente
+    with open("dist/configure.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
 
@@ -1234,9 +1506,18 @@ def main():
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
     os.makedirs("dist/posters", exist_ok=True)
+    os.makedirs("dist/c", exist_ok=True)
 
-    # Gerar vercel.json com CORS headers para o Stremio conseguir ler os catálogos
+    # Gerar vercel.json com Rewrites para URLs personalizadas e CORS headers
     vercel_config = {
+        "rewrites": [
+            {"source": "/c/:config/catalog/:path*", "destination": "/catalog/:path*"},
+            {"source": "/c/:config/posters/:path*", "destination": "/posters/:path*"},
+            {"source": "/c/:config/logo.png", "destination": "/logo.png"},
+            {"source": "/c/:config/configure", "destination": "/index.html"},
+            {"source": "/c/:config", "destination": "/index.html"},
+            {"source": "/configure", "destination": "/index.html"}
+        ],
         "headers": [
             {
                 "source": "/(.*)",
@@ -1249,7 +1530,7 @@ def main():
     }
     with open("dist/vercel.json", "w", encoding="utf-8") as f:
         json.dump(vercel_config, f, indent=2)
-    print("[i] vercel.json com CORS headers gerado.", flush=True)
+    print("[i] vercel.json com rewrites e CORS headers gerado.", flush=True)
 
     if os.path.exists("img/logo.png"):
         shutil.copy("img/logo.png", "dist/logo.png")
@@ -1343,12 +1624,13 @@ def main():
 
     save_history(new_history)
 
+    # 1. Manifest Padrão (todas as plataformas)
     manifest = {
         "id": "pt.top-streaming",
         "version": "1.1.0",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
-        "logo": "https://top-streaming-pt.vercel.app/logo.png",
+        "logo": f"{BASE_URL}/logo.png",
         "resources": [
             "catalog"
         ],
@@ -1356,11 +1638,59 @@ def main():
             "movie",
             "series"
         ],
+        "behaviorHints": {
+            "configurable": True,
+            "configurationRequired": False
+        },
         "catalogs": manifest_catalogs
     }
 
     with open("dist/manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+    # 2. Gerar manifests personalizados para todas as combinações possíveis de plataformas
+    all_provider_ids = sorted([p["id"] for p in PROVIDERS])
+    combos_count = 0
+    for r in range(1, len(all_provider_ids) + 1):
+        for combo in itertools.combinations(all_provider_ids, r):
+            combo_key = ",".join(combo)
+            combo_dir = f"dist/c/{combo_key}"
+            os.makedirs(combo_dir, exist_ok=True)
+
+            selected_set = set(combo)
+            filtered_catalogs = [
+                cat for cat in manifest_catalogs
+                if any(cat["id"].startswith(f"{pid}_pt_") for pid in selected_set)
+            ]
+
+            names = [p["name"] for p in PROVIDERS if p["id"] in selected_set]
+            names_str = ", ".join(names)
+
+            custom_manifest = {
+                "id": f"pt.top-streaming.{combo_key.replace(',', '.')}",
+                "version": "1.1.0",
+                "name": "TOP 10 Portugal",
+                "description": f"Top 10 real ({names_str}) em Portugal",
+                "logo": f"{BASE_URL}/logo.png",
+                "resources": [
+                    "catalog"
+                ],
+                "types": [
+                    "movie",
+                    "series"
+                ],
+                "behaviorHints": {
+                    "configurable": True,
+                    "configurationRequired": False
+                },
+                "catalogs": filtered_catalogs
+            }
+
+            with open(f"{combo_dir}/manifest.json", "w", encoding="utf-8") as f:
+                json.dump(custom_manifest, f, ensure_ascii=False, indent=2)
+            combos_count += 1
+
+    print(f"[i] Gerados {combos_count} manifests personalizados em dist/c/*", flush=True)
 
     create_landing_page(featured_items)
     print(f"\nFinalizado com sucesso! {len(manifest_catalogs)} catálogos registados.", flush=True)

@@ -48,6 +48,30 @@ jobs:
             "version": 3,
             "routes": [
               {
+                "src": "^/c/[^/]+/catalog/(.*)$",
+                "dest": "/catalog/$1"
+              },
+              {
+                "src": "^/c/[^/]+/posters/(.*)$",
+                "dest": "/posters/$1"
+              },
+              {
+                "src": "^/c/[^/]+/logo.png$",
+                "dest": "/logo.png"
+              },
+              {
+                "src": "^/c/[^/]+/configure$",
+                "dest": "/index.html"
+              },
+              {
+                "src": "^/c/[^/]+/?$",
+                "dest": "/index.html"
+              },
+              {
+                "src": "^/configure/?$",
+                "dest": "/index.html"
+              },
+              {
                 "src": "/(.*)",
                 "headers": {
                   "Access-Control-Allow-Origin": "*",
