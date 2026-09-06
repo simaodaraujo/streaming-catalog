@@ -25,6 +25,7 @@ except ImportError:
     ImageFont = None
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
+SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "https://top-streaming-pt.vercel.app").rstrip("/")
 HISTORY_FILE = "dist/history.json"
 LOCAL_HISTORY = "history.json"
@@ -41,6 +42,9 @@ if not TMDB_API_KEY and os.path.exists(".env"):
                 elif line.startswith("BASE_URL="):
                     BASE_URL = line.split("=", 1)[1].strip().strip('"').strip("'").rstrip("/")
                     os.environ["BASE_URL"] = BASE_URL
+                elif line.startswith("SCRAPER_API_KEY="):
+                  SCRAPER_API_KEY = line.split("=", 1)[1].strip().strip('"').strip("'")
+                  os.environ["SCRAPER_API_KEY"] = SCRAPER_API_KEY
     except Exception:
         pass
 
@@ -55,15 +59,14 @@ else:
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# Plataformas de streaming em Portugal:
-# Todas usam rankings diários reais de Portugal via JustWatch (100% gratuito e sem bloqueios)
+# Plataformas de streaming em Portugal.
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "justwatch", "jw_pkg": "nfx", "color": "#E50914"},
-    {"id": "disney", "name": "Disney+", "tmdb_id": 337, "source": "justwatch", "jw_pkg": "dnp", "color": "#0063e5"},
-    {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "source": "justwatch", "jw_pkg": "prv", "color": "#00a8e1"},
-    {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "source": "justwatch", "jw_pkg": "hbm", "color": "#a855f7"},
-    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "source": "justwatch", "jw_pkg": "atp", "color": "#ffffff"},
-    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "source": "justwatch", "jw_pkg": "sst", "color": "#00ff7f"},
+  {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "flix_slug": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
+  {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney", "jw_pkg": "dnp", "color": "#0063e5"},
+  {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "flix_slug": "amazon-prime", "jw_pkg": "prv", "color": "#00a8e1"},
+  {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "flix_slug": "hbo", "jw_pkg": "hbm", "color": "#a855f7"},
+  {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "flix_slug": "apple-tv", "jw_pkg": "atp", "color": "#ffffff"},
+  {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "flix_slug": "skyshowtime", "jw_pkg": "sst", "color": "#00ff7f"},
 ]
 
 NETFLIX_COUNTRY_SLUG = "portugal"
@@ -231,6 +234,63 @@ def get_justwatch_top10(package_code, media_type):
         print(f"  [!] Erro JustWatch ({package_code}): {e}", flush=True)
 
     return []
+
+
+def get_flixpatrol_top10(platform_slug, media_type):
+    """Recolhe o ranking PT do FlixPatrol através do proxy ScraperAPI."""
+    if not SCRAPER_API_KEY or not session or not BeautifulSoup:
+      return []
+
+    url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
+    try:
+        response = session.get(
+            "https://api.scraperapi.com/",
+            params={"api_key": SCRAPER_API_KEY, "url": url, "render": "false"},
+            headers=HEADERS,
+            timeout=30,
+        )
+        if response.status_code != 200:
+            print(f"  [!] FlixPatrol ({platform_slug}) respondeu HTTP {response.status_code}", flush=True)
+            return []
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        titles = []
+        fallback_titles = []
+        seen = set()
+        fallback_seen = set()
+        section_terms = {
+            "movie": ("movie", "movies", "filme", "filmes"),
+            "series": ("tv", "show", "shows", "series", "série", "séries"),
+        }
+        for link in soup.select("a[href]"):
+            href = link.get("href", "")
+            text = re.sub(r"\s+", " ", link.get_text(" ", strip=True)).strip()
+            if "/title/" not in href or not text or len(text) < 2:
+                continue
+            if text.lower() in {"more", "details", "watch now", "trailer"}:
+                continue
+            key = text.casefold()
+            if key not in fallback_seen:
+                fallback_seen.add(key)
+                fallback_titles.append(text)
+            headings = link.find_all_previous(["h1", "h2", "h3", "h4"], limit=1)
+            heading = headings[0].get_text(" ", strip=True).casefold() if headings else ""
+            matches_section = any(term in heading for term in section_terms.get(media_type, ()))
+            if matches_section and key not in seen:
+                seen.add(key)
+                titles.append(text)
+            if len(titles) >= 10:
+                break
+
+        if not titles:
+            titles = fallback_titles[:10]
+
+        if titles:
+            print(f"  [i] FlixPatrol Portugal ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
+        return titles
+    except Exception as exc:
+        print(f"  [!] Erro FlixPatrol ({platform_slug}): {exc}", flush=True)
+        return []
 
 
 # Fallback via TMDB caso alguma fonte externa esteja indisponível
@@ -448,28 +508,28 @@ def create_landing_page(featured_items=None):
         for prov in PROVIDERS:
             cat_movie = f"dist/catalog/movie/{prov['id']}_pt_movies.json"
             cat_series = f"dist/catalog/series/{prov['id']}_pt_series.json"
-        for catalog_path, media_label, cat_id in (
-          (cat_movie, "Filme", f"{prov['id']}_pt_movies"),
-          (cat_series, "Série", f"{prov['id']}_pt_series"),
-        ):
-          if not os.path.exists(catalog_path):
-            continue
-          try:
-            with open(catalog_path, "r", encoding="utf-8") as f:
-              data = json.load(f)
-          except Exception:
-            continue
-          for rank, item in enumerate(data.get("metas", []), 1):
-            local_poster = f"posters/{cat_id}_{rank}.jpg"
-            poster_src = local_poster if os.path.exists(f"dist/{local_poster}") else item.get("poster")
-            featured_items.append({
-              "platform": prov["name"],
-              "color": prov.get("color", "#7b5bf5"),
-              "title": item.get("name", "Destaque"),
-              "type": media_label,
-              "poster": poster_src,
-              "fallback_poster": item.get("poster")
-            })
+            for catalog_path, media_label, cat_id in (
+                (cat_movie, "Filme", f"{prov['id']}_pt_movies"),
+                (cat_series, "Série", f"{prov['id']}_pt_series"),
+            ):
+                if not os.path.exists(catalog_path):
+                    continue
+                try:
+                    with open(catalog_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                except Exception:
+                    continue
+                for rank, item in enumerate(data.get("metas", []), 1):
+                    local_poster = f"posters/{cat_id}_{rank}.jpg"
+                    poster_src = local_poster if os.path.exists(f"dist/{local_poster}") else item.get("poster")
+                    featured_items.append({
+                        "platform": prov["name"],
+                        "color": prov.get("color", "#7b5bf5"),
+                        "title": item.get("name", "Destaque"),
+                        "type": media_label,
+                        "poster": poster_src,
+                        "fallback_poster": item.get("poster")
+                    })
 
     # Intercala fornecedores antes de repartir os posters pelas três rows.
     grouped_items = {provider["name"]: [] for provider in PROVIDERS}
@@ -683,9 +743,6 @@ def create_landing_page(featured_items=None):
       display: flex;
       flex-direction: column;
       text-align: left;
-    }}
-    .peek-card:nth-child(even) {{
-      transform: translateY(38px);
     }}
     .peek-poster-box {{
       position: relative;
@@ -922,7 +979,7 @@ def create_landing_page(featured_items=None):
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
-      <span class="source-credit">Fonte dos rankings: <a href="https://www.justwatch.com/pt" target="_blank" rel="noopener"><img src="https://www.justwatch.com/appassets/img/logo/JustWatch-logo-large.png" alt="JustWatch"></a></span>
+      <span class="source-credit">Fonte dos rankings: <a href="https://flixpatrol.com/top10/streaming/portugal/" target="_blank" rel="noopener"><img src="https://flixpatrol.com/favicon.ico" alt="FlixPatrol"> FlixPatrol</a></span>
       <span class="version">v1.0.8</span>
     </div>
   </div>
@@ -1013,15 +1070,15 @@ def main():
         movie_titles = []
         series_titles = []
 
-        if prov["source"] == "netflix":
-            print("  -> A recolher Top 10 oficial da Netflix (Filmes)...", flush=True)
-            movie_titles = get_netflix_official_top10("films")
-            print("  -> A recolher Top 10 oficial da Netflix (Séries)...", flush=True)
-            series_titles = get_netflix_official_top10("tv")
-        else:
-            print(f"  -> A recolher Top 10 real via JustWatch Portugal...", flush=True)
-            movie_titles = get_justwatch_top10(prov["jw_pkg"], "movie")
-            series_titles = get_justwatch_top10(prov["jw_pkg"], "series")
+        print(f"  -> A recolher rankings FlixPatrol Portugal ({prov['name']})...", flush=True)
+        movie_titles = get_flixpatrol_top10(prov["flix_slug"], "movie")
+        series_titles = get_flixpatrol_top10(prov["flix_slug"], "series")
+        if not movie_titles:
+          print("  [i] FlixPatrol indisponível para filmes; a usar fallback JustWatch...", flush=True)
+          movie_titles = get_justwatch_top10(prov.get("jw_pkg", ""), "movie") if prov.get("jw_pkg") else []
+        if not series_titles:
+          print("  [i] FlixPatrol indisponível para séries; a usar fallback JustWatch...", flush=True)
+          series_titles = get_justwatch_top10(prov.get("jw_pkg", ""), "series") if prov.get("jw_pkg") else []
 
         movie_items = resolve_titles_to_items(movie_titles, "movie")
         if not movie_items:
