@@ -442,68 +442,76 @@ def apply_badges_to_catalog(items, cat_id, history_dict):
 def create_landing_page(featured_items=None):
     now_iso = datetime.utcnow().isoformat() + "Z"
 
-    # Se não foram fornecidos itens de destaque, tenta obter os #1 dos ficheiros de catálogo existentes
+    # Se não foram fornecidos itens, usa todos os posters dos catálogos locais.
     if not featured_items:
         featured_items = []
         for prov in PROVIDERS:
             cat_movie = f"dist/catalog/movie/{prov['id']}_pt_movies.json"
             cat_series = f"dist/catalog/series/{prov['id']}_pt_series.json"
-            chosen = None
-            media_label = "Filme"
-            if os.path.exists(cat_movie):
-                try:
-                    with open(cat_movie, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    if data.get("metas"):
-                        chosen = data["metas"][0]
-                        media_label = "Filme"
-                except Exception:
-                    pass
-            if not chosen and os.path.exists(cat_series):
-                try:
-                    with open(cat_series, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                    if data.get("metas"):
-                        chosen = data["metas"][0]
-                        media_label = "Série"
-                except Exception:
-                    pass
+        for catalog_path, media_label, cat_id in (
+          (cat_movie, "Filme", f"{prov['id']}_pt_movies"),
+          (cat_series, "Série", f"{prov['id']}_pt_series"),
+        ):
+          if not os.path.exists(catalog_path):
+            continue
+          try:
+            with open(catalog_path, "r", encoding="utf-8") as f:
+              data = json.load(f)
+          except Exception:
+            continue
+          for rank, item in enumerate(data.get("metas", []), 1):
+            local_poster = f"posters/{cat_id}_{rank}.jpg"
+            poster_src = local_poster if os.path.exists(f"dist/{local_poster}") else item.get("poster")
+            featured_items.append({
+              "platform": prov["name"],
+              "color": prov.get("color", "#7b5bf5"),
+              "title": item.get("name", "Destaque"),
+              "type": media_label,
+              "poster": poster_src,
+              "fallback_poster": item.get("poster")
+            })
 
-            if chosen:
-                local_poster = f"posters/{prov['id']}_pt_movies_1.jpg" if media_label == "Filme" else f"posters/{prov['id']}_pt_series_1.jpg"
-                poster_src = local_poster if os.path.exists(f"dist/{local_poster}") else chosen.get("poster")
-                featured_items.append({
-                    "platform": prov["name"],
-                    "color": prov.get("color", "#7b5bf5"),
-                    "title": chosen.get("name", "Destaque"),
-                    "type": media_label,
-                    "poster": poster_src,
-                    "fallback_poster": chosen.get("poster")
-                })
-
-    # Renderizar uma faixa contínua; a segunda cópia permite o loop sem saltos.
-    cards_html = ""
+    # Intercala fornecedores antes de repartir os posters pelas três rows.
+    grouped_items = {provider["name"]: [] for provider in PROVIDERS}
     for item in featured_items:
+      grouped_items.setdefault(item.get("platform", "Streaming"), []).append(item)
+    mixed_items = []
+    while any(grouped_items.values()):
+      for provider in PROVIDERS:
+        provider_items = grouped_items[provider["name"]]
+        if provider_items:
+          mixed_items.append(provider_items.pop(0))
+      extra_platforms = [name for name in grouped_items if name not in {provider["name"] for provider in PROVIDERS}]
+      for platform in extra_platforms:
+        if grouped_items[platform]:
+          mixed_items.append(grouped_items[platform].pop(0))
+
+    # Três rows horizontais criam o mosaico; cada row recebe uma fatia intercalada.
+    rows_html = []
+    for row_index in range(3):
+      row_cards = ""
+      for item in mixed_items[row_index::3]:
         color = item.get("color", "#7b5bf5")
         platform = item.get("platform", "Streaming")
         title = item.get("title", "")
         m_type = item.get("type", "Top 1")
         poster = item.get("poster", "")
         fallback = item.get("fallback_poster", "")
-
-        cards_html += (
-            '          <article class="peek-card">\n'
-            '            <div class="peek-poster-box">\n'
-            f'              <img src="{poster}" alt="{title}" loading="eager" decoding="async" onerror="this.src=\'{fallback}\'">\n'
-            '            </div>\n'
-            '            <div class="peek-card-info">\n'
-            f'              <div class="peek-card-platform" style="color: {color};">{platform}</div>\n'
-            f'              <div class="peek-card-title" title="{title}">{title}</div>\n'
-            f'              <div class="peek-card-type">{m_type}</div>\n'
-            '            </div>\n'
-            '          </article>\n'
+        row_cards += (
+          '          <article class="peek-card">\n'
+          '            <div class="peek-poster-box">\n'
+          f'              <img src="{poster}" alt="{title}" loading="eager" decoding="async" onerror="this.src=\'{fallback}\'">\n'
+          '            </div>\n'
+          '            <div class="peek-card-info">\n'
+          f'              <div class="peek-card-platform" style="color: {color};">{platform}</div>\n'
+          f'              <div class="peek-card-title" title="{title}">{title}</div>\n'
+          f'              <div class="peek-card-type">{m_type}</div>\n'
+          '            </div>\n'
+          '          </article>\n'
         )
-    cards_html = cards_html + cards_html
+      if row_cards:
+        rows_html.append(f'        <div class="peek-track peek-track-{row_index}">\n{row_cards}{row_cards}        </div>')
+    rows_html = "\n".join(rows_html)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="pt">
@@ -637,6 +645,9 @@ def create_landing_page(featured_items=None):
     .peek-marquee {{
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       padding: 8px 0 26px;
       margin: 0 -24px;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
@@ -649,6 +660,13 @@ def create_landing_page(featured_items=None):
       gap: 10px;
       animation: poster-marquee 120s linear infinite;
       will-change: transform;
+    }}
+    .peek-track-1 {{
+      animation-duration: 140s;
+      animation-direction: reverse;
+    }}
+    .peek-track-2 {{
+      animation-duration: 105s;
     }}
     .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
     @keyframes poster-marquee {{
@@ -799,6 +817,19 @@ def create_landing_page(featured_items=None):
     }}
     .schedule {{ color: #71717a; }}
     .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
+    .source-credit {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #71717a;
+      font-size: 10px;
+      margin-top: 4px;
+    }}
+    .source-credit img {{
+      width: 68px;
+      height: auto;
+      opacity: 0.8;
+    }}
   </style>
 </head>
 <body>
@@ -862,9 +893,7 @@ def create_landing_page(featured_items=None):
       </div>
 
       <div class="peek-marquee" aria-label="Títulos em destaque">
-        <div class="peek-track">
-          {cards_html}
-        </div>
+{rows_html}
       </div>
     </div>
 
@@ -893,6 +922,7 @@ def create_landing_page(featured_items=None):
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
+      <span class="source-credit">Fonte dos rankings: <a href="https://www.justwatch.com/pt" target="_blank" rel="noopener"><img src="https://www.justwatch.com/appassets/img/logo/JustWatch-logo-large.png" alt="JustWatch"></a></span>
       <span class="version">v1.0.8</span>
     </div>
   </div>

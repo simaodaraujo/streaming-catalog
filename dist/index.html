@@ -130,6 +130,9 @@
     .peek-marquee {
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       padding: 8px 0 26px;
       margin: 0 -24px;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
@@ -142,6 +145,13 @@
       gap: 10px;
       animation: poster-marquee 120s linear infinite;
       will-change: transform;
+    }
+    .peek-track-1 {
+      animation-duration: 140s;
+      animation-direction: reverse;
+    }
+    .peek-track-2 {
+      animation-duration: 105s;
     }
     .peek-marquee:hover .peek-track { animation-play-state: paused; }
     @keyframes poster-marquee {
@@ -292,6 +302,19 @@
     }
     .schedule { color: #71717a; }
     .version { color: #3f3f46; font-size: 11px; margin-top: 4px; }
+    .source-credit {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #71717a;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+    .source-credit img {
+      width: 68px;
+      height: auto;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -355,55 +378,75 @@
       </div>
 
       <div class="peek-marquee" aria-label="Títulos em destaque">
-        <div class="peek-track">
-                    <article class="peek-card">
+        <div class="peek-track peek-track-0">
+          <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/netflix_pt_movies_1.jpg" alt="Cara a Cara com El Chapo" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/842yFtWhxgs26LFpVdbGUCWatuV.jpg'">
+              <img src="posters/skyshowtime_pt_movies_1.jpg" alt="Avatar Aang - O Último Airbender" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/aS3WoFJ3w64QNKTl3GM6qSpjbTK.jpg'">
             </div>
             <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="Cara a Cara com El Chapo">Cara a Cara com El Chapo</div>
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Avatar Aang - O Último Airbender">Avatar Aang - O Último Airbender</div>
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/disney_pt_movies_1.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/8qBccgSj0Ru9Odm1Mjv82cxDr7l.jpg'">
+              <img src="https://image.tmdb.org/t/p/w500/6LgAPYv7xno572kYbzz8hIXB4Tf.jpg" alt="Missão: Impossível - O Ajuste de Contas Final" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/6LgAPYv7xno572kYbzz8hIXB4Tf.jpg'">
             </div>
             <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Missão: Impossível - O Ajuste de Contas Final">Missão: Impossível - O Ajuste de Contas Final</div>
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/zPlBUyu9rWhVrdiRfSClwMkmQiT.jpg'">
+              <img src="https://image.tmdb.org/t/p/w500/yapcL0AgqXswV7Cjd6heVxzjo3n.jpg" alt="Shrek" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/yapcL0AgqXswV7Cjd6heVxzjo3n.jpg'">
             </div>
             <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="The Runner">The Runner</div>
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Shrek">Shrek</div>
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/xSnM4ahmz692msbMTBsfBWHvR3M.jpg'">
+              <img src="https://image.tmdb.org/t/p/w500/AtAI3mz5upKhRmLGF24zpxw3sgV.jpg" alt="Como Treinares o Teu Dragão" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/AtAI3mz5upKhRmLGF24zpxw3sgV.jpg'">
             </div>
             <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Os Condenados de Shawshank">Os Condenados de Shawshank</div>
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Como Treinares o Teu Dragão">Como Treinares o Teu Dragão</div>
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/apple_pt_movies_1.jpg" alt="Mayday" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg'">
+              <img src="https://image.tmdb.org/t/p/w500/abjNx4jqvaJn5UvsuLaBVRVndyJ.jpg" alt="Investigação Criminal" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/abjNx4jqvaJn5UvsuLaBVRVndyJ.jpg'">
             </div>
             <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
-              <div class="peek-card-title" title="Mayday">Mayday</div>
-              <div class="peek-card-type">Filme</div>
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Investigação Criminal">Investigação Criminal</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/8yG2CZwRfZAkIGVLhy8aW1VXTJX.jpg" alt="Dr. House" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/8yG2CZwRfZAkIGVLhy8aW1VXTJX.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Dr. House">Dr. House</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/rrOYi7Zj2OmBojo1VuuZM129gic.jpg" alt="Yellowstone" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/rrOYi7Zj2OmBojo1VuuZM129gic.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Yellowstone">Yellowstone</div>
+              <div class="peek-card-type">Série</div>
             </div>
           </article>
           <article class="peek-card">
@@ -418,65 +461,328 @@
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/netflix_pt_movies_1.jpg" alt="Cara a Cara com El Chapo" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/842yFtWhxgs26LFpVdbGUCWatuV.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="Cara a Cara com El Chapo">Cara a Cara com El Chapo</div>
-              <div class="peek-card-type">Filme</div>
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="posters/disney_pt_movies_1.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/8qBccgSj0Ru9Odm1Mjv82cxDr7l.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
-              <div class="peek-card-type">Filme</div>
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/zPlBUyu9rWhVrdiRfSClwMkmQiT.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="The Runner">The Runner</div>
-              <div class="peek-card-type">Filme</div>
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/xSnM4ahmz692msbMTBsfBWHvR3M.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Os Condenados de Shawshank">Os Condenados de Shawshank</div>
-              <div class="peek-card-type">Filme</div>
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="posters/apple_pt_movies_1.jpg" alt="Mayday" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
-              <div class="peek-card-title" title="Mayday">Mayday</div>
-              <div class="peek-card-type">Filme</div>
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="posters/skyshowtime_pt_movies_1.jpg" alt="Avatar Aang - O Último Airbender" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/aS3WoFJ3w64QNKTl3GM6qSpjbTK.jpg'">
+              <img src="https://image.tmdb.org/t/p/w500/6LgAPYv7xno572kYbzz8hIXB4Tf.jpg" alt="Missão: Impossível - O Ajuste de Contas Final" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/6LgAPYv7xno572kYbzz8hIXB4Tf.jpg'">
             </div>
             <div class="peek-card-info">
               <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
-              <div class="peek-card-title" title="Avatar Aang - O Último Airbender">Avatar Aang - O Último Airbender</div>
+              <div class="peek-card-title" title="Missão: Impossível - O Ajuste de Contas Final">Missão: Impossível - O Ajuste de Contas Final</div>
               <div class="peek-card-type">Filme</div>
             </div>
           </article>
-
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/yapcL0AgqXswV7Cjd6heVxzjo3n.jpg" alt="Shrek" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/yapcL0AgqXswV7Cjd6heVxzjo3n.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Shrek">Shrek</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/AtAI3mz5upKhRmLGF24zpxw3sgV.jpg" alt="Como Treinares o Teu Dragão" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/AtAI3mz5upKhRmLGF24zpxw3sgV.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Como Treinares o Teu Dragão">Como Treinares o Teu Dragão</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/abjNx4jqvaJn5UvsuLaBVRVndyJ.jpg" alt="Investigação Criminal" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/abjNx4jqvaJn5UvsuLaBVRVndyJ.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Investigação Criminal">Investigação Criminal</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/8yG2CZwRfZAkIGVLhy8aW1VXTJX.jpg" alt="Dr. House" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/8yG2CZwRfZAkIGVLhy8aW1VXTJX.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Dr. House">Dr. House</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/rrOYi7Zj2OmBojo1VuuZM129gic.jpg" alt="Yellowstone" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/rrOYi7Zj2OmBojo1VuuZM129gic.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Yellowstone">Yellowstone</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+        </div>
+        <div class="peek-track peek-track-1">
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/uP46DujkD3nwcisOjz9a0Xw0Knj.jpg" alt="O Padrinho" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/uP46DujkD3nwcisOjz9a0Xw0Knj.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Padrinho">O Padrinho</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/kPbuLGVSJHATkW9fX9L3h1wM0Pa.jpg" alt="Top Gun: Maverick" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/kPbuLGVSJHATkW9fX9L3h1wM0Pa.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Top Gun: Maverick">Top Gun: Maverick</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/gT1FzbIDoTMIG8AsoknwFZcn9WQ.jpg" alt="O Padrinho: Parte II" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/gT1FzbIDoTMIG8AsoknwFZcn9WQ.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Padrinho: Parte II">O Padrinho: Parte II</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/5OeI0zcsoux6VNNQzGjvDO11gHA.jpg" alt="Lioness" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/5OeI0zcsoux6VNNQzGjvDO11gHA.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Lioness">Lioness</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/1Opw4Qfiza2Uk5ENZgLWVmQyzoL.jpg" alt="Lei & Ordem" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/1Opw4Qfiza2Uk5ENZgLWVmQyzoL.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Lei & Ordem">Lei & Ordem</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/kyChA2gNT2TH76RuKAj0ysNA2Ag.jpg" alt="Os Padrinhos Mágicos" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/kyChA2gNT2TH76RuKAj0ysNA2Ag.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Os Padrinhos Mágicos">Os Padrinhos Mágicos</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/5DHlhR5WHDFGkM5agZqfrtR7oDX.jpg" alt="Dexter" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/5DHlhR5WHDFGkM5agZqfrtR7oDX.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Dexter">Dexter</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/uP46DujkD3nwcisOjz9a0Xw0Knj.jpg" alt="O Padrinho" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/uP46DujkD3nwcisOjz9a0Xw0Knj.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Padrinho">O Padrinho</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/kPbuLGVSJHATkW9fX9L3h1wM0Pa.jpg" alt="Top Gun: Maverick" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/kPbuLGVSJHATkW9fX9L3h1wM0Pa.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Top Gun: Maverick">Top Gun: Maverick</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/gT1FzbIDoTMIG8AsoknwFZcn9WQ.jpg" alt="O Padrinho: Parte II" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/gT1FzbIDoTMIG8AsoknwFZcn9WQ.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Padrinho: Parte II">O Padrinho: Parte II</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/5OeI0zcsoux6VNNQzGjvDO11gHA.jpg" alt="Lioness" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/5OeI0zcsoux6VNNQzGjvDO11gHA.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Lioness">Lioness</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/1Opw4Qfiza2Uk5ENZgLWVmQyzoL.jpg" alt="Lei & Ordem" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/1Opw4Qfiza2Uk5ENZgLWVmQyzoL.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Lei & Ordem">Lei & Ordem</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/kyChA2gNT2TH76RuKAj0ysNA2Ag.jpg" alt="Os Padrinhos Mágicos" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/kyChA2gNT2TH76RuKAj0ysNA2Ag.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Os Padrinhos Mágicos">Os Padrinhos Mágicos</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/5DHlhR5WHDFGkM5agZqfrtR7oDX.jpg" alt="Dexter" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/5DHlhR5WHDFGkM5agZqfrtR7oDX.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Dexter">Dexter</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+        </div>
+        <div class="peek-track peek-track-2">
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/a3k0o2b8EIgTW5FkF43UpFCVVeF.jpg" alt="Mundo Jurássico - Renascimento" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/a3k0o2b8EIgTW5FkF43UpFCVVeF.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Mundo Jurássico - Renascimento">Mundo Jurássico - Renascimento</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/R1ieKOdGHYL7BRpl0iRgNV1uXw.jpg" alt="Gladiador" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/R1ieKOdGHYL7BRpl0iRgNV1uXw.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Gladiador">Gladiador</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/ptfTUMggoMpwFG4rh22vHG8WWuE.jpg" alt="Tubarão" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/ptfTUMggoMpwFG4rh22vHG8WWuE.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Tubarão">Tubarão</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/gUMArcGnsNmsJgQky7vE0cdnf4Y.jpg" alt="Lei & Ordem: Unidade Especial" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/gUMArcGnsNmsJgQky7vE0cdnf4Y.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Lei & Ordem: Unidade Especial">Lei & Ordem: Unidade Especial</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/zlghlgOvIU9Cyz3S2uib8ldFKJl.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/zlghlgOvIU9Cyz3S2uib8ldFKJl.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Escritório">O Escritório</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/gYAb6GCVEFsU9hzMCG5rxaxoIv3.jpg" alt="O Psiquiatra da Rádio" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/gYAb6GCVEFsU9hzMCG5rxaxoIv3.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Psiquiatra da Rádio">O Psiquiatra da Rádio</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/a3k0o2b8EIgTW5FkF43UpFCVVeF.jpg" alt="Mundo Jurássico - Renascimento" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/a3k0o2b8EIgTW5FkF43UpFCVVeF.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Mundo Jurássico - Renascimento">Mundo Jurássico - Renascimento</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/R1ieKOdGHYL7BRpl0iRgNV1uXw.jpg" alt="Gladiador" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/R1ieKOdGHYL7BRpl0iRgNV1uXw.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Gladiador">Gladiador</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/ptfTUMggoMpwFG4rh22vHG8WWuE.jpg" alt="Tubarão" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/ptfTUMggoMpwFG4rh22vHG8WWuE.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Tubarão">Tubarão</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/gUMArcGnsNmsJgQky7vE0cdnf4Y.jpg" alt="Lei & Ordem: Unidade Especial" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/gUMArcGnsNmsJgQky7vE0cdnf4Y.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Lei & Ordem: Unidade Especial">Lei & Ordem: Unidade Especial</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/zlghlgOvIU9Cyz3S2uib8ldFKJl.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/zlghlgOvIU9Cyz3S2uib8ldFKJl.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Escritório">O Escritório</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://image.tmdb.org/t/p/w500/gYAb6GCVEFsU9hzMCG5rxaxoIv3.jpg" alt="O Psiquiatra da Rádio" loading="eager" decoding="async" onerror="this.src='https://image.tmdb.org/t/p/w500/gYAb6GCVEFsU9hzMCG5rxaxoIv3.jpg'">
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="O Psiquiatra da Rádio">O Psiquiatra da Rádio</div>
+              <div class="peek-card-type">Série</div>
+            </div>
+          </article>
         </div>
       </div>
     </div>
@@ -504,8 +810,9 @@
     </div>
 
     <div class="footer">
-      <span id="time-ago" data-time="2026-09-06T02:55:59.932021Z">Atualizado recentemente</span>
+      <span id="time-ago" data-time="2026-09-06T03:01:01.469345Z">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
+      <span class="source-credit">Fonte dos rankings: <a href="https://www.justwatch.com/pt" target="_blank" rel="noopener"><img src="https://www.justwatch.com/appassets/img/logo/JustWatch-logo-large.png" alt="JustWatch"></a></span>
       <span class="version">v1.0.8</span>
     </div>
   </div>
