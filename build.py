@@ -398,9 +398,7 @@ def get_badge_font(size, bold=False):
 
 
 def draw_rank_badge(poster_bytes, rank, variation):
-    """
-  Desenha uma pílula compacta com a variação de ranking no canto superior esquerdo.
-    """
+    """Desenha uma pílula minimalista com a variação de ranking."""
     if not Image or not ImageDraw or not ImageFont:
         return poster_bytes
 
@@ -418,22 +416,22 @@ def draw_rank_badge(poster_bytes, rank, variation):
         radius = badge_h // 2
 
         if variation.startswith('+'):
-            var_text = f"▲ {variation}"
+            var_text = f"↑ {variation[1:]}"
             var_color = (74, 222, 128, 255)
             outline_color = (74, 222, 128, 110)
             fill_color = (12, 24, 16, 235)
         elif variation.startswith('-'):
-            var_text = f"▼ {variation}"
+            var_text = f"↓ {variation[1:]}"
             var_color = (248, 113, 113, 255)
             outline_color = (248, 113, 113, 110)
             fill_color = (26, 12, 14, 235)
         elif variation == 'NOVO':
-            var_text = "★ NOVO"
+            var_text = "NOVO"
             var_color = (250, 204, 21, 255)
             outline_color = (250, 204, 21, 110)
             fill_color = (26, 22, 10, 235)
         else:
-            var_text = "="
+            var_text = "–"
             var_color = (203, 213, 225, 255)
             outline_color = (203, 213, 225, 65)
             fill_color = (15, 17, 23, 235)
@@ -441,7 +439,7 @@ def draw_rank_badge(poster_bytes, rank, variation):
         font_badge = get_badge_font(max(11, int(13.5 * scale)), bold=True)
         text_bbox = draw.textbbox((0, 0), var_text, font=font_badge)
         text_w = text_bbox[2] - text_bbox[0]
-        pad_x = int(13 * scale) if var_text == "=" else int(10 * scale)
+        pad_x = int(13 * scale) if var_text == "–" else int(10 * scale)
         badge_w = max(badge_h, text_w + (2 * pad_x))
         box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
         draw.rounded_rectangle(
@@ -587,11 +585,11 @@ def create_landing_page(featured_items=None):
         if grouped_items[platform]:
           mixed_items.append(grouped_items[platform].pop(0))
 
-    # Três rows horizontais criam o mosaico; cada row recebe uma fatia intercalada.
+    # Duas faixas horizontais contínuas; cada uma recebe títulos intercalados.
     rows_html = []
-    for row_index in range(3):
+    for row_index in range(2):
       row_cards = ""
-      for item in mixed_items[:18][row_index * 6:(row_index + 1) * 6]:
+      for item in mixed_items[:16][row_index * 8:(row_index + 1) * 8]:
         color = item.get("color", "#7b5bf5")
         platform = item.get("platform", "Streaming")
         title = item.get("title", "")
@@ -683,6 +681,9 @@ def create_landing_page(featured_items=None):
       justify-content: center;
       gap: 8px;
       width: 100%;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
       padding: 14px;
       border-radius: 10px;
       font-size: 14px;
@@ -760,11 +761,11 @@ def create_landing_page(featured_items=None):
       display: flex;
       width: max-content;
       gap: 8px;
-      animation: gallery-drift 120s linear infinite;
+      animation: gallery-drift 140s linear infinite;
       will-change: transform;
     }}
-    .peek-track-1 {{ animation-duration: 135s; animation-direction: reverse; }}
-    .peek-track-2 {{ animation-duration: 150s; }}
+    .peek-track-1 {{ animation-duration: 155s; animation-direction: reverse; }}
+    .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
     @keyframes gallery-drift {{
       from {{ transform: translateX(0); }}
       to {{ transform: translateX(calc(-50% - 4px)); }}
@@ -1013,7 +1014,7 @@ def create_landing_page(featured_items=None):
 
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
-      <span class="schedule">Atualiza todos os dias às 09h30</span>
+      <span class="schedule">Atualiza todos os dias às 12h30 UTC</span>
       <span class="version">v1.0.8</span>
     </div>
   </div>
