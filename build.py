@@ -808,6 +808,13 @@ def create_landing_page(featured_items=None):
       margin-bottom: 24px;
       line-height: 1.5;
     }}
+    .tags-heading {{
+      font-size: 13px;
+      font-weight: 500;
+      color: #a1a1aa;
+      margin-bottom: 12px;
+      letter-spacing: 0.01em;
+    }}
 
     .tags {{
       display: flex;
@@ -1113,6 +1120,7 @@ def create_landing_page(featured_items=None):
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
+    <h3 class="tags-heading">Seleciona as plataformas que queres ver:</h3>
 
     <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
       <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
