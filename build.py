@@ -137,17 +137,16 @@ def search_tmdb_title(title, media_type):
 
 
 # ---------------------------------------------------------------------------
-# NETFLIX — fonte 100% oficial e pública (top10.netflix.com)
-# Atualiza-se semanalmente (à terça-feira, com dados de segunda a domingo anterior).
+# NETFLIX - fonte 100% oficial e publica (top10.netflix.com)
 # ---------------------------------------------------------------------------
 def _last_published_sunday(reference=None):
     ref = reference or date.today()
     w = ref.weekday()
-    if w == 6:       # Domingo
+    if w == 6:
         days = 7
-    elif w == 0:     # Segunda
+    elif w == 0:
         days = 8
-    else:            # Terça a Sábado (1 a 5)
+    else:
         days = w + 1
     return ref - timedelta(days=days)
 
@@ -158,7 +157,7 @@ _last_sunday = _last_published_sunday
 def get_netflix_official_top10(media_type):
     """
     media_type: 'films' ou 'tv'
-    Tenta as últimas 3 semanas publicadas (a lista da semana atual só sai à terça-feira).
+    Tenta as ultimas 3 semanas publicadas.
     """
     candidate_sunday = _last_published_sunday()
 
@@ -299,7 +298,7 @@ def get_badge_font(size, bold=False):
 
 def draw_rank_badge(poster_bytes, rank, variation):
     """
-    Desenha um badge moderno com o #rank e a variação no canto superior esquerdo do poster.
+  Desenha uma pílula compacta com a variação de ranking no canto superior esquerdo.
     """
     if not Image or not ImageDraw or not ImageFont:
         return poster_bytes
@@ -312,40 +311,50 @@ def draw_rank_badge(poster_bytes, rank, variation):
         draw = ImageDraw.Draw(overlay)
 
         scale = w / 500.0
-        margin_x = int(16 * scale)
-        margin_y = int(16 * scale)
-        badge_w = int(76 * scale)
-        badge_h = int(68 * scale)
-        radius = int(12 * scale)
-
-        # Fundo translúcido escuro com borda subtil
-        box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
-        draw.rounded_rectangle(box, radius=radius, fill=(15, 17, 23, 230), outline=(255, 255, 255, 75), width=max(1, int(1.5 * scale)))
-
-        font_rank = get_badge_font(int(30 * scale), bold=True)
-        font_sub = get_badge_font(int(13 * scale), bold=True)
-
-        rank_text = f"#{rank}"
-        r_bbox = draw.textbbox((0, 0), rank_text, font=font_rank)
-        r_w = r_bbox[2] - r_bbox[0]
-        draw.text((margin_x + (badge_w - r_w) / 2, margin_y + int(6 * scale)), rank_text, font=font_rank, fill=(255, 255, 255, 255))
+        margin_x = int(26 * scale)
+        margin_y = int(24 * scale)
+        badge_h = max(24, int(29 * scale))
+        radius = badge_h // 2
 
         if variation.startswith('+'):
             var_text = f"▲ {variation}"
-            var_color = (74, 222, 128, 255)    # Verde esmeralda
+            var_color = (74, 222, 128, 255)
+            outline_color = (74, 222, 128, 110)
+            fill_color = (12, 24, 16, 235)
         elif variation.startswith('-'):
             var_text = f"▼ {variation}"
-            var_color = (248, 113, 113, 255)   # Vermelho
+            var_color = (248, 113, 113, 255)
+            outline_color = (248, 113, 113, 110)
+            fill_color = (26, 12, 14, 235)
         elif variation == 'NOVO':
             var_text = "★ NOVO"
-            var_color = (250, 204, 21, 255)    # Dourado
+            var_color = (250, 204, 21, 255)
+            outline_color = (250, 204, 21, 110)
+            fill_color = (26, 22, 10, 235)
         else:
-            var_text = "—"
-            var_color = (148, 163, 184, 255)   # Cinzento neutro
+            var_text = "="
+            var_color = (203, 213, 225, 255)
+            outline_color = (203, 213, 225, 65)
+            fill_color = (15, 17, 23, 235)
 
-        v_bbox = draw.textbbox((0, 0), var_text, font=font_sub)
-        v_w = v_bbox[2] - v_bbox[0]
-        draw.text((margin_x + (badge_w - v_w) / 2, margin_y + badge_h - int(24 * scale)), var_text, font=font_sub, fill=var_color)
+        font_badge = get_badge_font(max(11, int(13.5 * scale)), bold=True)
+        text_bbox = draw.textbbox((0, 0), var_text, font=font_badge)
+        text_w = text_bbox[2] - text_bbox[0]
+        pad_x = int(13 * scale) if var_text == "=" else int(10 * scale)
+        badge_w = max(badge_h, text_w + (2 * pad_x))
+        box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
+        draw.rounded_rectangle(
+          box,
+          radius=radius,
+          fill=fill_color,
+          outline=outline_color,
+          width=max(1, int(1.2 * scale))
+        )
+        try:
+          draw.text((margin_x + badge_w / 2, margin_y + badge_h / 2), var_text, font=font_badge, fill=var_color, anchor="mm")
+        except TypeError:
+          text_h = text_bbox[3] - text_bbox[1]
+          draw.text((margin_x + (badge_w - text_w) / 2, margin_y + (badge_h - text_h) / 2), var_text, font=font_badge, fill=var_color)
 
         final_img = Image.alpha_composite(img, overlay).convert("RGB")
         output = io.BytesIO()
@@ -472,9 +481,9 @@ def create_landing_page(featured_items=None):
                     "fallback_poster": chosen.get("poster")
                 })
 
-    # Renderizar grelha de cards do Sneak Peek
+    # Renderizar uma faixa contínua; a segunda cópia permite o loop sem saltos.
     cards_html = ""
-    for item in featured_items[:6]:
+    for item in featured_items:
         color = item.get("color", "#7b5bf5")
         platform = item.get("platform", "Streaming")
         title = item.get("title", "")
@@ -483,18 +492,18 @@ def create_landing_page(featured_items=None):
         fallback = item.get("fallback_poster", "")
 
         cards_html += (
-            '          <div class="peek-card">\n'
+            '          <article class="peek-card">\n'
             '            <div class="peek-poster-box">\n'
             f'              <img src="{poster}" alt="{title}" loading="lazy" onerror="this.src=\'{fallback}\'">\n'
-            '              <span class="peek-rank-chip">#1</span>\n'
             '            </div>\n'
             '            <div class="peek-card-info">\n'
             f'              <div class="peek-card-platform" style="color: {color};">{platform}</div>\n'
             f'              <div class="peek-card-title" title="{title}">{title}</div>\n'
             f'              <div class="peek-card-type">{m_type}</div>\n'
             '            </div>\n'
-            '          </div>\n'
+            '          </article>\n'
         )
+    cards_html = cards_html + cards_html
 
     html_content = f"""<!DOCTYPE html>
 <html lang="pt">
@@ -623,28 +632,42 @@ def create_landing_page(featured_items=None):
       color: #71717a;
     }}
     .peek-grid-container {{
-      position: relative;
-      max-height: 420px;
-      overflow: hidden;
-      border-radius: 16px;
-      border: 1px solid #27272a;
-      background: #18181b;
-      padding: 12px;
+      display: none;
     }}
-    .peek-grid {{
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .peek-marquee {{
+      position: relative;
+      overflow: hidden;
+      padding: 8px 0 26px;
+      margin: 0 -24px;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+      mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    }}
+    .peek-track {{
+      display: flex;
+      align-items: flex-start;
+      width: max-content;
       gap: 10px;
+      animation: poster-marquee 52s linear infinite;
+      will-change: transform;
+    }}
+    .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
+    @keyframes poster-marquee {{
+      from {{ transform: translateX(0); }}
+      to {{ transform: translateX(calc(-50% - 5px)); }}
     }}
     .peek-card {{
       position: relative;
-      background: #27272a;
-      border-radius: 10px;
+      width: 112px;
+      flex: 0 0 112px;
+      background: transparent;
+      border-radius: 8px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       text-align: left;
-      border: 1px solid #3f3f46;
+    }}
+    .peek-card:nth-child(even) {{
+      transform: translateY(38px);
     }}
     .peek-poster-box {{
       position: relative;
@@ -658,19 +681,6 @@ def create_landing_page(featured_items=None):
       height: 100%;
       object-fit: cover;
       display: block;
-    }}
-    .peek-rank-chip {{
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      background: rgba(15, 17, 23, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #ffffff;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 6px;
-      backdrop-filter: blur(4px);
     }}
     .peek-card-info {{
       padding: 8px 6px;
@@ -695,19 +705,6 @@ def create_landing_page(featured_items=None):
       font-size: 10px;
       color: #71717a;
     }}
-    .peek-fade-overlay {{
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 250px;
-      background: linear-gradient(to bottom, rgba(24, 24, 27, 0) 0%, rgba(24, 24, 27, 0.75) 28%, rgba(24, 24, 27, 0.96) 65%, #18181b 100%);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 14px;
-      z-index: 10;
-    }}
     .peek-cta-card {{
       background: rgba(39, 39, 42, 0.94);
       border: 1px solid #52525b;
@@ -718,6 +715,7 @@ def create_landing_page(featured_items=None):
       width: 100%;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
       text-align: center;
+      margin-top: 8px;
     }}
     .peek-cta-badge {{
       font-size: 10px;
@@ -859,28 +857,13 @@ def create_landing_page(featured_items=None):
     <!-- Sneak Peek Section -->
     <div class="sneak-peek-section">
       <div class="peek-header">
-        <div class="peek-pill">EM ALTA HOJE</div>
         <h2 class="peek-heading">O que está a liderar em Portugal</h2>
-        <p class="peek-desc">Espreita os títulos #1 do dia nas plataformas mais populares</p>
+        <p class="peek-desc">Espreita os títulos em destaque nas plataformas mais populares</p>
       </div>
 
-      <div class="peek-grid-container">
-        <div class="peek-grid">
+      <div class="peek-marquee" aria-label="Títulos em destaque">
+        <div class="peek-track">
           {cards_html}
-        </div>
-
-        <div class="peek-fade-overlay">
-          <div class="peek-cta-card">
-            <div class="peek-cta-badge">⚡ TOP 10 COMPLETO</div>
-            <h3 class="peek-cta-title">Queres ver todos os rankings?</h3>
-            <p class="peek-cta-desc">Vê o Top 10 atualizado de cada plataforma diretamente na tua biblioteca do Stremio.</p>
-            <a href="#" class="btn btn-stremio btn-peek-action" onclick="openStremioLink(event)">
-              <svg viewBox="0 0 24 24" style="fill: currentColor; width: 18px; height: 18px;">
-                <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
-              </svg>
-              Instalar no Stremio
-            </a>
-          </div>
         </div>
       </div>
     </div>
@@ -1020,6 +1003,15 @@ def main():
             cat_id = f"{prov['id']}_pt_movies"
             movie_items, cat_hist = apply_badges_to_catalog(movie_items, cat_id, history.get(cat_id, {}))
             new_history[cat_id] = cat_hist
+            for rank, item in enumerate(movie_items, 1):
+              featured_items.append({
+                "platform": prov["name"],
+                "color": prov.get("color", "#7b5bf5"),
+                "title": item["name"],
+                "type": "Filme",
+                "poster": f"posters/{cat_id}_{rank}.jpg",
+                "fallback_poster": item.get("poster")
+              })
 
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": movie_items}, f, ensure_ascii=False)
@@ -1028,16 +1020,6 @@ def main():
                 "id": cat_id,
                 "name": f"{prov['name']} Top 10",
                 "extra": [{"name": "skip", "isRequired": False}]
-            })
-
-            local_poster = f"posters/{cat_id}_1.jpg"
-            featured_items.append({
-                "platform": prov["name"],
-                "color": prov.get("color", "#7b5bf5"),
-                "title": movie_items[0]["name"],
-                "type": "Filme",
-                "poster": local_poster,
-                "fallback_poster": movie_items[0].get("poster")
             })
 
         series_items = resolve_titles_to_items(series_titles, "series")
@@ -1050,6 +1032,15 @@ def main():
             cat_id = f"{prov['id']}_pt_series"
             series_items, cat_hist = apply_badges_to_catalog(series_items, cat_id, history.get(cat_id, {}))
             new_history[cat_id] = cat_hist
+            for rank, item in enumerate(series_items, 1):
+              featured_items.append({
+                "platform": prov["name"],
+                "color": prov.get("color", "#7b5bf5"),
+                "title": item["name"],
+                "type": "Série",
+                "poster": f"posters/{cat_id}_{rank}.jpg",
+                "fallback_poster": item.get("poster")
+              })
 
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": series_items}, f, ensure_ascii=False)
@@ -1059,18 +1050,6 @@ def main():
                 "name": f"{prov['name']} Top 10",
                 "extra": [{"name": "skip", "isRequired": False}]
             })
-
-            # Se ainda não adicionámos este fornecedor nos destaques
-            if not any(f["platform"] == prov["name"] for f in featured_items):
-                local_poster = f"posters/{cat_id}_1.jpg"
-                featured_items.append({
-                    "platform": prov["name"],
-                    "color": prov.get("color", "#7b5bf5"),
-                    "title": series_items[0]["name"],
-                    "type": "Série",
-                    "poster": local_poster,
-                    "fallback_poster": series_items[0].get("poster")
-                })
 
     save_history(new_history)
 
