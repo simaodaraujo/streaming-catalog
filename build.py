@@ -494,7 +494,7 @@ def create_landing_page(featured_items=None):
         cards_html += (
             '          <article class="peek-card">\n'
             '            <div class="peek-poster-box">\n'
-            f'              <img src="{poster}" alt="{title}" loading="lazy" onerror="this.src=\'{fallback}\'">\n'
+            f'              <img src="{poster}" alt="{title}" loading="eager" decoding="async" onerror="this.src=\'{fallback}\'">\n'
             '            </div>\n'
             '            <div class="peek-card-info">\n'
             f'              <div class="peek-card-platform" style="color: {color};">{platform}</div>\n'
@@ -647,7 +647,7 @@ def create_landing_page(featured_items=None):
       align-items: flex-start;
       width: max-content;
       gap: 10px;
-      animation: poster-marquee 52s linear infinite;
+      animation: poster-marquee 120s linear infinite;
       will-change: transform;
     }}
     .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
