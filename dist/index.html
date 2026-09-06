@@ -138,7 +138,7 @@
     .peek-gallery-drift {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-auto-rows: 48px;
+      grid-auto-rows: 78px;
       gap: 6px;
       animation: gallery-drift 34s ease-in-out infinite alternate;
       will-change: transform;
@@ -165,13 +165,17 @@
       position: relative;
       height: 100%;
       width: 100%;
-      background: #202024;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #15151a;
       overflow: hidden;
     }
     .peek-poster-box img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      object-position: center;
       display: block;
     }
     .peek-card-info {
@@ -297,7 +301,7 @@
       }
       .peek-gallery-drift {
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: 42px;
+        grid-auto-rows: 68px;
         gap: 5px;
       }
     }
@@ -578,7 +582,7 @@
     </div>
 
     <div class="footer">
-      <span id="time-ago" data-time="2026-09-06T03:34:09.973401Z">Atualizado recentemente</span>
+      <span id="time-ago" data-time="2026-09-06T03:36:58.834429Z">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 09h30</span>
       <span class="version">v1.0.8</span>
     </div>

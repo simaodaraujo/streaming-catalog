@@ -269,41 +269,39 @@ def parse_flixpatrol_titles(html, media_type):
 
 
 def get_flixpatrol_top10(platform_slug, media_type):
-    """Tenta scraping direto e usa ScraperAPI apenas como fallback."""
+    """Recolhe o ranking FlixPatrol exclusivamente através do ScraperAPI."""
     if not session or not BeautifulSoup:
         return []
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
     try:
-        direct = session.get(url, headers=HEADERS, timeout=15)
-        if direct.status_code == 200:
-            titles = parse_flixpatrol_titles(direct.text, media_type)
-            if titles:
-                print(f"  [i] FlixPatrol direto ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
-                return titles
         if not SCRAPER_API_KEY:
             return []
 
-        response = session.get(
+        response = None
+        try:
+          response = session.get(
             "https://api.scraperapi.com/",
             params={"api_key": SCRAPER_API_KEY, "url": url, "render": "false"},
             headers=HEADERS,
             timeout=30,
-        )
-        if response.status_code != 200:
-            print(f"  [!] FlixPatrol direto/proxy respondeu HTTP {response.status_code}", flush=True)
-            return []
-        titles = parse_flixpatrol_titles(response.text, media_type)
-        if not titles:
-          rendered = session.get(
-            "https://api.scraperapi.com/",
-            params={"api_key": SCRAPER_API_KEY, "url": url, "render": "true"},
-            headers=HEADERS,
-            timeout=45,
           )
-          if rendered.status_code == 200:
-            titles = parse_flixpatrol_titles(rendered.text, media_type)
-            if titles:
-              print(f"  [i] FlixPatrol renderizado ({platform_slug}, {media_type})", flush=True)
+        except Exception as exc:
+          print(f"  [!] FlixPatrol proxy sem render falhou: {exc}", flush=True)
+        titles = parse_flixpatrol_titles(response.text, media_type) if response is not None and response.status_code == 200 else []
+        if not titles:
+          try:
+            rendered = session.get(
+              "https://api.scraperapi.com/",
+              params={"api_key": SCRAPER_API_KEY, "url": url, "render": "true"},
+              headers=HEADERS,
+              timeout=75,
+            )
+            if rendered.status_code == 200:
+              titles = parse_flixpatrol_titles(rendered.text, media_type)
+              if titles:
+                print(f"  [i] FlixPatrol renderizado ({platform_slug}, {media_type})", flush=True)
+          except Exception as exc:
+            print(f"  [!] FlixPatrol proxy renderizado falhou: {exc}", flush=True)
         if titles:
             print(f"  [i] FlixPatrol via ScraperAPI ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
         return titles
@@ -732,7 +730,7 @@ def create_landing_page(featured_items=None):
     .peek-gallery-drift {{
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
-      grid-auto-rows: 48px;
+      grid-auto-rows: 78px;
       gap: 6px;
       animation: gallery-drift 34s ease-in-out infinite alternate;
       will-change: transform;
@@ -759,13 +757,17 @@ def create_landing_page(featured_items=None):
       position: relative;
       height: 100%;
       width: 100%;
-      background: #202024;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #15151a;
       overflow: hidden;
     }}
     .peek-poster-box img {{
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      object-position: center;
       display: block;
     }}
     .peek-card-info {{
@@ -891,7 +893,7 @@ def create_landing_page(featured_items=None):
       }}
       .peek-gallery-drift {{
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: 42px;
+        grid-auto-rows: 68px;
         gap: 5px;
       }}
     }}
