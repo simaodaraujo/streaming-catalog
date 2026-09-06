@@ -2,6 +2,7 @@ import os
 import json
 import time
 import re
+import io
 import shutil
 from datetime import datetime, date, timedelta
 
@@ -16,7 +17,17 @@ except ImportError:
     Retry = None
     BeautifulSoup = None
 
+try:
+    from PIL import Image, ImageDraw, ImageFont
+except ImportError:
+    Image = None
+    ImageDraw = None
+    ImageFont = None
+
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
+BASE_URL = os.environ.get("BASE_URL", "https://streaming-catalog.vercel.app").rstrip("/")
+HISTORY_FILE = "dist/history.json"
+LOCAL_HISTORY = "history.json"
 
 # Tenta carregar .env se não estiver no ambiente (para execução/teste local)
 if not TMDB_API_KEY and os.path.exists(".env"):
@@ -27,7 +38,9 @@ if not TMDB_API_KEY and os.path.exists(".env"):
                 if line.startswith("TMDB_API_KEY="):
                     TMDB_API_KEY = line.split("=", 1)[1].strip().strip('"').strip("'")
                     os.environ["TMDB_API_KEY"] = TMDB_API_KEY
-                    break
+                elif line.startswith("BASE_URL="):
+                    BASE_URL = line.split("=", 1)[1].strip().strip('"').strip("'").rstrip("/")
+                    os.environ["BASE_URL"] = BASE_URL
     except Exception:
         pass
 
@@ -42,29 +55,24 @@ else:
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# 'flixpatrol' é o slug usado em flixpatrol.com/top10/<slug>/<pais>/
+# Plataformas de streaming em Portugal:
+# - Netflix: fonte oficial semanal (top10.netflix.com)
+# - Disney+, Prime, HBO, Apple TV+, SkyShowtime: rankings reais de Portugal via JustWatch (100% gratuito e sem bloqueios)
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "netflix"},
-    {"id": "disney", "name": "Disney+", "tmdb_id": 337, "source": "flixpatrol", "flixpatrol": "disney"},
-    {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "source": "flixpatrol", "flixpatrol": "amazon-prime"},
-    {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "source": "flixpatrol", "flixpatrol": "hbo-max"},
-    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "source": "flixpatrol", "flixpatrol": "apple-tv"},
-    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "source": "flixpatrol", "flixpatrol": "skyshowtime"},
+    {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "source": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
+    {"id": "disney", "name": "Disney+", "tmdb_id": 337, "source": "justwatch", "jw_pkg": "dnp", "color": "#0063e5"},
+    {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "source": "justwatch", "jw_pkg": "prv", "color": "#00a8e1"},
+    {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "source": "justwatch", "jw_pkg": "hbm", "color": "#a855f7"},
+    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "source": "justwatch", "jw_pkg": "atp", "color": "#ffffff"},
+    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "source": "justwatch", "jw_pkg": "sst", "color": "#00ff7f"},
 ]
 
 NETFLIX_COUNTRY_SLUG = "portugal"
-FLIXPATROL_COUNTRY_SLUG = "portugal"
-
-# Cache: se já correu hoje, não volta a bater na FlixPatrol
-CACHE_DIR = "cache"
-FLIXPATROL_CACHE_FILE = os.path.join(CACHE_DIR, "flixpatrol_cache.json")
-
-# Atraso entre pedidos a cada plataforma da FlixPatrol
-FLIXPATROL_DELAY_SECONDS = 4
 
 
 def clean_title(title):
-    cleaned = re.sub(r'(?i)\b(season|temporada|series)\s+\d+\b', '', title)
+    cleaned = re.sub(r'^\d+\.?\s*', '', title)
+    cleaned = re.sub(r'(?i)\b(season|temporada|series|limited series)\s*(\d+)?\b', '', cleaned)
     cleaned = re.sub(r'[\(\[].*?[\)\]]', '', cleaned)
     cleaned = re.sub(r'\s*[-:–—|]\s*$', '', cleaned)
     return cleaned.strip(' :-–—|')
@@ -101,11 +109,13 @@ def search_tmdb_title(title, media_type):
             res = session.get(url, params=params, timeout=7)
             results = res.json().get("results", []) if res.status_code == 200 else []
 
-        if not results and search_type == "tv":
-            multi_url = "https://api.themoviedb.org/3/search/multi"
-            res = session.get(multi_url, params={"api_key": TMDB_API_KEY, "query": query, "page": 1}, timeout=7)
-            multi_res = res.json().get("results", []) if res.status_code == 200 else []
-            results = [r for r in multi_res if r.get("media_type") in ["tv", "movie"]]
+        # Se não encontrou, tenta o outro tipo (ex: minissérie listada como movie ou tv)
+        if not results:
+            other_type = "tv" if search_type == "movie" else "movie"
+            res = session.get(f"https://api.themoviedb.org/3/search/{other_type}", params={"api_key": TMDB_API_KEY, "query": query, "page": 1}, timeout=7)
+            results = res.json().get("results", []) if res.status_code == 200 else []
+            if results:
+                search_type = other_type
 
         if results:
             best = results[0]
@@ -128,14 +138,11 @@ def search_tmdb_title(title, media_type):
 
 
 # ---------------------------------------------------------------------------
-# NETFLIX — fonte oficial (top10.netflix.com)
-# Atualiza-se semanalmente (à terça, com dados de segunda a domingo anterior).
+# NETFLIX — fonte 100% oficial e pública (top10.netflix.com)
+# Atualiza-se semanalmente (à terça-feira, com dados de segunda a domingo anterior).
 # ---------------------------------------------------------------------------
 def _last_published_sunday(reference=None):
     ref = reference or date.today()
-    # A Netflix publica os dados semanais à terça-feira.
-    # Antes de terça (domingo ou segunda), a última lista disponível é a da semana anterior.
-    # weekday(): Monday=0, Tuesday=1, ..., Sunday=6
     w = ref.weekday()
     if w == 6:       # Domingo
         days = 7
@@ -152,8 +159,7 @@ _last_sunday = _last_published_sunday
 def get_netflix_official_top10(media_type):
     """
     media_type: 'films' ou 'tv'
-    Tenta as últimas 3 semanas publicadas (a lista da semana atual só sai
-    à terça-feira, por isso pode ainda não existir).
+    Tenta as últimas 3 semanas publicadas (a lista da semana atual só sai à terça-feira).
     """
     candidate_sunday = _last_published_sunday()
 
@@ -171,11 +177,14 @@ def get_netflix_official_top10(media_type):
                     for row in rows[:10]:
                         cols = row.find_all("td")
                         if cols:
-                            title_text = cols[0].get_text(strip=True)
+                            # O título está dentro da tag <button> ou precedido pelo ranking
+                            btn = cols[0].find("button")
+                            title_text = btn.get_text(strip=True) if btn else cols[0].get_text(strip=True)
+                            title_text = re.sub(r'^\d+\.?\s*', '', title_text)
                             if title_text:
                                 titles.append(title_text)
                 if titles:
-                    print(f"  [i] Netflix Top 10 ({media_type}) da semana de {date_str}", flush=True)
+                    print(f"  [i] Netflix Top 10 ({media_type}) da semana de {date_str} ({len(titles)} títulos)", flush=True)
                     return titles
         except Exception as e:
             print(f"  [!] Erro ao obter Top 10 oficial da Netflix ({date_str}): {e}", flush=True)
@@ -186,86 +195,47 @@ def get_netflix_official_top10(media_type):
 
 
 # ---------------------------------------------------------------------------
-# OUTRAS PLATAFORMAS — via FlixPatrol (flixpatrol.com/top10/<slug>/<pais>/)
+# JUSTWATCH — rankings reais de streaming em Portugal
+# 100% gratuito, oficial para Portugal, sem necessidade de chaves pagas.
 # ---------------------------------------------------------------------------
-def _load_flixpatrol_cache():
-    if os.path.exists(FLIXPATROL_CACHE_FILE):
-        try:
-            with open(FLIXPATROL_CACHE_FILE, "r", encoding="utf-8") as f:
-                cache = json.load(f)
-            if cache.get("date") == date.today().isoformat():
-                return cache.get("data", {})
-        except Exception:
-            pass
-    return None
-
-
-def _save_flixpatrol_cache(data):
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    with open(FLIXPATROL_CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump({"date": date.today().isoformat(), "data": data}, f, ensure_ascii=False)
-
-
-def get_flixpatrol_top10(flixpatrol_slug, section_keyword):
+def get_justwatch_top10(package_code, media_type):
     """
-    section_keyword: 'Movies' ou 'TV Shows'
+    Recolhe o Top 10 real de Portugal para a plataforma indicada via JustWatch GraphQL.
     """
-    url = f"https://flixpatrol.com/top10/{flixpatrol_slug}/{FLIXPATROL_COUNTRY_SLUG}/"
+    obj_type = "MOVIE" if media_type == "movie" else "SHOW"
+    query = f"""
+    {{
+      popularTitles(country: PT, first: 10, filter: {{packages: ["{package_code}"], objectTypes: [{obj_type}]}}) {{
+        edges {{
+          node {{
+            content(country: PT, language: "pt") {{
+              title
+            }}
+          }}
+        }}
+      }}
+    }}
+    """
     try:
-        res = session.get(url, headers=HEADERS, timeout=10)
-        if res.status_code != 200:
-            print(f"  [!] FlixPatrol devolveu {res.status_code} para {flixpatrol_slug}", flush=True)
-            return []
-
-        soup = BeautifulSoup(res.text, "html.parser")
-
-        heading = None
-        for tag in soup.find_all(["h2", "h3", "div", "span"]):
-            text = tag.get_text(strip=True)
-            if text.lower().startswith("top 10") and section_keyword.lower() in text.lower():
-                heading = tag
-                break
-
-        titles = []
-        if heading:
-            table = heading.find_next("table")
-            if table:
-                for row in table.select("tbody tr")[:10]:
-                    cell = row.find("td")
-                    if cell:
-                        text = cell.get_text(strip=True)
-                        text = re.sub(r'^\d+\.?\s*', '', text)
-                        if text:
-                            titles.append(text)
-
-        if not titles:
-            print(f"  [i] Não consegui extrair '{section_keyword}' de {flixpatrol_slug} "
-                  f"(a estrutura da página pode ter mudado)", flush=True)
-
-        return titles
+        res = session.post(
+            "https://apis.justwatch.com/graphql",
+            json={"query": query},
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Content-Type": "application/json"},
+            timeout=10
+        )
+        if res.status_code == 200:
+            edges = res.json().get("data", {}).get("popularTitles", {}).get("edges", [])
+            titles = [e["node"]["content"]["title"] for e in edges if e.get("node", {}).get("content", {}).get("title")]
+            if titles:
+                print(f"  [i] JustWatch Portugal ({package_code}): {len(titles)} títulos reais encontrados", flush=True)
+                return titles
     except Exception as e:
-        print(f"  [!] Erro FlixPatrol ({flixpatrol_slug}): {e}", flush=True)
-        return []
+        print(f"  [!] Erro JustWatch ({package_code}): {e}", flush=True)
+
+    return []
 
 
-def get_flixpatrol_titles_cached(flixpatrol_slug):
-    cache = _load_flixpatrol_cache() or {}
-
-    if flixpatrol_slug in cache:
-        print(f"  [i] A usar cache de hoje para {flixpatrol_slug}", flush=True)
-        return cache[flixpatrol_slug]
-
-    movies = get_flixpatrol_top10(flixpatrol_slug, "Movies")
-    time.sleep(FLIXPATROL_DELAY_SECONDS)
-    tv = get_flixpatrol_top10(flixpatrol_slug, "TV Shows")
-    time.sleep(FLIXPATROL_DELAY_SECONDS)
-
-    cache[flixpatrol_slug] = {"movies": movies, "tv": tv}
-    _save_flixpatrol_cache(cache)
-
-    return cache[flixpatrol_slug]
-
-
+# Fallback via TMDB caso alguma fonte externa esteja indisponível
 def get_tmdb_fallback(tmdb_provider_id, media_type):
     if not TMDB_API_KEY:
         return []
@@ -312,8 +282,217 @@ def resolve_titles_to_items(titles, media_type):
     return items
 
 
-def create_landing_page():
+# ---------------------------------------------------------------------------
+# BADGES DE RANKING E HISTÓRICO DE VARIAÇÃO (+1, -1, =, NOVO)
+# ---------------------------------------------------------------------------
+def get_badge_font(size, bold=False):
+    candidates = ['arialbd.ttf', 'arial.ttf', 'DejaVuSans-Bold.ttf', 'DejaVuSans.ttf', 'FreeSansBold.ttf'] if bold else ['arial.ttf', 'DejaVuSans.ttf', 'FreeSans.ttf']
+    for c in candidates:
+        try:
+            return ImageFont.truetype(c, size)
+        except Exception:
+            pass
+    try:
+        return ImageFont.load_default(size=size)
+    except Exception:
+        return ImageFont.load_default()
+
+
+def draw_rank_badge(poster_bytes, rank, variation):
+    """
+    Desenha um badge moderno com o #rank e a variação no canto superior esquerdo do poster.
+    """
+    if not Image or not ImageDraw or not ImageFont:
+        return poster_bytes
+
+    try:
+        img = Image.open(io.BytesIO(poster_bytes)).convert("RGBA")
+        w, h = img.size
+
+        overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+
+        scale = w / 500.0
+        margin_x = int(16 * scale)
+        margin_y = int(16 * scale)
+        badge_w = int(76 * scale)
+        badge_h = int(68 * scale)
+        radius = int(12 * scale)
+
+        # Fundo translúcido escuro com borda subtil
+        box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
+        draw.rounded_rectangle(box, radius=radius, fill=(15, 17, 23, 230), outline=(255, 255, 255, 75), width=max(1, int(1.5 * scale)))
+
+        font_rank = get_badge_font(int(30 * scale), bold=True)
+        font_sub = get_badge_font(int(13 * scale), bold=True)
+
+        rank_text = f"#{rank}"
+        r_bbox = draw.textbbox((0, 0), rank_text, font=font_rank)
+        r_w = r_bbox[2] - r_bbox[0]
+        draw.text((margin_x + (badge_w - r_w) / 2, margin_y + int(6 * scale)), rank_text, font=font_rank, fill=(255, 255, 255, 255))
+
+        if variation.startswith('+'):
+            var_text = f"▲ {variation}"
+            var_color = (74, 222, 128, 255)    # Verde esmeralda
+        elif variation.startswith('-'):
+            var_text = f"▼ {variation}"
+            var_color = (248, 113, 113, 255)   # Vermelho
+        elif variation == 'NOVO':
+            var_text = "★ NOVO"
+            var_color = (250, 204, 21, 255)    # Dourado
+        else:
+            var_text = "—"
+            var_color = (148, 163, 184, 255)   # Cinzento neutro
+
+        v_bbox = draw.textbbox((0, 0), var_text, font=font_sub)
+        v_w = v_bbox[2] - v_bbox[0]
+        draw.text((margin_x + (badge_w - v_w) / 2, margin_y + badge_h - int(24 * scale)), var_text, font=font_sub, fill=var_color)
+
+        final_img = Image.alpha_composite(img, overlay).convert("RGB")
+        output = io.BytesIO()
+        final_img.save(output, format="JPEG", quality=88)
+        return output.getvalue()
+    except Exception as e:
+        print(f"  [!] Erro ao desenhar badge: {e}", flush=True)
+        return poster_bytes
+
+
+def load_history():
+    for path in [HISTORY_FILE, LOCAL_HISTORY]:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception:
+                pass
+    return {}
+
+
+def save_history(history):
+    os.makedirs("dist", exist_ok=True)
+    try:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+        with open(LOCAL_HISTORY, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"  [!] Erro ao guardar histórico de rankings: {e}", flush=True)
+
+
+def apply_badges_to_catalog(items, cat_id, history_dict):
+    """
+    Calcula variações de ranking, desenha badges nos posters e guarda em dist/posters.
+    """
+    os.makedirs("dist/posters", exist_ok=True)
+    new_cat_history = {}
+    updated_items = []
+
+    for rank, item in enumerate(items, 1):
+        item_copy = dict(item)
+        item_id = item_copy.get("id")
+        old_rank = history_dict.get(item_id) if history_dict else None
+
+        if old_rank is None:
+            variation = "NOVO"
+        else:
+            diff = old_rank - rank
+            if diff > 0:
+                variation = f"+{diff}"
+            elif diff < 0:
+                variation = f"{diff}"
+            else:
+                variation = "="
+
+        if item_id:
+            new_cat_history[item_id] = rank
+
+        original_poster = item_copy.get("poster")
+        if original_poster and Image and session:
+            poster_filename = f"{cat_id}_{rank}.jpg"
+            poster_path = f"dist/posters/{poster_filename}"
+            try:
+                res = session.get(original_poster, timeout=8)
+                if res.status_code == 200:
+                    badged_bytes = draw_rank_badge(res.content, rank, variation)
+                    with open(poster_path, "wb") as f:
+                        f.write(badged_bytes)
+                    if BASE_URL:
+                        item_copy["poster"] = f"{BASE_URL}/posters/{poster_filename}"
+                    else:
+                        item_copy["poster"] = f"/posters/{poster_filename}"
+            except Exception as e:
+                print(f"  [!] Aviso: Não foi possível aplicar badge em '{item_copy.get('name')}': {e}", flush=True)
+
+        updated_items.append(item_copy)
+
+    return updated_items, new_cat_history
+
+
+def create_landing_page(featured_items=None):
     now_iso = datetime.utcnow().isoformat() + "Z"
+
+    # Se não foram fornecidos itens de destaque, tenta obter os #1 dos ficheiros de catálogo existentes
+    if not featured_items:
+        featured_items = []
+        for prov in PROVIDERS:
+            cat_movie = f"dist/catalog/movie/{prov['id']}_pt_movies.json"
+            cat_series = f"dist/catalog/series/{prov['id']}_pt_series.json"
+            chosen = None
+            media_label = "Filme"
+            if os.path.exists(cat_movie):
+                try:
+                    with open(cat_movie, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if data.get("metas"):
+                        chosen = data["metas"][0]
+                        media_label = "Filme"
+                except Exception:
+                    pass
+            if not chosen and os.path.exists(cat_series):
+                try:
+                    with open(cat_series, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if data.get("metas"):
+                        chosen = data["metas"][0]
+                        media_label = "Série"
+                except Exception:
+                    pass
+
+            if chosen:
+                local_poster = f"posters/{prov['id']}_pt_movies_1.jpg" if media_label == "Filme" else f"posters/{prov['id']}_pt_series_1.jpg"
+                poster_src = local_poster if os.path.exists(f"dist/{local_poster}") else chosen.get("poster")
+                featured_items.append({
+                    "platform": prov["name"],
+                    "color": prov.get("color", "#7b5bf5"),
+                    "title": chosen.get("name", "Destaque"),
+                    "type": media_label,
+                    "poster": poster_src,
+                    "fallback_poster": chosen.get("poster")
+                })
+
+    # Renderizar grelha de cards do Sneak Peek
+    cards_html = ""
+    for item in featured_items[:6]:
+        color = item.get("color", "#7b5bf5")
+        platform = item.get("platform", "Streaming")
+        title = item.get("title", "")
+        m_type = item.get("type", "Top 1")
+        poster = item.get("poster", "")
+        fallback = item.get("fallback_poster", "")
+
+        cards_html += (
+            '          <div class="peek-card">\n'
+            '            <div class="peek-poster-box">\n'
+            f'              <img src="{poster}" alt="{title}" loading="lazy" onerror="this.src=\'{fallback}\'">\n'
+            '              <span class="peek-rank-chip">#1</span>\n'
+            '            </div>\n'
+            '            <div class="peek-card-info">\n'
+            f'              <div class="peek-card-platform" style="color: {color};">{platform}</div>\n'
+            f'              <div class="peek-card-title" title="{title}">{title}</div>\n'
+            f'              <div class="peek-card-type">{m_type}</div>\n'
+            '            </div>\n'
+            '          </div>\n'
+        )
 
     html_content = f"""<!DOCTYPE html>
 <html lang="pt">
@@ -323,7 +502,7 @@ def create_landing_page():
   <title>Top 10 Streams PT - Stremio extension</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
@@ -338,7 +517,7 @@ def create_landing_page():
       -webkit-font-smoothing: antialiased;
     }}
     .wrapper {{
-      max-width: 440px;
+      max-width: 480px;
       width: 100%;
       text-align: center;
     }}
@@ -355,7 +534,7 @@ def create_landing_page():
     p.subtitle {{
       font-size: 14px;
       color: #a1a1aa;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       line-height: 1.5;
     }}
     .tags {{
@@ -363,7 +542,7 @@ def create_landing_page():
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
     }}
     .tag {{
       display: inline-flex;
@@ -409,6 +588,159 @@ def create_landing_page():
       color: #f5f5f7;
     }}
     .btn svg {{ width: 20px; height: 20px; }}
+
+    /* SNEAK PEEK / MINI AD SECTION */
+    .sneak-peek-section {{
+      margin-top: 32px;
+      text-align: center;
+    }}
+    .peek-header {{
+      margin-bottom: 14px;
+    }}
+    .peek-pill {{
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c084fc;
+      background: rgba(192, 132, 252, 0.12);
+      border: 1px solid rgba(192, 132, 252, 0.25);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }}
+    .peek-heading {{
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }}
+    .peek-desc {{
+      font-size: 12px;
+      color: #71717a;
+    }}
+    .peek-grid-container {{
+      position: relative;
+      max-height: 420px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid #27272a;
+      background: #18181b;
+      padding: 12px;
+    }}
+    .peek-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }}
+    .peek-card {{
+      position: relative;
+      background: #27272a;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      border: 1px solid #3f3f46;
+    }}
+    .peek-poster-box {{
+      position: relative;
+      aspect-ratio: 2/3;
+      width: 100%;
+      background: #202024;
+      overflow: hidden;
+    }}
+    .peek-poster-box img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }}
+    .peek-rank-chip {{
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(15, 17, 23, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+    }}
+    .peek-card-info {{
+      padding: 8px 6px;
+      background: #18181b;
+    }}
+    .peek-card-platform {{
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }}
+    .peek-card-title {{
+      font-size: 11px;
+      font-weight: 600;
+      color: #f4f4f5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }}
+    .peek-card-type {{
+      font-size: 10px;
+      color: #71717a;
+    }}
+    .peek-fade-overlay {{
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 250px;
+      background: linear-gradient(to bottom, rgba(24, 24, 27, 0) 0%, rgba(24, 24, 27, 0.75) 28%, rgba(24, 24, 27, 0.96) 65%, #18181b 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+      z-index: 10;
+    }}
+    .peek-cta-card {{
+      background: rgba(39, 39, 42, 0.94);
+      border: 1px solid #52525b;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 16px 14px;
+      width: 100%;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }}
+    .peek-cta-badge {{
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #4ade80;
+      margin-bottom: 4px;
+    }}
+    .peek-cta-title {{
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }}
+    .peek-cta-desc {{
+      font-size: 11px;
+      color: #a1a1aa;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }}
+    .btn-peek-action {{
+      padding: 10px 14px;
+      font-size: 12px;
+      margin-bottom: 0;
+    }}
 
     .recommendations {{
       margin-top: 36px;
@@ -522,6 +854,35 @@ def create_landing_page():
       Copiar manifest
     </button>
 
+    <!-- Sneak Peek Section -->
+    <div class="sneak-peek-section">
+      <div class="peek-header">
+        <div class="peek-pill">EM ALTA HOJE</div>
+        <h2 class="peek-heading">O que está a liderar em Portugal</h2>
+        <p class="peek-desc">Espreita os títulos #1 do dia nas plataformas mais populares</p>
+      </div>
+
+      <div class="peek-grid-container">
+        <div class="peek-grid">
+          {cards_html}
+        </div>
+
+        <div class="peek-fade-overlay">
+          <div class="peek-cta-card">
+            <div class="peek-cta-badge">⚡ TOP 10 COMPLETO</div>
+            <h3 class="peek-cta-title">Queres ver todos os rankings?</h3>
+            <p class="peek-cta-desc">Vê o Top 10 atualizado de cada plataforma diretamente na tua biblioteca do Stremio.</p>
+            <a href="#" class="btn btn-stremio btn-peek-action" onclick="openStremioLink(event)">
+              <svg viewBox="0 0 24 24" style="fill: currentColor; width: 18px; height: 18px;">
+                <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
+              </svg>
+              Instalar no Stremio
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="recommendations">
       <div class="rec-title">Extensões que recomendo</div>
       <div class="rec-list">
@@ -556,6 +917,11 @@ def create_landing_page():
     const stremioUrl = manifestUrl.replace(/^https?:\\/\\//, 'stremio://');
 
     document.getElementById('install-btn').href = stremioUrl;
+
+    function openStremioLink(e) {{
+      e.preventDefault();
+      window.location.href = stremioUrl;
+    }}
 
     function copyManifestUrl() {{
       navigator.clipboard.writeText(manifestUrl);
@@ -600,14 +966,21 @@ def main():
 
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
+    os.makedirs("dist/posters", exist_ok=True)
 
     if os.path.exists("img/logo.png"):
         shutil.copy("img/logo.png", "dist/logo.png")
 
+    history = load_history()
+    new_history = {}
     manifest_catalogs = []
+    featured_items = []
 
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
+
+        movie_titles = []
+        series_titles = []
 
         if prov["source"] == "netflix":
             print("  -> A recolher Top 10 oficial da Netflix (Filmes)...", flush=True)
@@ -615,19 +988,21 @@ def main():
             print("  -> A recolher Top 10 oficial da Netflix (Séries)...", flush=True)
             series_titles = get_netflix_official_top10("tv")
         else:
-            print(f"  -> A recolher Top 10 real via FlixPatrol...", flush=True)
-            fp_data = get_flixpatrol_titles_cached(prov["flixpatrol"])
-            movie_titles = fp_data.get("movies", [])
-            series_titles = fp_data.get("tv", [])
+            print(f"  -> A recolher Top 10 real via JustWatch Portugal...", flush=True)
+            movie_titles = get_justwatch_top10(prov["jw_pkg"], "movie")
+            series_titles = get_justwatch_top10(prov["jw_pkg"], "series")
 
         movie_items = resolve_titles_to_items(movie_titles, "movie")
         if not movie_items:
-            print("  [i] Sem dados reais, a usar fallback TMDB (popularidade)...", flush=True)
+            print(f"  [i] Sem dados reais, a usar fallback TMDB ({prov['name']} Filmes)...", flush=True)
             movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
 
-        print(f"  -> Filmes guardados: {len(movie_items)}/10", flush=True)
+        print(f"  -> Filmes encontrados: {len(movie_items)}/10", flush=True)
         if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
+            movie_items, cat_hist = apply_badges_to_catalog(movie_items, cat_id, history.get(cat_id, {}))
+            new_history[cat_id] = cat_hist
+
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": movie_items}, f, ensure_ascii=False)
             manifest_catalogs.append({
@@ -637,14 +1012,27 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
+            local_poster = f"posters/{cat_id}_1.jpg"
+            featured_items.append({
+                "platform": prov["name"],
+                "color": prov.get("color", "#7b5bf5"),
+                "title": movie_items[0]["name"],
+                "type": "Filme",
+                "poster": local_poster,
+                "fallback_poster": movie_items[0].get("poster")
+            })
+
         series_items = resolve_titles_to_items(series_titles, "series")
         if not series_items:
-            print("  [i] Sem dados reais, a usar fallback TMDB (popularidade)...", flush=True)
+            print(f"  [i] Sem dados reais, a usar fallback TMDB ({prov['name']} Séries)...", flush=True)
             series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
 
-        print(f"  -> Séries guardadas: {len(series_items)}/10", flush=True)
+        print(f"  -> Séries encontradas: {len(series_items)}/10", flush=True)
         if series_items:
             cat_id = f"{prov['id']}_pt_series"
+            series_items, cat_hist = apply_badges_to_catalog(series_items, cat_id, history.get(cat_id, {}))
+            new_history[cat_id] = cat_hist
+
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": series_items}, f, ensure_ascii=False)
             manifest_catalogs.append({
@@ -653,6 +1041,20 @@ def main():
                 "name": f"{prov['name']} Top 10",
                 "extra": [{"name": "skip", "isRequired": False}]
             })
+
+            # Se ainda não adicionámos este fornecedor nos destaques
+            if not any(f["platform"] == prov["name"] for f in featured_items):
+                local_poster = f"posters/{cat_id}_1.jpg"
+                featured_items.append({
+                    "platform": prov["name"],
+                    "color": prov.get("color", "#7b5bf5"),
+                    "title": series_items[0]["name"],
+                    "type": "Série",
+                    "poster": local_poster,
+                    "fallback_poster": series_items[0].get("poster")
+                })
+
+    save_history(new_history)
 
     manifest = {
         "id": "org.portugal.streaming.top",
@@ -668,7 +1070,7 @@ def main():
     with open("dist/manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
-    create_landing_page()
+    create_landing_page(featured_items)
     print(f"\nFinalizado com sucesso! {len(manifest_catalogs)} catálogos registados.", flush=True)
 
 

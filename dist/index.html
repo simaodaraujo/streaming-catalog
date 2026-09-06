@@ -1,101 +1,527 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top Streaming Portugal — Stremio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #09090b;
-            color: #fafafa;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            -webkit-font-smoothing: antialiased;
-        }
-        .container { width: 100%; max-width: 400px; }
-        .header { margin-bottom: 24px; }
-        .meta-line { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .flag { width: 13px; height: 13px; border-radius: 50%; display: inline-block; overflow: hidden; flex-shrink: 0; }
-        .meta-text { font-size: 11px; font-weight: 500; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.04em; }
-        h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #ffffff; margin-bottom: 6px; }
-        p.desc { font-size: 13px; line-height: 1.5; color: #71717a; }
-        .platforms { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #18181b; }
-        .platform { font-size: 11px; color: #a1a1aa; background: #121215; border: 1px solid #27272a; border-radius: 5px; padding: 3px 8px; }
-        .actions { display: flex; flex-direction: column; gap: 8px; }
-        .btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; transition: opacity 0.15s ease, background 0.15s ease; font-family: inherit; }
-        .btn-primary { background: #ffffff; color: #09090b; border: 1px solid #ffffff; }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-secondary { background: transparent; color: #a1a1aa; border: 1px solid #27272a; }
-        .btn-secondary:hover { color: #fafafa; background: #141417; }
-        .footer-note { margin-top: 24px; font-size: 11px; color: #52525b; display: flex; align-items: center; justify-content: space-between; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 10 Streams PT - Stremio extension</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #1c1c1e;
+      color: #f5f5f7;
+      font-family: 'Inter', -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrapper {
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .main-logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 100%;
+      height: auto;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #a1a1aa;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      color: #d4d4d8;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+    .tag svg { height: 12px; width: auto; opacity: 0.9; fill: currentColor; }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+    }
+    .btn-stremio {
+      background-color: #7b5bf5;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+    .btn-stremio:hover { background-color: #6a4ce0; }
+    .btn-outline {
+      background-color: transparent;
+      color: #a1a1aa;
+      border: 1px solid #3f3f46;
+    }
+    .btn-outline:hover {
+      background-color: #27272a;
+      color: #f5f5f7;
+    }
+    .btn svg { width: 20px; height: 20px; }
+
+    /* SNEAK PEEK / MINI AD SECTION */
+    .sneak-peek-section {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .peek-header {
+      margin-bottom: 14px;
+    }
+    .peek-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c084fc;
+      background: rgba(192, 132, 252, 0.12);
+      border: 1px solid rgba(192, 132, 252, 0.25);
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+    .peek-heading {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .peek-desc {
+      font-size: 12px;
+      color: #71717a;
+    }
+    .peek-grid-container {
+      position: relative;
+      max-height: 420px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid #27272a;
+      background: #18181b;
+      padding: 12px;
+    }
+    .peek-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .peek-card {
+      position: relative;
+      background: #27272a;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      border: 1px solid #3f3f46;
+    }
+    .peek-poster-box {
+      position: relative;
+      aspect-ratio: 2/3;
+      width: 100%;
+      background: #202024;
+      overflow: hidden;
+    }
+    .peek-poster-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .peek-rank-chip {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(15, 17, 23, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+    }
+    .peek-card-info {
+      padding: 8px 6px;
+      background: #18181b;
+    }
+    .peek-card-platform {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }
+    .peek-card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f4f4f5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .peek-card-type {
+      font-size: 10px;
+      color: #71717a;
+    }
+    .peek-fade-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 250px;
+      background: linear-gradient(to bottom, rgba(24, 24, 27, 0) 0%, rgba(24, 24, 27, 0.75) 28%, rgba(24, 24, 27, 0.96) 65%, #18181b 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+      z-index: 10;
+    }
+    .peek-cta-card {
+      background: rgba(39, 39, 42, 0.94);
+      border: 1px solid #52525b;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 16px 14px;
+      width: 100%;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+    .peek-cta-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #4ade80;
+      margin-bottom: 4px;
+    }
+    .peek-cta-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .peek-cta-desc {
+      font-size: 11px;
+      color: #a1a1aa;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .btn-peek-action {
+      padding: 10px 14px;
+      font-size: 12px;
+      margin-bottom: 0;
+    }
+
+    .recommendations {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid #27272a;
+      text-align: left;
+    }
+    .rec-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #71717a;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .rec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rec-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #e4e4e7;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .rec-item:hover {
+      background-color: #323238;
+      border-color: #52525b;
+      color: #ffffff;
+    }
+    .rec-item span.badge {
+      font-size: 10px;
+      color: #a1a1aa;
+      background: #18181b;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .footer {
+      margin-top: 32px;
+      font-size: 12px;
+      color: #52525b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .schedule { color: #71717a; }
+    .version { color: #3f3f46; font-size: 11px; margin-top: 4px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="meta-line">
-                <span class="flag">
-                    <svg viewBox="0 0 600 400" width="100%" height="100%">
-                        <rect width="240" height="400" fill="#046A38"/>
-                        <rect x="240" width="360" height="400" fill="#DA291C"/>
-                        <circle cx="240" cy="200" r="80" fill="#FFC72C"/>
-                        <circle cx="240" cy="200" r="50" fill="#DA291C"/>
-                        <rect x="215" y="175" width="50" height="50" rx="6" fill="#FFFFFF"/>
-                    </svg>
-                </span>
-                <span class="meta-text">Portugal · Stremio</span>
-            </div>
-            <h1>Top Streaming</h1>
-            <p class="desc">Top 10 diário real dos filmes e séries mais vistos nos serviços de streaming em Portugal.</p>
-        </div>
+  <div class="wrapper">
+    <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
-        <div class="platforms">
-            <span class="platform">Netflix</span>
-            <span class="platform">Disney+</span>
-            <span class="platform">Prime</span>
-            <span class="platform">HBO</span>
-            <span class="platform">Apple TV+</span>
-            <span class="platform">SkyShowtime</span>
-        </div>
+    <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
 
-        <div class="actions">
-            <a id="install-btn" href="#" class="btn btn-primary">
-                Instalar no Stremio
-            </a>
-            <button id="copy-btn" class="btn btn-secondary" onclick="copyManifestUrl()">
-                Copiar manifesto
-            </button>
-        </div>
-
-        <div class="footer-note">
-            <span>v1.0.3</span>
-            <span>Atualização diária (09:30 UTC)</span>
-        </div>
+    <div class="tags">
+      <div class="tag">
+        <svg viewBox="0 0 24 24" style="color: #E50914;"><path d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
+        Netflix
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 24 24" style="color: #0063e5;">
+           <path d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
+           <path d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
+        </svg>
+        Disney+
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
+        Prime Video
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 24 24" style="color: #ffffff;">
+           <path d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
+        </svg>
+        HBO
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 384 512" style="color: #ffffff;"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+        Apple TV+
+      </div>
+      <div class="tag">
+        <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        SkyShowtime
+      </div>
     </div>
 
-    <script>
-        const manifestUrl = window.location.origin + window.location.pathname.replace(/\/?$/, '/') + 'manifest.json';
-        const stremioUrl = manifestUrl.replace(/^https?:\/\//, 'stremio://');
-        
-        document.getElementById('install-btn').href = stremioUrl;
+    <a id="install-btn" href="#" class="btn btn-stremio">
+      <svg viewBox="0 0 24 24" style="fill: currentColor;">
+        <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
+      </svg>
+      Instalar Addon
+    </a>
 
-        function copyManifestUrl() {
-            navigator.clipboard.writeText(manifestUrl);
-            const btn = document.getElementById('copy-btn');
-            const original = btn.textContent;
-            btn.textContent = 'Copiado';
-            setTimeout(() => {
-                btn.textContent = original;
-            }, 1800);
-        }
-    </script>
+    <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
+      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+      </svg>
+      Copiar manifest
+    </button>
+
+    <!-- Sneak Peek Section -->
+    <div class="sneak-peek-section">
+      <div class="peek-header">
+        <div class="peek-pill">EM ALTA HOJE</div>
+        <h2 class="peek-heading">O que está a liderar em Portugal</h2>
+        <p class="peek-desc">Espreita os títulos #1 do dia nas plataformas mais populares</p>
+      </div>
+
+      <div class="peek-grid-container">
+        <div class="peek-grid">
+                    <div class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/netflix_pt_movies_1.jpg" alt="Cara a Cara com El Chapo" loading="lazy" onerror="this.src='https://image.tmdb.org/t/p/w500/842yFtWhxgs26LFpVdbGUCWatuV.jpg'">
+              <span class="peek-rank-chip">#1</span>
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
+              <div class="peek-card-title" title="Cara a Cara com El Chapo">Cara a Cara com El Chapo</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </div>
+          <div class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/disney_pt_movies_1.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="lazy" onerror="this.src='https://image.tmdb.org/t/p/w500/8qBccgSj0Ru9Odm1Mjv82cxDr7l.jpg'">
+              <span class="peek-rank-chip">#1</span>
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
+              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </div>
+          <div class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="lazy" onerror="this.src='https://image.tmdb.org/t/p/w500/zPlBUyu9rWhVrdiRfSClwMkmQiT.jpg'">
+              <span class="peek-rank-chip">#1</span>
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
+              <div class="peek-card-title" title="The Runner">The Runner</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </div>
+          <div class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="lazy" onerror="this.src='https://image.tmdb.org/t/p/w500/xSnM4ahmz692msbMTBsfBWHvR3M.jpg'">
+              <span class="peek-rank-chip">#1</span>
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
+              <div class="peek-card-title" title="Os Condenados de Shawshank">Os Condenados de Shawshank</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </div>
+          <div class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/apple_pt_movies_1.jpg" alt="Mayday" loading="lazy" onerror="this.src='https://image.tmdb.org/t/p/w500/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg'">
+              <span class="peek-rank-chip">#1</span>
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
+              <div class="peek-card-title" title="Mayday">Mayday</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </div>
+          <div class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/skyshowtime_pt_movies_1.jpg" alt="Avatar Aang - O Último Airbender" loading="lazy" onerror="this.src='https://image.tmdb.org/t/p/w500/aS3WoFJ3w64QNKTl3GM6qSpjbTK.jpg'">
+              <span class="peek-rank-chip">#1</span>
+            </div>
+            <div class="peek-card-info">
+              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
+              <div class="peek-card-title" title="Avatar Aang - O Último Airbender">Avatar Aang - O Último Airbender</div>
+              <div class="peek-card-type">Filme</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="peek-fade-overlay">
+          <div class="peek-cta-card">
+            <div class="peek-cta-badge">⚡ TOP 10 COMPLETO</div>
+            <h3 class="peek-cta-title">Queres ver todos os rankings?</h3>
+            <p class="peek-cta-desc">Vê o Top 10 atualizado de cada plataforma diretamente na tua biblioteca do Stremio.</p>
+            <a href="#" class="btn btn-stremio btn-peek-action" onclick="openStremioLink(event)">
+              <svg viewBox="0 0 24 24" style="fill: currentColor; width: 18px; height: 18px;">
+                <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
+              </svg>
+              Instalar no Stremio
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="recommendations">
+      <div class="rec-title">Extensões que recomendo</div>
+      <div class="rec-list">
+        <a href="https://real-debrid.com/" target="_blank" rel="noopener" class="rec-item">
+          <span>Real-Debrid</span>
+          <span class="badge">Debrid</span>
+        </a>
+        <a href="https://subdl.strem.top/configure" target="_blank" rel="noopener" class="rec-item">
+          <span>SubDL Subtitles</span>
+          <span class="badge">Legendas</span>
+        </a>
+        <a href="https://opensubtitles-v3.strem.io/" target="_blank" rel="noopener" class="rec-item">
+          <span>OpenSubtitles v3</span>
+          <span class="badge">Legendas</span>
+        </a>
+        <a href="https://stremio-addons.net/addons/imdb-ratings" target="_blank" rel="noopener" class="rec-item">
+          <span>IMDb Ratings</span>
+          <span class="badge">Avaliações</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span id="time-ago" data-time="2026-09-06T02:00:55.642348Z">Atualizado recentemente</span>
+      <span class="schedule">Atualiza todos os dias às 09h30</span>
+      <span class="version">v1.0.8</span>
+    </div>
+  </div>
+
+  <script>
+    const manifestUrl = window.location.origin + window.location.pathname.replace(/\/?$/, '/') + 'manifest.json';
+    const stremioUrl = manifestUrl.replace(/^https?:\/\//, 'stremio://');
+
+    document.getElementById('install-btn').href = stremioUrl;
+
+    function openStremioLink(e) {
+      e.preventDefault();
+      window.location.href = stremioUrl;
+    }
+
+    function copyManifestUrl() {
+      navigator.clipboard.writeText(manifestUrl);
+      const btn = document.getElementById('copy-btn');
+      btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
+      setTimeout(() => {
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+          Copiar manifest
+        `;
+      }, 2000);
+    }
+
+    function updateTime() {
+      const el = document.getElementById('time-ago');
+      const updated = new Date(el.getAttribute('data-time'));
+      const diffMins = Math.floor((new Date() - updated) / 60000);
+      const diffHrs = Math.floor(diffMins / 60);
+
+      if (diffMins < 1) el.textContent = 'Atualizado agora mesmo';
+      else if (diffMins < 60) el.textContent = `Atualizado há ${diffMins} minuto${diffMins > 1 ? 's' : ''}`;
+      else if (diffHrs < 24) el.textContent = `Atualizado há ${diffHrs} hora${diffHrs > 1 ? 's' : ''}`;
+      else el.textContent = `Atualizado há ${Math.floor(diffHrs/24)} dia${Math.floor(diffHrs/24) > 1 ? 's' : ''}`;
+    }
+
+    updateTime();
+    setInterval(updateTime, 60000);
+  </script>
 </body>
 </html>
