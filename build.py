@@ -261,7 +261,6 @@ def get_netflix_official_top10(media_type):
                     for row in rows[:10]:
                         cols = row.find_all("td")
                         if cols:
-                            # O título está dentro da tag <button> ou precedido pelo ranking
                             btn = cols[0].find("button")
                             title_text = btn.get_text(strip=True) if btn else cols[0].get_text(strip=True)
                             title_text = re.sub(r'^\d+\.?\s*', '', title_text)
@@ -277,11 +276,6 @@ def get_netflix_official_top10(media_type):
 
     return []
 
-
-# ---------------------------------------------------------------------------
-# JUSTWATCH — rankings reais de streaming em Portugal
-# 100% gratuito, oficial para Portugal, sem necessidade de chaves pagas.
-# ---------------------------------------------------------------------------
 def get_justwatch_top10(package_code, media_type):
     """
     Recolhe o Top 10 real de Portugal para a plataforma indicada via JustWatch GraphQL.
@@ -367,7 +361,6 @@ def get_flixpatrol_top10(platform_slug, media_type):
         try:
           response = session.get(
             "https://api.scraperapi.com/",
-            # A ScraperAPI exige que o URL de destino seja o último parâmetro.
             params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
             headers=HEADERS,
             timeout=30,
@@ -475,10 +468,6 @@ def resolve_titles_to_items(titles, media_type):
         time.sleep(0.03)
     return items
 
-
-# ---------------------------------------------------------------------------
-# BADGES DE RANKING E HISTÓRICO DE VARIAÇÃO (+1, -1, =, NOVO)
-# ---------------------------------------------------------------------------
 def get_badge_font(size, bold=False):
     candidates = ['arialbd.ttf', 'arial.ttf', 'DejaVuSans-Bold.ttf', 'DejaVuSans.ttf', 'FreeSansBold.ttf'] if bold else ['arial.ttf', 'DejaVuSans.ttf', 'FreeSans.ttf']
     for c in candidates:
@@ -506,8 +495,6 @@ def draw_rank_badge(poster_bytes, rank, variation):
         if raw_img.mode != "RGB":
             raw_img = raw_img.convert("RGB")
 
-        # 1. Normalizar dimensões para o formato padrão Stremio 2:3 (600x900)
-        # ImageOps.fit corta/redimensiona proporcionalmente mantendo o centro
         TARGET_W, TARGET_H = 600, 900
         try:
             if ImageOps:
@@ -520,13 +507,11 @@ def draw_rank_badge(poster_bytes, rank, variation):
         overlay = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
 
-        # 2. Posição e dimensões exatas e fixas em todos os posters
         margin_x = 24
         margin_y = 24
         badge_h = 46
         radius = badge_h // 2  # 23px
 
-        # 3. Configura texto e paleta cromática conforme a variação
         if variation.startswith('+'):
             var_text = f"▲ +{variation[1:]}"
             accent_color = (74, 222, 128, 255)       # Verde vivo
@@ -1120,7 +1105,7 @@ def create_landing_page(featured_items=None):
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
-    <h3 class="tags-heading">Seleciona as plataformas que queres ver:</h3>
+    <h3 class="tags-heading">Clique nas plataformas que queres ver disponível no stremio(<bold>todas selecionadas por padrão<bold>):</h3>
 
     <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
       <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
@@ -1396,7 +1381,7 @@ def main():
                 "color": prov.get("color", "#7b5bf5"),
                 "title": item["name"],
                 "type": "Filme",
-                "poster": f"posters/{cat_id}_{rank}.jpg",
+                "poster": item.get("poster") or f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
 
@@ -1429,7 +1414,7 @@ def main():
                 "color": prov.get("color", "#7b5bf5"),
                 "title": item["name"],
                 "type": "Série",
-                "poster": f"posters/{cat_id}_{rank}.jpg",
+                "poster": item.get("poster") or f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
 
