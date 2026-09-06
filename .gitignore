@@ -3,11 +3,6 @@ venv/
 .venv/
 env/
 
-# Ficheiros e scripts de build de teste local
-build_top10.py
-test_build.py
-build_*.py
-
 # Cache e ficheiros temporários
 __pycache__/
 *.py[cod]

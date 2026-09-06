@@ -4,11 +4,9 @@ Teste/validador do build do Top 10 Streams PT.
 
 Uso:
     python test_flix.py
-    ou
-    python test_build.py
 
 O script:
-1. valida a sintaxe do build (build_top10.py);
+1. valida a sintaxe do build (build.py);
 2. testa a lógica das datas da Netflix sem fazer pedidos à rede;
 3. executa o build real (se TMDB_API_KEY estiver definida);
 4. valida manifest.json, catálogos e referências aos ficheiros;
