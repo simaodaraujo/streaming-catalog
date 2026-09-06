@@ -642,8 +642,8 @@ def save_history(history):
 
 def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streaming"):
     """
-    Calcula variações de ranking, desenha badges nos posters, guarda em dist/posters,
-    e enriquece os metadados (tags de género e sinopse) com informação de ranking e subida/queda.
+    Calcula variações de ranking, desenha badges nos posters e guarda em dist/posters.
+    Mantém os metadados (géneros, sinopse, rating) originais e limpos para o Cinemeta/Stremio.
     """
     os.makedirs("dist/posters", exist_ok=True)
     new_cat_history = {}
@@ -656,54 +656,21 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
 
         if old_rank is None:
             variation = "NOVO"
-            trend_text = "Estreia no Top 10"
-            trend_tag = "⭐ Estreia"
         else:
             diff = old_rank - rank
             if diff > 0:
                 variation = f"+{diff}"
-                trend_text = f"Subiu {diff} {'posição' if diff == 1 else 'posições'} (Ontem: #{old_rank})"
-                trend_tag = f"▲ +{diff}"
             elif diff < 0:
                 variation = f"{diff}"
-                abs_diff = abs(diff)
-                trend_text = f"Caiu {abs_diff} {'posição' if abs_diff == 1 else 'posições'} (Ontem: #{old_rank})"
-                trend_tag = f"▼ {abs_diff}"
             else:
                 variation = "="
-                trend_text = f"Manteve a posição (Ontem: #{old_rank})"
-                trend_tag = "● Manteve"
 
         if item_id:
             new_cat_history[item_id] = rank
 
-        # Guarda dados de ranking estruturados para criação dos endpoints /meta
-        item_copy["_ranking_info"] = {
-            "provider": provider_name,
-            "rank": rank,
-            "variation": variation,
-            "trend_text": trend_text,
-            "trend_tag": trend_tag,
-            "cat_id": cat_id,
-        }
-
-        # Enriquecer tags / géneros no Stremio com badges destacados
-        rank_tag = f"🏆 #{rank} {provider_name} PT"
-        existing_genres = item_copy.get("genres") or []
-        extra_tags = [rank_tag, trend_tag]
-        # Coloca as nossas tags primeiro para serem exibidas em grande destaque
-        item_copy["genres"] = [t for t in extra_tags if t not in existing_genres] + [g for g in existing_genres if g not in extra_tags]
-
-        # Enriquecer a descrição / sinopse exibida ao clicar no filme
-        info_header = (
-            f"🏆 #{rank} no TOP 10 Portugal ({provider_name})\n"
-            f"📊 {trend_text}\n"
-            f"──────────────────────────────\n"
-        )
-        overview = (item_copy.get("overview") or item_copy.get("description") or "").strip()
-        if "──────────────────────────────" in overview:
-            overview = overview.split("──────────────────────────────", 1)[1].strip()
-        item_copy["description"] = f"{info_header}\n{overview}" if overview else info_header.strip()
+        # Mantém a descrição original limpa se existir overview
+        if "overview" in item_copy and not item_copy.get("description"):
+            item_copy["description"] = item_copy["overview"]
 
         original_poster = item_copy.get("poster")
         if original_poster and Image and session:
@@ -1271,11 +1238,9 @@ def main():
 
     os.makedirs("dist/catalog/movie", exist_ok=True)
     os.makedirs("dist/catalog/series", exist_ok=True)
-    os.makedirs("dist/meta/movie", exist_ok=True)
-    os.makedirs("dist/meta/series", exist_ok=True)
     os.makedirs("dist/posters", exist_ok=True)
 
-    # Gerar vercel.json com CORS headers para o Stremio conseguir ler os catálogos e metas
+    # Gerar vercel.json com CORS headers para o Stremio conseguir ler os catálogos
     vercel_config = {
         "headers": [
             {
@@ -1298,7 +1263,6 @@ def main():
     new_history = {}
     manifest_catalogs = []
     featured_items = []
-    all_meta_entries = {}
 
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
@@ -1335,7 +1299,6 @@ def main():
                 "poster": f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
-              all_meta_entries.setdefault(("movie", item["id"]), []).append(item)
 
             clean_movie_items = []
             for it in movie_items:
@@ -1369,7 +1332,6 @@ def main():
                 "poster": f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
-              all_meta_entries.setdefault(("series", item["id"]), []).append(item)
 
             clean_series_items = []
             for it in series_items:
@@ -1384,81 +1346,20 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
-    # Gerar endpoints de metadados /meta/movie/{id}.json e /meta/series/{id}.json
-    # Isso garante que ao clicar num filme ou série no Stremio, a descrição,
-    # rankings, badges e tags da extensão apareçam em grande destaque.
-    for (m_type, item_id), appearances in all_meta_entries.items():
-        base = appearances[0]
-        header_lines = []
-        extra_tags = []
-        for app in appearances:
-            r_info = app.get("_ranking_info", {})
-            provider = r_info.get("provider", "Streaming")
-            rank = r_info.get("rank", 1)
-            trend_text = r_info.get("trend_text", "")
-            trend_tag = r_info.get("trend_tag", "")
-            header_lines.append(f"🏆 #{rank} no TOP 10 Portugal ({provider})")
-            if trend_text:
-                header_lines.append(f"📊 {trend_text}")
-            extra_tags.append(f"🏆 #{rank} {provider} PT")
-            if trend_tag:
-                extra_tags.append(trend_tag)
-
-        header_lines.append("──────────────────────────────")
-        overview = (base.get("overview") or base.get("description") or "").strip()
-        if "──────────────────────────────" in overview:
-            overview = overview.split("──────────────────────────────", 1)[1].strip()
-
-        combined_desc = "\n".join(header_lines) + (f"\n{overview}" if overview else "")
-
-        all_genres = []
-        for t in extra_tags:
-            if t not in all_genres:
-                all_genres.append(t)
-        for g in base.get("genres", []):
-            if g not in all_genres and not any(g.startswith(pfx) for pfx in ("🏆", "▲", "▼", "⭐", "●")):
-                all_genres.append(g)
-
-        meta_payload = {
-            "id": item_id,
-            "type": m_type,
-            "name": base.get("name"),
-            "genres": all_genres,
-            "poster": base.get("poster"),
-            "background": base.get("background"),
-            "description": combined_desc,
-            "releaseInfo": base.get("releaseInfo"),
-            "imdbRating": base.get("imdbRating"),
-            "behaviorHints": {
-                "defaultVideoId": item_id
-            }
-        }
-        meta_payload = {k: v for k, v in meta_payload.items() if v is not None}
-
-        meta_file_path = f"dist/meta/{m_type}/{item_id}.json"
-        with open(meta_file_path, "w", encoding="utf-8") as f:
-            json.dump({"meta": meta_payload}, f, ensure_ascii=False, indent=2)
-
-    print(f"[i] Gerados {len(all_meta_entries)} ficheiros de metadados (/meta).", flush=True)
-
     save_history(new_history)
 
     manifest = {
         "id": "org.portugal.streaming.top",
-        "version": "1.0.9",
+        "version": "1.1.0",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": "logo.png",
         "resources": [
-            "catalog",
-            "meta"
+            "catalog"
         ],
         "types": [
             "movie",
             "series"
-        ],
-        "idPrefixes": [
-            "tt"
         ],
         "catalogs": manifest_catalogs
     }
