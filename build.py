@@ -1344,7 +1344,7 @@ def main():
     save_history(new_history)
 
     manifest = {
-        "id": "org.portugal.streaming.top",
+        "id": "pt.top-streaming",
         "version": "1.1.0",
         "name": "TOP 10 Portugal (Filmes & Séries)",
         "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
