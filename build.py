@@ -5,12 +5,10 @@ import re
 import shutil
 import requests
 from datetime import datetime
-from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY")
-SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY")
 
 if not TMDB_API_KEY:
     raise ValueError("TMDB_API_KEY não foi encontrada nas variáveis de ambiente.")
@@ -22,19 +20,13 @@ session.mount("https://", adapter)
 session.mount("http://", adapter)
 
 PROVIDERS = [
-    {"id": "netflix", "name": "Netflix", "flix_slug": "netflix", "tmdb_id": 8},
-    {"id": "disney", "name": "Disney+", "flix_slug": "disney", "tmdb_id": 337},
-    {"id": "prime", "name": "Prime Video", "flix_slug": "amazon-prime", "tmdb_id": 119},
-    {"id": "hbo", "name": "HBO", "flix_slug": "hbo", "tmdb_id": 1899},
-    {"id": "apple", "name": "Apple TV+", "flix_slug": "apple-tv", "tmdb_id": 350},
-    {"id": "skyshowtime", "name": "SkyShowtime", "flix_slug": "skyshowtime", "tmdb_id": 1773}
+    {"id": "netflix", "name": "Netflix", "tmdb_id": 8},
+    {"id": "disney", "name": "Disney+", "tmdb_id": 337},
+    {"id": "prime", "name": "Prime Video", "tmdb_id": 119},
+    {"id": "hbo", "name": "HBO", "tmdb_id": 1899},
+    {"id": "apple", "name": "Apple TV+", "tmdb_id": 350},
+    {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773}
 ]
-
-def clean_title(title):
-    cleaned = re.sub(r'(?i)\b(season|temporada|series)\s+\d+\b', '', title)
-    cleaned = re.sub(r'[\(\[].*?[\)\]]', '', cleaned)
-    cleaned = re.sub(r'\s*[-:–—|]\s*$', '', cleaned)
-    return cleaned.strip(' :-–—|')
 
 def get_imdb_id(tmdb_id, media_type):
     url = f"https://api.themoviedb.org/3/{media_type}/{tmdb_id}/external_ids"
@@ -46,48 +38,7 @@ def get_imdb_id(tmdb_id, media_type):
         pass
     return None
 
-def search_tmdb_title(title, media_type):
-    search_type = "movie" if media_type == "movie" else "tv"
-    query = clean_title(title)
-    
-    url = f"https://api.themoviedb.org/3/search/{search_type}"
-    params = {"api_key": TMDB_API_KEY, "query": query, "language": "pt-PT", "page": 1}
-    
-    try:
-        res = session.get(url, params=params, timeout=7)
-        results = res.json().get("results", []) if res.status_code == 200 else []
-        
-        if not results:
-            params.pop("language", None)
-            res = session.get(url, params=params, timeout=7)
-            results = res.json().get("results", []) if res.status_code == 200 else []
-
-        if not results and search_type == "tv":
-            multi_url = "https://api.themoviedb.org/3/search/multi"
-            res = session.get(multi_url, params={"api_key": TMDB_API_KEY, "query": query, "page": 1}, timeout=7)
-            multi_res = res.json().get("results", []) if res.status_code == 200 else []
-            results = [r for r in multi_res if r.get("media_type") in ["tv", "movie"]]
-
-        if results:
-            best = results[0]
-            actual_type = best.get("media_type", search_type)
-            tmdb_id = best["id"]
-            imdb_id = get_imdb_id(tmdb_id, actual_type)
-            
-            if imdb_id:
-                name = best.get("name") if actual_type == "tv" else best.get("title")
-                return {
-                    "id": imdb_id,
-                    "type": "series" if actual_type == "tv" else "movie",
-                    "name": name or title,
-                    "poster": f"https://image.tmdb.org/t/p/w500{best.get('poster_path')}" if best.get("poster_path") else None
-                }
-    except Exception as e:
-        print(f"  [!] Erro TMDB ao procurar '{title}': {e}", flush=True)
-        
-    return None
-
-def get_tmdb_fallback(tmdb_provider_id, media_type):
+def get_tmdb_popular_provider(tmdb_provider_id, media_type):
     search_type = "movie" if media_type == "movie" else "tv"
     url = f"https://api.themoviedb.org/3/discover/{search_type}"
     params = {
@@ -101,7 +52,7 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
     }
     items = []
     try:
-        res = session.get(url, params=params, timeout=6)
+        res = session.get(url, params=params, timeout=7)
         if res.status_code == 200:
             results = res.json().get("results", [])
             for item in results[:10]:
@@ -117,60 +68,8 @@ def get_tmdb_fallback(tmdb_provider_id, media_type):
                         "poster": f"https://image.tmdb.org/t/p/w500{item.get('poster_path')}" if item.get("poster_path") else None
                     })
     except Exception as e:
-        print(f"  [!] Erro Fallback TMDB: {e}", flush=True)
+        print(f"  [!] Erro ao obter Top Popular TMDB: {e}", flush=True)
     return items
-
-from curl_cffi import requests as cffi_requests
-from bs4 import BeautifulSoup
-
-def scrape_flixpatrol(flix_slug):
-    movies, series = [], []
-    target_url = f"https://flixpatrol.com/top10/{flix_slug}/portugal/today/"
-    
-    print(f"  -> A extrair FlixPatrol diretamente para {flix_slug}...", flush=True)
-    try:
-        # impersonate="chrome124" emula a handshake TLS de um browser real
-        res = cffi_requests.get(
-            target_url,
-            impersonate="chrome124",
-            headers={
-                "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Referer": "https://flixpatrol.com/"
-            },
-            timeout=15
-        )
-        
-        if res.status_code != 200:
-            print(f"  [!] FlixPatrol devolveu HTTP {res.status_code}", flush=True)
-            return movies, series
-
-        soup = BeautifulSoup(res.text, "html.parser")
-        tables = soup.find_all("table")
-
-        for idx, table in enumerate(tables):
-            extracted = []
-            for row in table.select("tbody tr") or table.select("tr"):
-                if len(extracted) >= 10:
-                    break
-                for a in row.find_all("a"):
-                    href = a.get("href", "")
-                    text = a.get_text(strip=True)
-                    if "/title/" in href and text and not text.isdigit():
-                        if text not in extracted:
-                            extracted.append(text)
-                        break
-
-            if idx == 0 and not movies:
-                movies = extracted
-            elif idx == 1 and not series:
-                series = extracted
-
-        print(f"  -> FlixPatrol: {len(movies)} filmes e {len(series)} séries encontrados.", flush=True)
-
-    except Exception as e:
-        print(f"  [!] Erro ao extrair FlixPatrol: {e}", flush=True)
-
-    return movies, series
 
 def create_landing_page():
     now_iso = datetime.utcnow().isoformat() + "Z"
@@ -464,19 +363,8 @@ def main():
 
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
-        movie_titles, series_titles = scrape_flixpatrol(prov["flix_slug"])
 
-        movie_items = []
-        for title in movie_titles:
-            item = search_tmdb_title(title, "movie")
-            if item and not any(m["id"] == item["id"] for m in movie_items):
-                movie_items.append(item)
-            time.sleep(0.03)
-
-        if not movie_items:
-            print(f"  [i] Erro crasso na fonte. A usar fallback TMDB (Filmes)...", flush=True)
-            movie_items = get_tmdb_fallback(prov["tmdb_id"], "movie")
-
+        movie_items = get_tmdb_popular_provider(prov["tmdb_id"], "movie")
         print(f"  -> Filmes guardados: {len(movie_items)}/10", flush=True)
         if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
@@ -489,17 +377,7 @@ def main():
                 "extra": [{"name": "skip", "isRequired": False}]
             })
 
-        series_items = []
-        for title in series_titles:
-            item = search_tmdb_title(title, "series")
-            if item and not any(s["id"] == item["id"] for s in series_items):
-                series_items.append(item)
-            time.sleep(0.03)
-
-        if not series_items:
-            print(f"  [i] Erro crasso na fonte. A usar fallback TMDB (Séries)...", flush=True)
-            series_items = get_tmdb_fallback(prov["tmdb_id"], "series")
-
+        series_items = get_tmdb_popular_provider(prov["tmdb_id"], "series")
         print(f"  -> Séries guardadas: {len(series_items)}/10", flush=True)
         if series_items:
             cat_id = f"{prov['id']}_pt_series"
