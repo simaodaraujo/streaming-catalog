@@ -744,20 +744,26 @@ def create_landing_page(featured_items=None):
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
-      background-color: #1c1c1e;
-      color: #f5f5f7;
-      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #09090b;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 58, 237, 0.12), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(59, 130, 246, 0.04), transparent 70%);
+      background-attachment: fixed;
+      color: #f4f4f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 24px;
+      padding: 32px 20px;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }}
     .wrapper {{
-      max-width: 900px;
+      max-width: 860px;
       width: 100%;
       text-align: center;
+      margin: 0 auto;
     }}
     .main-logo {{
       display: block;
@@ -772,8 +778,10 @@ def create_landing_page(featured_items=None):
     p.subtitle {{
       font-size: 14px;
       color: #a1a1aa;
-      margin-bottom: 16px;
-      line-height: 1.5;
+      max-width: 480px;
+      margin: 0 auto 18px auto;
+      line-height: 1.6;
+      font-weight: 400;
     }}
     .features-row {{
       display: flex;
@@ -786,51 +794,55 @@ def create_landing_page(featured_items=None):
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #27272a;
-      border: 1px solid #3f3f46;
-      color: #a1a1aa;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      color: #d4d4d8;
       font-size: 12px;
       font-weight: 500;
       padding: 5px 12px;
-      border-radius: 999px;
+      border-radius: 9999px;
     }}
     .feature-pill svg {{
       width: 13px;
       height: 13px;
-      opacity: 0.7;
+      color: #a1a1aa;
       flex-shrink: 0;
     }}
     .platform-customizer {{
       width: 100%;
-      max-width: 480px;
-      margin: 0 auto 20px auto;
+      max-width: 460px;
+      margin: 0 auto 16px auto;
     }}
     .customizer-btn {{
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      background-color: #27272a;
-      border: 1px solid #3f3f46;
+      background: rgba(24, 24, 27, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
       color: #e4e4e7;
-      padding: 10px 14px;
-      border-radius: 10px;
+      padding: 11px 16px;
+      border-radius: 12px;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       user-select: none;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       outline: none;
     }}
     .customizer-btn:hover {{
-      background-color: #323238;
-      border-color: #52525b;
+      background: rgba(39, 39, 42, 0.85);
+      border-color: rgba(255, 255, 255, 0.15);
       color: #ffffff;
     }}
     .customizer-btn.open {{
-      border-color: #71717a;
-      background-color: #2e2e33;
+      border-color: rgba(255, 255, 255, 0.18);
+      background: rgba(39, 39, 42, 0.95);
     }}
     .customizer-btn-left {{
       display: flex;
@@ -850,17 +862,17 @@ def create_landing_page(featured_items=None):
     .customizer-counter {{
       font-size: 11px;
       font-weight: 600;
-      background: #18181b;
-      border: 1px solid #3f3f46;
-      color: #4ade80;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #34d399;
       padding: 2px 8px;
       border-radius: 9999px;
-      transition: color 0.2s ease;
+      transition: all 0.2s ease;
     }}
     .customizer-chevron {{
       width: 15px;
       height: 15px;
-      color: #a1a1aa;
+      color: #71717a;
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }}
     .customizer-btn.open .customizer-chevron {{
@@ -874,15 +886,25 @@ def create_landing_page(featured_items=None):
       margin-top: 0;
     }}
     .customizer-drawer.open {{
-      max-height: 300px;
+      max-height: 350px;
       opacity: 1;
-      margin-top: 12px;
+      margin-top: 10px;
+    }}
+    .customizer-panel {{
+      background: rgba(18, 18, 22, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      padding: 14px;
     }}
     .customizer-hint {{
       font-size: 11px;
       color: #71717a;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       text-align: center;
+      font-weight: 400;
     }}
 
     .tags {{
@@ -890,38 +912,41 @@ def create_landing_page(featured_items=None):
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 8px;
     }}
     .tag {{
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: #1f1f23;
-      border: 1px solid #3f3f46;
-      color: #d4d4d8;
-      font-size: 11px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      color: #e4e4e7;
+      font-size: 12px;
       font-weight: 500;
-      padding: 7px 12px;
+      padding: 6px 12px;
       border-radius: 8px;
       cursor: pointer;
       user-select: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       outline: none;
     }}
-    .tag svg {{ height: 12px; width: auto; opacity: 0.9; fill: currentColor; }}
+    .tag svg {{ height: 13px; width: auto; opacity: 0.95; fill: currentColor; }}
     .tag:hover {{
-      background-color: #27272a;
-      border-color: #52525b;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
       color: #ffffff;
+      transform: translateY(-1px);
     }}
     .tag.inactive {{
       opacity: 0.35;
-      background-color: #18181b;
-      border-color: #27272a;
+      background: transparent;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      box-shadow: none;
       color: #71717a;
       filter: grayscale(100%);
       text-decoration: line-through;
+      transform: none;
     }}
 
     .btn {{
@@ -930,91 +955,95 @@ def create_landing_page(featured_items=None):
       justify-content: center;
       gap: 8px;
       width: 100%;
-      max-width: 480px;
+      max-width: 460px;
       margin-left: auto;
       margin-right: auto;
-      padding: 14px;
-      border-radius: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
       font-size: 14px;
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       border: none;
+      letter-spacing: -0.01em;
+      font-family: inherit;
     }}
     .btn.disabled {{
-      opacity: 0.4;
+      opacity: 0.35;
       pointer-events: none;
       cursor: not-allowed;
     }}
     .btn-stremio {{
-      background-color: #7b5bf5;
+      background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
       color: #ffffff;
-      margin-bottom: 12px;
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      margin-bottom: 10px;
     }}
-    .btn-stremio:hover {{ background-color: #6a4ce0; }}
+    .btn-stremio:hover {{
+      background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+      box-shadow: 0 6px 20px rgba(109, 40, 217, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transform: translateY(-1px);
+    }}
+    .btn-stremio:active {{
+      transform: translateY(0);
+    }}
     .btn-outline {{
-      background-color: transparent;
-      color: #a1a1aa;
-      border: 1px solid #3f3f46;
+      background: rgba(24, 24, 27, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #e4e4e7;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     }}
     .btn-outline:hover {{
-      background-color: #27272a;
-      color: #f5f5f7;
+      background: rgba(39, 39, 42, 0.85);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      transform: translateY(-1px);
     }}
-    .btn svg {{ width: 20px; height: 20px; }}
+    .btn-outline:active {{
+      transform: translateY(0);
+    }}
+    .btn svg {{ width: 18px; height: 18px; flex-shrink: 0; }}
 
-    /* SNEAK PEEK / MINI AD SECTION */
+    /* SNEAK PEEK / GALLERY SECTION */
     .sneak-peek-section {{
-      margin-top: 32px;
+      margin-top: 36px;
       text-align: center;
     }}
     .peek-header {{
-      margin-bottom: 14px;
-    }}
-    .peek-pill {{
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #c084fc;
-      background: rgba(192, 132, 252, 0.12);
-      border: 1px solid rgba(192, 132, 252, 0.25);
-      padding: 3px 10px;
-      border-radius: 999px;
-      margin-bottom: 6px;
+      margin-bottom: 16px;
     }}
     .peek-heading {{
-      font-size: 16px;
-      font-weight: 700;
-      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      color: #f4f4f5;
       margin-bottom: 4px;
+      letter-spacing: -0.01em;
     }}
     .peek-desc {{
       font-size: 12px;
       color: #71717a;
     }}
-    .peek-grid-container {{
-      display: none;
-    }}
     .peek-marquee {{
       position: relative;
       overflow: hidden;
       padding: 10px 0 14px;
-      margin: 0 -12px;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-      mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+      margin: 0 -16px;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+      mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
     }}
     .peek-gallery-drift {{
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }}
     .peek-track {{
       display: flex;
       width: max-content;
-      gap: 8px;
+      gap: 10px;
       animation: gallery-drift 140s linear infinite;
       will-change: transform;
     }}
@@ -1022,13 +1051,13 @@ def create_landing_page(featured_items=None):
     .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
     @keyframes gallery-drift {{
       from {{ transform: translateX(0); }}
-      to {{ transform: translateX(calc(-50% - 4px)); }}
+      to {{ transform: translateX(calc(-50% - 5px)); }}
     }}
     .peek-card {{
       position: relative;
       width: auto;
       background: transparent;
-      border-radius: 5px;
+      border-radius: 8px;
       overflow: hidden;
       text-align: left;
     }}
@@ -1039,8 +1068,16 @@ def create_landing_page(featured_items=None):
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #15151a;
+      background: #121215;
+      border-radius: 8px;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+    }}
+    .peek-card:hover .peek-poster-box {{
+      transform: scale(1.03);
+      border-color: rgba(255, 255, 255, 0.2);
     }}
     .peek-poster-box img {{
       width: 100%;
@@ -1049,76 +1086,21 @@ def create_landing_page(featured_items=None):
       object-position: center;
       display: block;
     }}
-    .peek-card-info {{
-      display: none;
-    }}
-    .peek-card-platform {{
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 2px;
-    }}
-    .peek-card-title {{
-      font-size: 11px;
-      font-weight: 600;
-      color: #f4f4f5;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }}
-    .peek-card-type {{
-      font-size: 10px;
-      color: #71717a;
-    }}
-    .peek-cta-card {{
-      background: rgba(39, 39, 42, 0.94);
-      border: 1px solid #52525b;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 12px;
-      padding: 16px 14px;
-      width: 100%;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-      text-align: center;
-      margin-top: 8px;
-    }}
-    .peek-cta-badge {{
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      color: #4ade80;
-      margin-bottom: 4px;
-    }}
-    .peek-cta-title {{
-      font-size: 13px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }}
-    .peek-cta-desc {{
-      font-size: 11px;
-      color: #a1a1aa;
-      line-height: 1.4;
-      margin-bottom: 12px;
-    }}
-    .btn-peek-action {{
-      padding: 10px 14px;
-      font-size: 12px;
-      margin-bottom: 0;
-    }}
 
     .recommendations {{
-      margin-top: 36px;
+      margin-top: 40px;
       padding-top: 24px;
-      border-top: 1px solid #27272a;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
       text-align: left;
+      max-width: 460px;
+      margin-left: auto;
+      margin-right: auto;
     }}
     .rec-title {{
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       color: #71717a;
       margin-bottom: 12px;
       text-align: center;
@@ -1132,26 +1114,32 @@ def create_landing_page(featured_items=None):
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: #27272a;
-      border: 1px solid #3f3f46;
-      padding: 8px 12px;
-      border-radius: 8px;
+      background: rgba(24, 24, 27, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      padding: 9px 14px;
+      border-radius: 10px;
       font-size: 12px;
       color: #e4e4e7;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }}
     .rec-item:hover {{
-      background-color: #323238;
-      border-color: #52525b;
+      background: rgba(39, 39, 42, 0.8);
+      border-color: rgba(255, 255, 255, 0.15);
       color: #ffffff;
+      transform: translateY(-1px);
     }}
     .rec-item span.badge {{
       font-size: 10px;
+      font-weight: 500;
       color: #a1a1aa;
-      background: #18181b;
-      padding: 2px 6px;
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 6px;
     }}
     .referral-note {{
       display: block;
@@ -1162,19 +1150,19 @@ def create_landing_page(featured_items=None):
     }}
 
     .footer {{
-      margin-top: 32px;
+      margin-top: 36px;
       font-size: 12px;
-      color: #52525b;
+      color: #71717a;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }}
-    .schedule {{ color: #71717a; }}
-    .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
+    .schedule {{ color: #52525b; font-size: 11px; }}
+    .version {{ color: #3f3f46; font-size: 11px; margin-top: 2px; }}
     @media (max-width: 520px) {{
       .peek-marquee {{
-        margin: 0 -8px;
+        margin: 0 -10px;
         padding-top: 6px;
       }}
       .peek-poster-box {{
@@ -1216,8 +1204,9 @@ def create_landing_page(featured_items=None):
       </button>
 
       <div class="customizer-drawer" id="customizer-drawer">
-        <p class="customizer-hint">Clica numa plataforma para incluir ou retirar do teu addon:</p>
-        <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
+        <div class="customizer-panel">
+          <p class="customizer-hint">Clica numa plataforma para incluir ou retirar do teu addon:</p>
+          <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
           <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
             <svg viewBox="0 0 24 24" style="color: #E50914;"><path fill="currentColor" d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
             Netflix
@@ -1252,6 +1241,7 @@ def create_landing_page(featured_items=None):
             <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
             SkyShowtime
           </button>
+        </div>
         </div>
       </div>
     </div>
@@ -1346,11 +1336,17 @@ def create_landing_page(featured_items=None):
       if (counter) {{
         counter.textContent = `${{selected.length}} de ${{ALL_PROVIDERS.length}} ativas`;
         if (selected.length === ALL_PROVIDERS.length) {{
-          counter.style.color = '#4ade80';
+          counter.style.color = '#34d399';
+          counter.style.background = 'rgba(16, 185, 129, 0.1)';
+          counter.style.borderColor = 'rgba(16, 185, 129, 0.25)';
         }} else if (selected.length > 0) {{
-          counter.style.color = '#facc15';
+          counter.style.color = '#fbbf24';
+          counter.style.background = 'rgba(245, 158, 11, 0.1)';
+          counter.style.borderColor = 'rgba(245, 158, 11, 0.25)';
         }} else {{
           counter.style.color = '#f87171';
+          counter.style.background = 'rgba(239, 68, 68, 0.1)';
+          counter.style.borderColor = 'rgba(239, 68, 68, 0.25)';
         }}
       }}
 
@@ -1379,10 +1375,10 @@ def create_landing_page(featured_items=None):
       if (!currentManifestUrl) return;
       navigator.clipboard.writeText(currentManifestUrl);
       const btn = document.getElementById('copy-btn');
-      btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
+      btn.innerHTML = '<span style="color:#34d399; display:inline-flex; align-items:center; gap:6px;">✔ Link Copiado!</span>';
       setTimeout(() => {{
         btn.innerHTML = `
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
           </svg>
