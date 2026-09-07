@@ -1324,11 +1324,23 @@ def main():
 
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": clean_movie_items}, f, ensure_ascii=False)
+
+            # Gerar catálogos filtrados por género
+            movie_genres = sorted({g for item in clean_movie_items for g in item.get("genres", [])})
+            if movie_genres:
+                os.makedirs(f"dist/catalog/movie/{cat_id}", exist_ok=True)
+                for genre in movie_genres:
+                    genre_items = [item for item in clean_movie_items if genre in item.get("genres", [])]
+                    if genre_items:
+                        with open(f"dist/catalog/movie/{cat_id}/genre={genre}.json", "w", encoding="utf-8") as f:
+                            json.dump({"metas": genre_items}, f, ensure_ascii=False)
+
+            genre_extra = [{"name": "genre", "isRequired": False, "options": movie_genres}] if movie_genres else []
             manifest_catalogs.append({
                 "type": "movie",
                 "id": cat_id,
                 "name": f"{prov['name']} Top 10",
-                "extra": [{"name": "skip", "isRequired": False}]
+                "extra": genre_extra + [{"name": "skip", "isRequired": False}]
             })
 
         series_items = resolve_titles_to_items(series_titles, "series")
@@ -1356,11 +1368,23 @@ def main():
 
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": clean_series_items}, f, ensure_ascii=False)
+
+            # Gerar catálogos filtrados por género
+            series_genres = sorted({g for item in clean_series_items for g in item.get("genres", [])})
+            if series_genres:
+                os.makedirs(f"dist/catalog/series/{cat_id}", exist_ok=True)
+                for genre in series_genres:
+                    genre_items = [item for item in clean_series_items if genre in item.get("genres", [])]
+                    if genre_items:
+                        with open(f"dist/catalog/series/{cat_id}/genre={genre}.json", "w", encoding="utf-8") as f:
+                            json.dump({"metas": genre_items}, f, ensure_ascii=False)
+
+            genre_extra = [{"name": "genre", "isRequired": False, "options": series_genres}] if series_genres else []
             manifest_catalogs.append({
                 "type": "series",
                 "id": cat_id,
                 "name": f"{prov['name']} Top 10",
-                "extra": [{"name": "skip", "isRequired": False}]
+                "extra": genre_extra + [{"name": "skip", "isRequired": False}]
             })
 
     # 1. Manifest Padrão (todas as plataformas)
