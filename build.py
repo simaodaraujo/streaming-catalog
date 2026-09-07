@@ -1188,7 +1188,7 @@ def create_landing_page(featured_items=None):
   <div class="wrapper">
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
-    <p class="subtitle">Extensão para o Stremio com o TOP 10 real de Portugal — atualizado diariamente.</p>
+    <p class="subtitle">Extensão para o Stremio com o TOP 10 do momento nas principais plataformas de streaming em Portugal.</p>
     <div class="features-row">
       <div class="feature-pill">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 4a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h8a1 1 0 010 2H3a1 1 0 01-1-1z"/></svg>
@@ -1596,7 +1596,7 @@ def main():
         "id": "pt.top-streaming",
         "version": "1.1.0",
         "name": "TOP 10 Portugal (Filmes & Séries)",
-        "description": "Top 10 real da Netflix, Disney+, Prime, HBO, Apple TV+ e SkyShowtime em Portugal",
+        "description": "TOP 10 do momento na Netflix, Disney+, Prime Video, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": f"{BASE_URL}/logo.png",
         "resources": [
             "catalog"
@@ -1637,7 +1637,7 @@ def main():
                 "id": f"pt.top-streaming.{combo_key.replace(',', '.')}",
                 "version": "1.1.0",
                 "name": "TOP 10 Portugal",
-                "description": f"Top 10 real ({names_str}) em Portugal",
+                "description": f"TOP 10 do momento ({names_str}) em Portugal",
                 "logo": f"{BASE_URL}/logo.png",
                 "resources": [
                     "catalog"
