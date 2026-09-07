@@ -12,7 +12,7 @@
     body {
       background-color: #1c1c1e;
       color: #f5f5f7;
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -24,6 +24,7 @@
       max-width: 900px;
       width: 100%;
       text-align: center;
+      margin: 0 auto;
     }
     .main-logo {
       display: block;
@@ -38,15 +39,129 @@
     p.subtitle {
       font-size: 14px;
       color: #a1a1aa;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       line-height: 1.5;
     }
-    .tags-heading {
+    .features-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .feature-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 9999px;
+    }
+    .feature-pill svg {
+      width: 13px;
+      height: 13px;
+      opacity: 0.8;
+      flex-shrink: 0;
+    }
+    .platform-customizer {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 20px auto;
+    }
+    .customizer-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      color: #e4e4e7;
+      padding: 11px 15px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+      outline: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    .customizer-btn:hover {
+      background-color: #323238;
+      border-color: #52525b;
+      color: #ffffff;
+    }
+    .customizer-btn:active {
+      transform: scale(0.99);
+    }
+    .customizer-btn.open {
+      border-color: #52525b;
+      background-color: #2e2e33;
+    }
+    .customizer-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .customizer-btn-left svg {
+      width: 17px;
+      height: 17px;
       color: #a1a1aa;
-      margin-bottom: 12px;
-      letter-spacing: 0.01em;
+      flex-shrink: 0;
+    }
+    .customizer-btn-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .customizer-counter {
+      font-size: 11px;
+      font-weight: 600;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      color: #4ade80;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .customizer-chevron {
+      width: 15px;
+      height: 15px;
+      color: #a1a1aa;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .customizer-btn.open .customizer-chevron {
+      transform: rotate(180deg);
+    }
+    .customizer-drawer {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
+      margin-top: 0;
+    }
+    .customizer-drawer.open {
+      max-height: 350px;
+      opacity: 1;
+      margin-top: 10px;
+    }
+    .customizer-panel {
+      background-color: #222226;
+      border: 1px solid #38383e;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .customizer-hint {
+      font-size: 11px;
+      color: #71717a;
+      margin-bottom: 8px;
+      text-align: center;
     }
 
     .tags {
@@ -54,38 +169,42 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 28px;
     }
     .tag {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: #27272a;
-      border: 1px solid #3f3f46;
+      background-color: #1f1f23;
+      border: 1px solid #38383e;
       color: #d4d4d8;
       font-size: 11px;
       font-weight: 500;
-      padding: 6px 12px;
+      padding: 7px 12px;
       border-radius: 8px;
       cursor: pointer;
       user-select: none;
-      transition: all 0.15s ease;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       outline: none;
     }
     .tag svg { height: 12px; width: auto; opacity: 0.9; fill: currentColor; }
     .tag:hover {
-      background-color: #323238;
+      background-color: #2a2a2f;
       border-color: #52525b;
       color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .tag:active {
+      transform: scale(0.96);
     }
     .tag.inactive {
-      opacity: 0.3;
+      opacity: 0.35;
       background-color: #18181b;
-      border-color: #27272a;
+      border: 1px dashed #2e2e33;
       color: #71717a;
       filter: grayscale(100%);
       text-decoration: line-through;
+      transform: none;
     }
 
     .btn {
@@ -103,8 +222,12 @@
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       border: none;
+      font-family: inherit;
+    }
+    .btn:active {
+      transform: scale(0.98);
     }
     .btn.disabled {
       opacity: 0.4;
@@ -115,57 +238,36 @@
       background-color: #7b5bf5;
       color: #ffffff;
       margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
-    .btn-stremio:hover { background-color: #6a4ce0; }
+    .btn-stremio:hover {
+      background-color: #6a4ce0;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
     .btn-outline {
-      background-color: transparent;
+      background-color: #27272a;
       color: #a1a1aa;
       border: 1px solid #3f3f46;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
     .btn-outline:hover {
-      background-color: #27272a;
+      background-color: #323238;
+      border-color: #52525b;
       color: #f5f5f7;
+      transform: translateY(-1px);
     }
     .btn svg { width: 20px; height: 20px; }
 
-    /* SNEAK PEEK / MINI AD SECTION */
+    /* SNEAK PEEK / GALLERY SECTION */
     .sneak-peek-section {
       margin-top: 32px;
       text-align: center;
     }
-    .peek-header {
-      margin-bottom: 14px;
-    }
-    .peek-pill {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #c084fc;
-      background: rgba(192, 132, 252, 0.12);
-      border: 1px solid rgba(192, 132, 252, 0.25);
-      padding: 3px 10px;
-      border-radius: 999px;
-      margin-bottom: 6px;
-    }
-    .peek-heading {
-      font-size: 16px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }
-    .peek-desc {
-      font-size: 12px;
-      color: #71717a;
-    }
-    .peek-grid-container {
-      display: none;
-    }
     .peek-marquee {
       position: relative;
       overflow: hidden;
-      padding: 10px 0 14px;
+      padding: 8px 0 12px;
       margin: 0 -12px;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
       mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
@@ -192,7 +294,7 @@
       position: relative;
       width: auto;
       background: transparent;
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
       text-align: left;
     }
@@ -204,7 +306,15 @@
       align-items: center;
       justify-content: center;
       background: #15151a;
+      border-radius: 6px;
+      border: 1px solid #2e2e33;
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+    }
+    .peek-card:hover .peek-poster-box {
+      transform: scale(1.03);
+      border-color: #52525b;
     }
     .peek-poster-box img {
       width: 100%;
@@ -213,116 +323,72 @@
       object-position: center;
       display: block;
     }
-    .peek-card-info {
-      display: none;
-    }
-    .peek-card-platform {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 2px;
-    }
-    .peek-card-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #f4f4f5;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .peek-card-type {
-      font-size: 10px;
-      color: #71717a;
-    }
-    .peek-cta-card {
-      background: rgba(39, 39, 42, 0.94);
-      border: 1px solid #52525b;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 12px;
-      padding: 16px 14px;
-      width: 100%;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-      text-align: center;
-      margin-top: 8px;
-    }
-    .peek-cta-badge {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      color: #4ade80;
-      margin-bottom: 4px;
-    }
-    .peek-cta-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }
-    .peek-cta-desc {
-      font-size: 11px;
-      color: #a1a1aa;
-      line-height: 1.4;
-      margin-bottom: 12px;
-    }
-    .btn-peek-action {
-      padding: 10px 14px;
-      font-size: 12px;
-      margin-bottom: 0;
-    }
 
-    .recommendations {
+    .support-section {
       margin-top: 36px;
-      padding-top: 24px;
-      border-top: 1px solid #27272a;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
       text-align: left;
     }
-    .rec-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #71717a;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .rec-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .rec-item {
+    .support-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       background-color: #27272a;
       border: 1px solid #3f3f46;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      color: #e4e4e7;
+      padding: 12px 14px;
+      border-radius: 10px;
       text-decoration: none;
-      transition: all 0.15s ease;
+      color: inherit;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
-    .rec-item:hover {
+    .support-card:hover {
       background-color: #323238;
       border-color: #52525b;
-      color: #ffffff;
+      transform: translateY(-1px);
     }
-    .rec-item span.badge {
-      font-size: 10px;
+    .support-card:active {
+      transform: scale(0.99);
+    }
+    .support-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .support-icon {
+      width: 20px;
+      height: 20px;
+      color: #f43f5e;
+      flex-shrink: 0;
+    }
+    .support-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .support-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f4f4f5;
+    }
+    .support-desc {
+      font-size: 11px;
       color: #a1a1aa;
-      background: #18181b;
-      padding: 2px 6px;
-      border-radius: 4px;
+      line-height: 1.35;
     }
-    .referral-note {
-      display: block;
-      margin-top: 2px;
-      color: #71717a;
-      font-size: 10px;
-      font-weight: 400;
+    .support-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4ade80;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .footer {
@@ -352,44 +418,75 @@
   <div class="wrapper">
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
-    <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
-    <h3 class="tags-heading">Seleciona as plataformas — <strong>todas selecionadas por padrão</strong>:</h3>
-
-    <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
-      <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #E50914;"><path fill="currentColor" d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
-        Netflix
+    <p class="subtitle">Extensão para o Stremio com o TOP 10 do momento nas principais plataformas de streaming em Portugal.</p>
+    <div class="features-row">
+      <div class="feature-pill">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 4a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h8a1 1 0 010 2H3a1 1 0 01-1-1z"/></svg>
+        Top 10 por plataforma
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.553.894l-4 2A1 1 0 016 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
+        Filtro por género
+      </div>
+    </div>
+    <div class="platform-customizer">
+      <button type="button" class="customizer-btn" id="customizer-toggle" onclick="toggleCustomizer()" aria-expanded="false">
+        <div class="customizer-btn-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Personalizar Plataformas</span>
+        </div>
+        <div class="customizer-btn-right">
+          <span class="customizer-counter" id="platform-counter">6 de 6 ativas</span>
+          <svg viewBox="0 0 20 20" fill="currentColor" class="customizer-chevron" id="customizer-chevron">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </div>
       </button>
 
-      <button type="button" class="tag" data-provider="disney" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #0063e5;">
-          <path fill="currentColor" d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
-          <path fill="currentColor" d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
-        </svg>
-        Disney+
-      </button>
+      <div class="customizer-drawer" id="customizer-drawer">
+        <div class="customizer-panel">
+          <p class="customizer-hint">Clica numa plataforma para incluir ou retirar do teu addon:</p>
+          <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
+          <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #E50914;"><path fill="currentColor" d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
+            Netflix
+          </button>
 
-      <button type="button" class="tag" data-provider="prime" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path fill="currentColor" d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
-        Prime Video
-      </button>
+          <button type="button" class="tag" data-provider="disney" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #0063e5;">
+              <path fill="currentColor" d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
+              <path fill="currentColor" d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
+            </svg>
+            Disney+
+          </button>
 
-      <button type="button" class="tag" data-provider="hbo" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #a855f7;">
-          <path fill="currentColor" d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
-        </svg>
-        HBO
-      </button>
+          <button type="button" class="tag" data-provider="prime" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path fill="currentColor" d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
+            Prime Video
+          </button>
 
-      <button type="button" class="tag" data-provider="apple" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 384 512" style="color: #ffffff;"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-        Apple TV+
-      </button>
+          <button type="button" class="tag" data-provider="hbo" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #a855f7;">
+              <path fill="currentColor" d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
+            </svg>
+            HBO
+          </button>
 
-      <button type="button" class="tag" data-provider="skyshowtime" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        SkyShowtime
-      </button>
+          <button type="button" class="tag" data-provider="apple" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 384 512" style="color: #ffffff;"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+            Apple TV+
+          </button>
+
+          <button type="button" class="tag" data-provider="skyshowtime" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            SkyShowtime
+          </button>
+        </div>
+        </div>
+      </div>
     </div>
 
     <a id="install-btn" href="#" class="btn btn-stremio">
@@ -409,334 +506,209 @@
 
     <!-- Sneak Peek Section -->
     <div class="sneak-peek-section">
-      <div class="peek-header">
-        <h2 class="peek-heading">O que está a liderar em Portugal</h2>
-        <p class="peek-desc">Espreita os títulos em destaque nas plataformas mais populares</p>
-      </div>
-
       <div class="peek-marquee" aria-label="Títulos em destaque">
         <div class="peek-gallery-drift">
               <div class="peek-track peek-track-0">
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/netflix_pt_movies_1.jpg" alt="Cara a Cara com El Chapo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="Cara a Cara com El Chapo">Cara a Cara com El Chapo</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_10.jpg" alt="Capitão América: Admirável Mundo Novo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/disney_pt_movies_1.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_4.jpg" alt="Slow Horses" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="The Runner">The Runner</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg" alt="Top Gun: Maverick" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Os Condenados de Shawshank">Os Condenados de Shawshank</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_4.jpg" alt="A Guerra dos Mundos" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/apple_pt_movies_1.jpg" alt="Mayday" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
-              <div class="peek-card-title" title="Mayday">Mayday</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_5.jpg" alt="A Última Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/skyshowtime_pt_movies_1.jpg" alt="Avatar Aang - O Último Airbender" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_1.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_9.jpg" alt="As Ovelhas Detetives" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_9.jpg'">
             </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
-              <div class="peek-card-title" title="Avatar Aang - O Último Airbender">Avatar Aang - O Último Airbender</div>
-              <div class="peek-card-type">Filme</div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_7.jpg" alt="Homem-Aranha: Regresso a Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_7.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg" alt="O Silo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
               <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_2.jpg" alt="O Homem dos Sussurros" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_2.jpg'">
             </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="O Homem dos Sussurros">O Homem dos Sussurros</div>
-              <div class="peek-card-type">Filme</div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_6.jpg" alt="O Cavaleiro das Trevas" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_6.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Os Vingadores">Os Vingadores</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_10.jpg" alt="Capitão América: Admirável Mundo Novo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/netflix_pt_movies_1.jpg" alt="Cara a Cara com El Chapo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="Cara a Cara com El Chapo">Cara a Cara com El Chapo</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_4.jpg" alt="Slow Horses" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/disney_pt_movies_1.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg" alt="Top Gun: Maverick" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="The Runner">The Runner</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_4.jpg" alt="A Guerra dos Mundos" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Os Condenados de Shawshank">Os Condenados de Shawshank</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_5.jpg" alt="A Última Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/apple_pt_movies_1.jpg" alt="Mayday" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_1.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
-              <div class="peek-card-title" title="Mayday">Mayday</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_9.jpg" alt="As Ovelhas Detetives" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_9.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="posters/skyshowtime_pt_movies_1.jpg" alt="Avatar Aang - O Último Airbender" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_1.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_7.jpg" alt="Homem-Aranha: Regresso a Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_7.jpg'">
             </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
-              <div class="peek-card-title" title="Avatar Aang - O Último Airbender">Avatar Aang - O Último Airbender</div>
-              <div class="peek-card-type">Filme</div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg" alt="O Silo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
               <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_2.jpg" alt="O Homem dos Sussurros" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_2.jpg'">
             </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="O Homem dos Sussurros">O Homem dos Sussurros</div>
-              <div class="peek-card-type">Filme</div>
-            </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Os Vingadores">Os Vingadores</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_6.jpg" alt="O Cavaleiro das Trevas" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_6.jpg'">
             </div>
           </article>
         </div>
         <div class="peek-track peek-track-1">
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg" alt="The Last Sunrise" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="The Last Sunrise">The Last Sunrise</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_2.jpg" alt="Lei & Ordem: Unidade Especial" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_2.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_4.jpg" alt="Sobrenatural" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_2.jpg" alt="F1 - O Filme" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
-              <div class="peek-card-title" title="F1 - O Filme">F1 - O Filme</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_1.jpg" alt="Os Simpsons" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_2.jpg" alt="O Padrinho" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
-              <div class="peek-card-title" title="O Padrinho">O Padrinho</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_4.jpg" alt="O Cavaleiro das Trevas" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_3.jpg" alt="गांधारी" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="गांधारी">गांधारी</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_5.jpg" alt="A Proposta" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg" alt="Vingadores: Guerra do Infinito" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Vingadores: Guerra do Infinito">Vingadores: Guerra do Infinito</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_9.jpg" alt="Tubarão" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_9.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_3.jpg" alt="Projeto Hail Mary" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="Projeto Hail Mary">Projeto Hail Mary</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_6.jpg" alt="No Ritmo do Coração" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_6.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_3.jpg" alt="Interstellar" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Interstellar">Interstellar</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg" alt="The Last Sunrise" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="The Last Sunrise">The Last Sunrise</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_2.jpg" alt="Homem-Aranha: Sem Volta a Casa" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Homem-Aranha: Sem Volta a Casa">Homem-Aranha: Sem Volta a Casa</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_8.jpg" alt="Vingadores: Endgame" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_8.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_2.jpg" alt="F1 - O Filme" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #ffffff;">Apple TV+</div>
-              <div class="peek-card-title" title="F1 - O Filme">F1 - O Filme</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_2.jpg" alt="Lei & Ordem: Unidade Especial" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_2.jpg" alt="O Padrinho" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_2.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00ff7f;">SkyShowtime</div>
-              <div class="peek-card-title" title="O Padrinho">O Padrinho</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_4.jpg" alt="Sobrenatural" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_3.jpg" alt="गांधारी" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #E50914;">Netflix</div>
-              <div class="peek-card-title" title="गांधारी">गांधारी</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_1.jpg" alt="Os Simpsons" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg" alt="Vingadores: Guerra do Infinito" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #0063e5;">Disney+</div>
-              <div class="peek-card-title" title="Vingadores: Guerra do Infinito">Vingadores: Guerra do Infinito</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_4.jpg" alt="O Cavaleiro das Trevas" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_3.jpg" alt="Projeto Hail Mary" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_3.jpg'">
-            </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #00a8e1;">Prime Video</div>
-              <div class="peek-card-title" title="Projeto Hail Mary">Projeto Hail Mary</div>
-              <div class="peek-card-type">Filme</div>
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_5.jpg" alt="A Proposta" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_3.jpg" alt="Interstellar" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_3.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_9.jpg" alt="Tubarão" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_9.jpg'">
             </div>
-            <div class="peek-card-info">
-              <div class="peek-card-platform" style="color: #a855f7;">HBO</div>
-              <div class="peek-card-title" title="Interstellar">Interstellar</div>
-              <div class="peek-card-type">Filme</div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_6.jpg" alt="No Ritmo do Coração" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_6.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_8.jpg" alt="Vingadores: Endgame" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_8.jpg'">
             </div>
           </article>
         </div>
@@ -744,30 +716,23 @@
       </div>
     </div>
 
-    <div class="recommendations">
-      <div class="rec-title">Extensões que recomendo</div>
-      <div class="rec-list">
-        <a href="http://real-debrid.com/?id=10970377" target="_blank" rel="noopener sponsored" class="rec-item">
-          <span>Real-Debrid <small class="referral-note">O teu apoio através deste link ajuda o projeto.</small></span>
-          <span class="badge">Apoiar</span>
-        </a>
-        <a href="https://subdl.strem.top/configure" target="_blank" rel="noopener" class="rec-item">
-          <span>SubDL Subtitles</span>
-          <span class="badge">Legendas</span>
-        </a>
-        <a href="https://opensubtitles-v3.strem.io/" target="_blank" rel="noopener" class="rec-item">
-          <span>OpenSubtitles v3</span>
-          <span class="badge">Legendas</span>
-        </a>
-        <a href="https://stremio-addons.net/addons/imdb-ratings" target="_blank" rel="noopener" class="rec-item">
-          <span>IMDb Ratings</span>
-          <span class="badge">Avaliações</span>
-        </a>
-      </div>
+    <div class="support-section">
+      <a href="http://real-debrid.com/?id=10970377" target="_blank" rel="noopener sponsored" class="support-card">
+        <div class="support-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="support-icon">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <div class="support-text">
+            <span class="support-title">Apoiar o projeto</span>
+            <span class="support-desc">Subscreve o Real-Debrid através deste link para ajudar a manter o addon ativo e gratuito.</span>
+          </div>
+        </div>
+        <span class="support-badge">Real-Debrid &rarr;</span>
+      </a>
     </div>
 
     <div class="footer">
-      <span id="time-ago" data-time="2026-09-06T17:44:47.999276Z">Atualizado recentemente</span>
+      <span id="time-ago" data-time="2026-09-07T21:04:59.514211Z">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 12h30 UTC</span>
       <span class="version">v1.1.0</span>
     </div>
@@ -781,6 +746,14 @@
       return window.location.origin;
     }
 
+    function toggleCustomizer() {
+      const btn = document.getElementById('customizer-toggle');
+      const drawer = document.getElementById('customizer-drawer');
+      const isOpen = drawer.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      btn.setAttribute('aria-expanded', isOpen);
+    }
+
     function toggleProvider(element) {
       element.classList.toggle('inactive');
       updateManifestUrls();
@@ -791,7 +764,25 @@
       const selected = activeTags.map(el => el.getAttribute('data-provider')).sort();
       const installBtn = document.getElementById('install-btn');
       const copyBtn = document.getElementById('copy-btn');
+      const counter = document.getElementById('platform-counter');
       const origin = getBaseHostUrl();
+
+      if (counter) {
+        counter.textContent = `${selected.length} de ${ALL_PROVIDERS.length} ativas`;
+        if (selected.length === ALL_PROVIDERS.length) {
+          counter.style.color = '#34d399';
+          counter.style.background = 'rgba(16, 185, 129, 0.1)';
+          counter.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+        } else if (selected.length > 0) {
+          counter.style.color = '#fbbf24';
+          counter.style.background = 'rgba(245, 158, 11, 0.1)';
+          counter.style.borderColor = 'rgba(245, 158, 11, 0.25)';
+        } else {
+          counter.style.color = '#f87171';
+          counter.style.background = 'rgba(239, 68, 68, 0.1)';
+          counter.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+        }
+      }
 
       if (selected.length === 0) {
         installBtn.classList.add('disabled');
@@ -818,10 +809,10 @@
       if (!currentManifestUrl) return;
       navigator.clipboard.writeText(currentManifestUrl);
       const btn = document.getElementById('copy-btn');
-      btn.innerHTML = '<span style="color:#4ade80;">✔ Link Copiado!</span>';
+      btn.innerHTML = '<span style="color:#34d399; display:inline-flex; align-items:center; gap:6px;">✔ Link Copiado!</span>';
       setTimeout(() => {
         btn.innerHTML = `
-          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
           </svg>

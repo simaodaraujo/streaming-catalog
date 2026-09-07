@@ -710,21 +710,13 @@ def create_landing_page(featured_items=None):
     for row_index in range(2):
       row_cards = ""
       for item in marquee_pool[row_index * cards_per_row:(row_index + 1) * cards_per_row]:
-        color = item.get("color", "#7b5bf5")
-        platform = item.get("platform", "Streaming")
         title = item.get("title", "")
-        m_type = item.get("type", "Top 1")
         poster = item.get("poster", "")
         fallback = item.get("fallback_poster", "")
         row_cards += (
           '          <article class="peek-card">\n'
           '            <div class="peek-poster-box">\n'
           f'              <img src="{poster}" alt="{title}" loading="eager" decoding="async" onerror="this.src=\'{fallback}\'">\n'
-          '            </div>\n'
-          '            <div class="peek-card-info">\n'
-          f'              <div class="peek-card-platform" style="color: {color};">{platform}</div>\n'
-          f'              <div class="peek-card-title" title="{title}">{title}</div>\n'
-          f'              <div class="peek-card-type">{m_type}</div>\n'
           '            </div>\n'
           '          </article>\n'
         )
@@ -744,23 +736,18 @@ def create_landing_page(featured_items=None):
   <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
-      background-color: #09090b;
-      background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 58, 237, 0.12), transparent 70%),
-        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(59, 130, 246, 0.04), transparent 70%);
-      background-attachment: fixed;
-      color: #f4f4f5;
+      background-color: #1c1c1e;
+      color: #f5f5f7;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 32px 20px;
+      padding: 24px;
       -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }}
     .wrapper {{
-      max-width: 860px;
+      max-width: 900px;
       width: 100%;
       text-align: center;
       margin: 0 auto;
@@ -778,10 +765,8 @@ def create_landing_page(featured_items=None):
     p.subtitle {{
       font-size: 14px;
       color: #a1a1aa;
-      max-width: 480px;
-      margin: 0 auto 18px auto;
-      line-height: 1.6;
-      font-weight: 400;
+      margin-bottom: 16px;
+      line-height: 1.5;
     }}
     .features-row {{
       display: flex;
@@ -794,10 +779,9 @@ def create_landing_page(featured_items=None):
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      color: #d4d4d8;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
       font-size: 12px;
       font-weight: 500;
       padding: 5px 12px;
@@ -806,27 +790,24 @@ def create_landing_page(featured_items=None):
     .feature-pill svg {{
       width: 13px;
       height: 13px;
-      color: #a1a1aa;
+      opacity: 0.8;
       flex-shrink: 0;
     }}
     .platform-customizer {{
       width: 100%;
-      max-width: 460px;
-      margin: 0 auto 16px auto;
+      max-width: 480px;
+      margin: 0 auto 20px auto;
     }}
     .customizer-btn {{
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      background: rgba(24, 24, 27, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
       color: #e4e4e7;
-      padding: 11px 16px;
-      border-radius: 12px;
+      padding: 11px 15px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
@@ -834,15 +815,19 @@ def create_landing_page(featured_items=None):
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       outline: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }}
     .customizer-btn:hover {{
-      background: rgba(39, 39, 42, 0.85);
-      border-color: rgba(255, 255, 255, 0.15);
+      background-color: #323238;
+      border-color: #52525b;
       color: #ffffff;
     }}
+    .customizer-btn:active {{
+      transform: scale(0.99);
+    }}
     .customizer-btn.open {{
-      border-color: rgba(255, 255, 255, 0.18);
-      background: rgba(39, 39, 42, 0.95);
+      border-color: #52525b;
+      background-color: #2e2e33;
     }}
     .customizer-btn-left {{
       display: flex;
@@ -850,9 +835,10 @@ def create_landing_page(featured_items=None):
       gap: 8px;
     }}
     .customizer-btn-left svg {{
-      width: 15px;
-      height: 15px;
+      width: 17px;
+      height: 17px;
       color: #a1a1aa;
+      flex-shrink: 0;
     }}
     .customizer-btn-right {{
       display: flex;
@@ -862,17 +848,17 @@ def create_landing_page(featured_items=None):
     .customizer-counter {{
       font-size: 11px;
       font-weight: 600;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      color: #34d399;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      color: #4ade80;
       padding: 2px 8px;
       border-radius: 9999px;
-      transition: all 0.2s ease;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }}
     .customizer-chevron {{
       width: 15px;
       height: 15px;
-      color: #71717a;
+      color: #a1a1aa;
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }}
     .customizer-btn.open .customizer-chevron {{
@@ -891,20 +877,17 @@ def create_landing_page(featured_items=None):
       margin-top: 10px;
     }}
     .customizer-panel {{
-      background: rgba(18, 18, 22, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      border-radius: 12px;
-      padding: 14px;
+      background-color: #222226;
+      border: 1px solid #38383e;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }}
     .customizer-hint {{
       font-size: 11px;
       color: #71717a;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       text-align: center;
-      font-weight: 400;
     }}
 
     .tags {{
@@ -917,32 +900,33 @@ def create_landing_page(featured_items=None):
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      color: #e4e4e7;
-      font-size: 12px;
+      background-color: #1f1f23;
+      border: 1px solid #38383e;
+      color: #d4d4d8;
+      font-size: 11px;
       font-weight: 500;
-      padding: 6px 12px;
+      padding: 7px 12px;
       border-radius: 8px;
       cursor: pointer;
       user-select: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       outline: none;
     }}
-    .tag svg {{ height: 13px; width: auto; opacity: 0.95; fill: currentColor; }}
+    .tag svg {{ height: 12px; width: auto; opacity: 0.9; fill: currentColor; }}
     .tag:hover {{
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.18);
+      background-color: #2a2a2f;
+      border-color: #52525b;
       color: #ffffff;
       transform: translateY(-1px);
     }}
+    .tag:active {{
+      transform: scale(0.96);
+    }}
     .tag.inactive {{
       opacity: 0.35;
-      background: transparent;
-      border: 1px dashed rgba(255, 255, 255, 0.08);
-      box-shadow: none;
+      background-color: #18181b;
+      border: 1px dashed #2e2e33;
       color: #71717a;
       filter: grayscale(100%);
       text-decoration: line-through;
@@ -955,95 +939,74 @@ def create_landing_page(featured_items=None):
       justify-content: center;
       gap: 8px;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       margin-left: auto;
       margin-right: auto;
-      padding: 12px 16px;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       border: none;
-      letter-spacing: -0.01em;
       font-family: inherit;
     }}
+    .btn:active {{
+      transform: scale(0.98);
+    }}
     .btn.disabled {{
-      opacity: 0.35;
+      opacity: 0.4;
       pointer-events: none;
       cursor: not-allowed;
     }}
     .btn-stremio {{
-      background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
+      background-color: #7b5bf5;
       color: #ffffff;
-      border: 1px solid rgba(167, 139, 250, 0.3);
-      box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }}
     .btn-stremio:hover {{
-      background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
-      box-shadow: 0 6px 20px rgba(109, 40, 217, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      background-color: #6a4ce0;
       transform: translateY(-1px);
-    }}
-    .btn-stremio:active {{
-      transform: translateY(0);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     }}
     .btn-outline {{
-      background: rgba(24, 24, 27, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #e4e4e7;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      background-color: #27272a;
+      color: #a1a1aa;
+      border: 1px solid #3f3f46;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }}
     .btn-outline:hover {{
-      background: rgba(39, 39, 42, 0.85);
-      border-color: rgba(255, 255, 255, 0.16);
-      color: #ffffff;
+      background-color: #323238;
+      border-color: #52525b;
+      color: #f5f5f7;
       transform: translateY(-1px);
     }}
-    .btn-outline:active {{
-      transform: translateY(0);
-    }}
-    .btn svg {{ width: 18px; height: 18px; flex-shrink: 0; }}
+    .btn svg {{ width: 20px; height: 20px; }}
 
     /* SNEAK PEEK / GALLERY SECTION */
     .sneak-peek-section {{
-      margin-top: 36px;
+      margin-top: 32px;
       text-align: center;
-    }}
-    .peek-header {{
-      margin-bottom: 16px;
-    }}
-    .peek-heading {{
-      font-size: 15px;
-      font-weight: 600;
-      color: #f4f4f5;
-      margin-bottom: 4px;
-      letter-spacing: -0.01em;
-    }}
-    .peek-desc {{
-      font-size: 12px;
-      color: #71717a;
     }}
     .peek-marquee {{
       position: relative;
       overflow: hidden;
-      padding: 10px 0 14px;
-      margin: 0 -16px;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-      mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+      padding: 8px 0 12px;
+      margin: 0 -12px;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+      mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
     }}
     .peek-gallery-drift {{
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }}
     .peek-track {{
       display: flex;
       width: max-content;
-      gap: 10px;
+      gap: 8px;
       animation: gallery-drift 140s linear infinite;
       will-change: transform;
     }}
@@ -1051,13 +1014,13 @@ def create_landing_page(featured_items=None):
     .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
     @keyframes gallery-drift {{
       from {{ transform: translateX(0); }}
-      to {{ transform: translateX(calc(-50% - 5px)); }}
+      to {{ transform: translateX(calc(-50% - 4px)); }}
     }}
     .peek-card {{
       position: relative;
       width: auto;
       background: transparent;
-      border-radius: 8px;
+      border-radius: 6px;
       overflow: hidden;
       text-align: left;
     }}
@@ -1068,16 +1031,16 @@ def create_landing_page(featured_items=None):
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #121215;
-      border-radius: 8px;
+      background: #15151a;
+      border-radius: 6px;
+      border: 1px solid #2e2e33;
       overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
     }}
     .peek-card:hover .peek-poster-box {{
       transform: scale(1.03);
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: #52525b;
     }}
     .peek-poster-box img {{
       width: 100%;
@@ -1087,82 +1050,87 @@ def create_landing_page(featured_items=None):
       display: block;
     }}
 
-    .recommendations {{
-      margin-top: 40px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      text-align: left;
-      max-width: 460px;
+    .support-section {{
+      margin-top: 36px;
+      max-width: 480px;
       margin-left: auto;
       margin-right: auto;
+      text-align: left;
     }}
-    .rec-title {{
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #71717a;
-      margin-bottom: 12px;
-      text-align: center;
-    }}
-    .rec-list {{
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }}
-    .rec-item {{
+    .support-card {{
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(24, 24, 27, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-      padding: 9px 14px;
+      gap: 12px;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      padding: 12px 14px;
       border-radius: 10px;
-      font-size: 12px;
-      color: #e4e4e7;
       text-decoration: none;
+      color: inherit;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }}
-    .rec-item:hover {{
-      background: rgba(39, 39, 42, 0.8);
-      border-color: rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+    .support-card:hover {{
+      background-color: #323238;
+      border-color: #52525b;
       transform: translateY(-1px);
     }}
-    .rec-item span.badge {{
-      font-size: 10px;
-      font-weight: 500;
-      color: #a1a1aa;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 2px 8px;
-      border-radius: 6px;
+    .support-card:active {{
+      transform: scale(0.99);
     }}
-    .referral-note {{
-      display: block;
-      margin-top: 2px;
-      color: #71717a;
-      font-size: 10px;
-      font-weight: 400;
+    .support-left {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }}
+    .support-icon {{
+      width: 20px;
+      height: 20px;
+      color: #f43f5e;
+      flex-shrink: 0;
+    }}
+    .support-text {{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }}
+    .support-title {{
+      font-size: 13px;
+      font-weight: 600;
+      color: #f4f4f5;
+    }}
+    .support-desc {{
+      font-size: 11px;
+      color: #a1a1aa;
+      line-height: 1.35;
+    }}
+    .support-badge {{
+      font-size: 11px;
+      font-weight: 600;
+      color: #4ade80;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }}
 
     .footer {{
-      margin-top: 36px;
+      margin-top: 32px;
       font-size: 12px;
-      color: #71717a;
+      color: #52525b;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }}
-    .schedule {{ color: #52525b; font-size: 11px; }}
-    .version {{ color: #3f3f46; font-size: 11px; margin-top: 2px; }}
+    .schedule {{ color: #71717a; }}
+    .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
     @media (max-width: 520px) {{
       .peek-marquee {{
-        margin: 0 -10px;
+        margin: 0 -8px;
         padding-top: 6px;
       }}
       .peek-poster-box {{
@@ -1190,8 +1158,9 @@ def create_landing_page(featured_items=None):
     <div class="platform-customizer">
       <button type="button" class="customizer-btn" id="customizer-toggle" onclick="toggleCustomizer()" aria-expanded="false">
         <div class="customizer-btn-left">
-          <svg viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span>Personalizar Plataformas</span>
         </div>
@@ -1263,11 +1232,6 @@ def create_landing_page(featured_items=None):
 
     <!-- Sneak Peek Section -->
     <div class="sneak-peek-section">
-      <div class="peek-header">
-        <h2 class="peek-heading">O que está a liderar em Portugal</h2>
-        <p class="peek-desc">Espreita os títulos em destaque nas plataformas mais populares</p>
-      </div>
-
       <div class="peek-marquee" aria-label="Títulos em destaque">
         <div class="peek-gallery-drift">
       {rows_html}
@@ -1275,26 +1239,19 @@ def create_landing_page(featured_items=None):
       </div>
     </div>
 
-    <div class="recommendations">
-      <div class="rec-title">Extensões que recomendo</div>
-      <div class="rec-list">
-        <a href="http://real-debrid.com/?id=10970377" target="_blank" rel="noopener sponsored" class="rec-item">
-          <span>Real-Debrid <small class="referral-note">O teu apoio através deste link ajuda o projeto.</small></span>
-          <span class="badge">Apoiar</span>
-        </a>
-        <a href="https://subdl.strem.top/configure" target="_blank" rel="noopener" class="rec-item">
-          <span>SubDL Subtitles</span>
-          <span class="badge">Legendas</span>
-        </a>
-        <a href="https://opensubtitles-v3.strem.io/" target="_blank" rel="noopener" class="rec-item">
-          <span>OpenSubtitles v3</span>
-          <span class="badge">Legendas</span>
-        </a>
-        <a href="https://stremio-addons.net/addons/imdb-ratings" target="_blank" rel="noopener" class="rec-item">
-          <span>IMDb Ratings</span>
-          <span class="badge">Avaliações</span>
-        </a>
-      </div>
+    <div class="support-section">
+      <a href="http://real-debrid.com/?id=10970377" target="_blank" rel="noopener sponsored" class="support-card">
+        <div class="support-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="support-icon">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <div class="support-text">
+            <span class="support-title">Apoiar o projeto</span>
+            <span class="support-desc">Subscreve o Real-Debrid através deste link para ajudar a manter o addon ativo e gratuito.</span>
+          </div>
+        </div>
+        <span class="support-badge">Real-Debrid &rarr;</span>
+      </a>
     </div>
 
     <div class="footer">
