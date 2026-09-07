@@ -35,35 +35,15 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # Criar estrutura .vercel/output para deploy prebuilt (ficheiros estáticos + serverless functions)
+          # Criar estrutura .vercel/output para deploy prebuilt (ficheiros estáticos puros)
           mkdir -p .vercel/output/static
           cp -r dist/* .vercel/output/static/
 
-          # Criar Serverless Function para o motor de legendas PT-PT (/api/subtitles)
-          mkdir -p .vercel/output/functions/api/subtitles.func
-          cp api/subtitles.js .vercel/output/functions/api/subtitles.func/index.js
-          cat > .vercel/output/functions/api/subtitles.func/.vc-config.json << 'EOF'
-          {
-            "runtime": "nodejs20.x",
-            "handler": "index.js",
-            "launcherType": "Nodejs",
-            "shouldAddHelpers": true
-          }
-          EOF
-
-          # Config que garante ficheiros estáticos e roteamento de legendas sem framework detection
+          # Config que garante ficheiros estáticos sem framework detection
           cat > .vercel/output/config.json << 'EOF'
           {
             "version": 3,
             "routes": [
-              {
-                "src": "^/(?:c/[^/]+/)?subtitles/([^/]+)/([^/]+)/(.+?)(?:\\.json)?$",
-                "dest": "/api/subtitles?type=$1&id=$2&extra=$3"
-              },
-              {
-                "src": "^/(?:c/[^/]+/)?subtitles/([^/]+)/([^/]+?)(?:\\.json)?$",
-                "dest": "/api/subtitles?type=$1&id=$2"
-              },
               {
                 "src": "^/c/[^/]+/catalog/(.*)$",
                 "dest": "/catalog/$1"

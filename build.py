@@ -1144,7 +1144,7 @@ def create_landing_page(featured_items=None):
   <div class="wrapper">
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
-    <p class="subtitle">Extensão para o Stremio com o TOP 10 do momento nas principais plataformas de streaming e legendas PT-PT automáticas.</p>
+    <p class="subtitle">Extensão para o Stremio com o TOP 10 do momento nas principais plataformas de streaming em Portugal.</p>
     <div class="features-row">
       <div class="feature-pill">
         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 4a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h8a1 1 0 010 2H3a1 1 0 01-1-1z"/></svg>
@@ -1153,10 +1153,6 @@ def create_landing_page(featured_items=None):
       <div class="feature-pill">
         <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.553.894l-4 2A1 1 0 016 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
         Filtro por género
-      </div>
-      <div class="feature-pill">
-        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.5 3A1.5 1.5 0 004 9.5v1A1.5 1.5 0 005.5 12h2a.5.5 0 000-1h-2a.5.5 0 01-.5-.5v-1a.5.5 0 01.5-.5h2a.5.5 0 000-1h-2zm7 0A1.5 1.5 0 0011 9.5v1a1.5 1.5 0 001.5 1.5h2a.5.5 0 000-1h-2a.5.5 0 01-.5-.5v-1a.5.5 0 01.5-.5h2a.5.5 0 000-1h-2z"/></svg>
-        Legendas PT-PT
       </div>
     </div>
     <div class="platform-customizer">
@@ -1261,7 +1257,7 @@ def create_landing_page(featured_items=None):
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 12h30 UTC</span>
-      <span class="version">v1.2.0</span>
+      <span class="version">v1.1.0</span>
     </div>
   </div>
 
@@ -1409,10 +1405,6 @@ def main():
     # Gerar vercel.json com Rewrites para URLs personalizadas e CORS headers
     vercel_config = {
         "rewrites": [
-            {"source": "/subtitles/:type/:id/:extra*", "destination": "/api/subtitles?type=:type&id=:id&extra=:extra*"},
-            {"source": "/subtitles/:type/:id", "destination": "/api/subtitles?type=:type&id=:id"},
-            {"source": "/c/:config/subtitles/:type/:id/:extra*", "destination": "/api/subtitles?type=:type&id=:id&extra=:extra*"},
-            {"source": "/c/:config/subtitles/:type/:id", "destination": "/api/subtitles?type=:type&id=:id"},
             {"source": "/c/:config/catalog/:path*", "destination": "/catalog/:path*"},
             {"source": "/c/:config/posters/:path*", "destination": "/posters/:path*"},
             {"source": "/c/:config/logo.png", "destination": "/logo.png"},
@@ -1555,17 +1547,12 @@ def main():
     # 1. Manifest Padrão (todas as plataformas)
     manifest = {
         "id": "pt.top-streaming",
-        "version": "1.2.0",
-        "name": "TOP 10 Portugal (Filmes, Séries & Legendas PT-PT)",
-        "description": "TOP 10 do momento na Netflix, Disney+, Prime Video, HBO, Apple TV+, SkyShowtime e legendas PT-PT automáticas",
+        "version": "1.1.0",
+        "name": "TOP 10 Portugal (Filmes & Séries)",
+        "description": "TOP 10 do momento na Netflix, Disney+, Prime Video, HBO, Apple TV+ e SkyShowtime em Portugal",
         "logo": f"{BASE_URL}/logo.png",
         "resources": [
-            "catalog",
-            {
-                "name": "subtitles",
-                "types": ["movie", "series"],
-                "idPrefixes": ["tt", "kitsu"]
-            }
+            "catalog"
         ],
         "types": [
             "movie",
@@ -1601,17 +1588,12 @@ def main():
 
             custom_manifest = {
                 "id": f"pt.top-streaming.{combo_key.replace(',', '.')}",
-                "version": "1.2.0",
-                "name": "TOP 10 Portugal & Legendas PT-PT",
-                "description": f"TOP 10 do momento ({names_str}) e legendas PT-PT em Portugal",
+                "version": "1.1.0",
+                "name": "TOP 10 Portugal",
+                "description": f"TOP 10 do momento ({names_str}) em Portugal",
                 "logo": f"{BASE_URL}/logo.png",
                 "resources": [
-                    "catalog",
-                    {
-                        "name": "subtitles",
-                        "types": ["movie", "series"],
-                        "idPrefixes": ["tt", "kitsu"]
-                    }
+                    "catalog"
                 ],
                 "types": [
                     "movie",
