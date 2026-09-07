@@ -1,5 +1,16 @@
 {
-  "rewrites": [],
+  "rewrites": [
+    { "source": "/subtitles/:type/:id/:extra*", "destination": "/api/subtitles?type=:type&id=:id&extra=:extra*" },
+    { "source": "/subtitles/:type/:id", "destination": "/api/subtitles?type=:type&id=:id" },
+    { "source": "/c/:config/subtitles/:type/:id/:extra*", "destination": "/api/subtitles?type=:type&id=:id&extra=:extra*" },
+    { "source": "/c/:config/subtitles/:type/:id", "destination": "/api/subtitles?type=:type&id=:id" },
+    { "source": "/c/:config/catalog/:path*", "destination": "/catalog/:path*" },
+    { "source": "/c/:config/posters/:path*", "destination": "/posters/:path*" },
+    { "source": "/c/:config/logo.png", "destination": "/logo.png" },
+    { "source": "/c/:config/configure", "destination": "/index.html" },
+    { "source": "/c/:config", "destination": "/index.html" },
+    { "source": "/configure", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
