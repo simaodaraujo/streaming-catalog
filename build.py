@@ -5,6 +5,7 @@ import re
 import io
 import shutil
 import itertools
+import random
 from datetime import datetime
 
 try:
@@ -609,30 +610,46 @@ def create_landing_page(featured_items=None):
                         "color": prov.get("color", "#7b5bf5"),
                         "title": item.get("name", "Destaque"),
                         "type": media_label,
+                        "rank": rank,
                         "poster": poster_src,
                         "fallback_poster": item.get("poster")
                     })
 
-    # Intercala fornecedores antes de repartir os posters pelas três rows.
-    grouped_items = {provider["name"]: [] for provider in PROVIDERS}
+    # Baralha e intercala itens para misturar completamente plataformas e posições de ranking (#1 a #10)
+    rng = random.Random()
+    pool_by_platform = {}
     for item in featured_items:
-      grouped_items.setdefault(item.get("platform", "Streaming"), []).append(item)
-    mixed_items = []
-    while any(grouped_items.values()):
-      for provider in PROVIDERS:
-        provider_items = grouped_items[provider["name"]]
-        if provider_items:
-          mixed_items.append(provider_items.pop(0))
-      extra_platforms = [name for name in grouped_items if name not in {provider["name"] for provider in PROVIDERS}]
-      for platform in extra_platforms:
-        if grouped_items[platform]:
-          mixed_items.append(grouped_items[platform].pop(0))
+        pool_by_platform.setdefault(item.get("platform", "Streaming"), []).append(item)
 
-    # Duas faixas horizontais contínuas; cada uma recebe títulos intercalados.
+    for p_items in pool_by_platform.values():
+        rng.shuffle(p_items)
+
+    mixed_items = []
+    platforms = list(pool_by_platform.keys())
+    rng.shuffle(platforms)
+
+    last_platform = None
+    last_rank = None
+    while any(pool_by_platform.values()):
+        avail = [p for p in platforms if pool_by_platform[p]]
+        cand_platform = [p for p in avail if p != last_platform]
+        pool_cand = cand_platform if cand_platform else avail
+        cand_diff_rank = [p for p in pool_cand if pool_by_platform[p][0].get("rank") != last_rank]
+        final_cand = cand_diff_rank if cand_diff_rank else pool_cand
+        chosen = rng.choice(final_cand)
+        item = pool_by_platform[chosen].pop(0)
+        mixed_items.append(item)
+        last_platform = chosen
+        last_rank = item.get("rank")
+
+    # Duas faixas horizontais contínuas; cada uma recebe títulos intercalados e variados.
     rows_html = []
+    cards_per_row = 10
+    total_needed = cards_per_row * 2
+    marquee_pool = mixed_items[:total_needed] if len(mixed_items) >= total_needed else mixed_items
     for row_index in range(2):
       row_cards = ""
-      for item in mixed_items[:16][row_index * 8:(row_index + 1) * 8]:
+      for item in marquee_pool[row_index * cards_per_row:(row_index + 1) * cards_per_row]:
         color = item.get("color", "#7b5bf5")
         platform = item.get("platform", "Streaming")
         title = item.get("title", "")
@@ -1318,6 +1335,7 @@ def main():
                 "color": prov.get("color", "#7b5bf5"),
                 "title": item["name"],
                 "type": "Filme",
+                "rank": rank,
                 "poster": item.get("poster") or f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
@@ -1362,6 +1380,7 @@ def main():
                 "color": prov.get("color", "#7b5bf5"),
                 "title": item["name"],
                 "type": "Série",
+                "rank": rank,
                 "poster": item.get("poster") or f"posters/{cat_id}_{rank}.jpg",
                 "fallback_poster": item.get("poster")
               })
