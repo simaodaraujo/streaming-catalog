@@ -510,17 +510,10 @@ def draw_rank_badge(poster_bytes, rank):
         badge_h = 46
         radius = badge_h // 2  # 23px
 
-        # Badge de ranking simples: #1, #2, ... #10
         rank_text = f"#{rank}"
-        # #1 recebe destaque dourado, restantes ficam brancos
-        if rank == 1:
-            accent_color = (250, 204, 21, 255)   # Dourado
-            outline_color = (250, 204, 21, 180)
-            fill_color = (20, 15, 3, 245)
-        else:
-            accent_color = (255, 255, 255, 255)  # Branco
-            outline_color = (255, 255, 255, 100)
-            fill_color = (10, 10, 20, 230)
+        accent_color = (255, 255, 255, 255)
+        outline_color = (255, 255, 255, 100)
+        fill_color = (10, 10, 20, 230)
 
         font_badge = get_badge_font(22, bold=True)
         text_bbox = draw.textbbox((0, 0), rank_text, font=font_badge)
