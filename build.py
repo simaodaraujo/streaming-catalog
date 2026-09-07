@@ -726,8 +726,33 @@ def create_landing_page(featured_items=None):
     p.subtitle {{
       font-size: 14px;
       color: #a1a1aa;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       line-height: 1.5;
+    }}
+    .features-row {{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }}
+    .feature-pill {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }}
+    .feature-pill svg {{
+      width: 13px;
+      height: 13px;
+      opacity: 0.7;
+      flex-shrink: 0;
     }}
     .tags-heading {{
       font-size: 13px;
@@ -1040,7 +1065,21 @@ def create_landing_page(featured_items=None):
   <div class="wrapper">
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
-    <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
+    <p class="subtitle">Extensão para o Stremio com o TOP 10 real de Portugal — atualizado diariamente.</p>
+    <div class="features-row">
+      <div class="feature-pill">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 4a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h14a1 1 0 010 2H3a1 1 0 01-1-1zm0 5a1 1 0 011-1h8a1 1 0 010 2H3a1 1 0 01-1-1z"/></svg>
+        Top 10 por plataforma
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.553.894l-4 2A1 1 0 016 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
+        Filtro por género
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        Netflix · Disney+ · Prime · HBO · Apple TV+ · SkyShowtime
+      </div>
+    </div>
     <h3 class="tags-heading">Seleciona as plataformas — <strong>todas selecionadas por padrão</strong>:</h3>
 
     <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
