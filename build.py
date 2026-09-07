@@ -70,7 +70,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 # Plataformas de streaming em Portugal
 PROVIDERS = [
   {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "flix_slug": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
-  {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney", "jw_pkg": "dnp", "color": "#0063e5"},
+  {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney-plus", "jw_pkg": "dnp", "color": "#0063e5"},
   {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "flix_slug": "amazon-prime", "jw_pkg": "prv", "color": "#00a8e1"},
   {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "flix_slug": "hbo-max", "jw_pkg": "hbm", "color": "#a855f7"},
   {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "flix_slug": "apple-tv", "jw_pkg": "atp", "color": "#ffffff"},
@@ -184,13 +184,15 @@ def search_imdb_title(title, media_type):
     if not session:
         return None
 
+    import unicodedata
     query = clean_title(title)
-    query_slug = re.sub(r"[^a-z0-9]+", "_", query.casefold()).strip("_")
+    query_unaccented = unicodedata.normalize('NFKD', query).encode('ascii', 'ignore').decode('ascii')
+    query_slug = re.sub(r"[^a-z0-9]+", "_", query_unaccented.casefold()).strip("_")
     if not query_slug:
         return None
 
     expected_types = {"feature", "movie"} if media_type == "movie" else {"tvSeries", "tvMiniSeries"}
-    normalized_query = re.sub(r"\W+", "", query.casefold())
+    normalized_query = re.sub(r"\W+", "", query_unaccented.casefold())
     try:
         res = session.get(
             f"https://v3.sg.media-imdb.com/suggestion/{query_slug[0]}/{query_slug}.json",
@@ -200,7 +202,8 @@ def search_imdb_title(title, media_type):
         results = res.json().get("d", []) if res.status_code == 200 else []
         for result in results:
             candidate = result.get("l", "")
-            normalized_candidate = re.sub(r"\W+", "", candidate.casefold())
+            candidate_unaccented = unicodedata.normalize('NFKD', candidate).encode('ascii', 'ignore').decode('ascii')
+            normalized_candidate = re.sub(r"\W+", "", candidate_unaccented.casefold())
             if normalized_candidate != normalized_query or result.get("qid") not in expected_types:
                 continue
             imdb_id = result.get("id", "")
@@ -263,8 +266,8 @@ def parse_flixpatrol_titles(html, media_type):
     """Extrai apenas a secção principal de filmes ou séries do FlixPatrol."""
     soup = BeautifulSoup(html, "html.parser")
     section_terms = {
-        "movie": ("top 10 movies", "top ranked movies"),
-        "series": ("top 10 tv shows", "top ranked tv shows"),
+        "movie": ("top 10 movies", "top ranked movies", "top 10 films", "top 10 movie"),
+        "series": ("top 10 tv shows", "top ranked tv shows", "top 10 tv", "top 10 series", "top 10 shows"),
     }
     heading = next(
         (
@@ -293,31 +296,76 @@ def parse_flixpatrol_titles(html, media_type):
     return titles
 
 
-def get_flixpatrol_top10(platform_slug, media_type):
-    """Recolhe o ranking FlixPatrol via ScraperAPI (sem render para poupar créditos)."""
+def get_flixpatrol_platform_data(platform_slug):
+    """
+    Recolhe simultaneamente os rankings de filmes e séries da FlixPatrol num único pedido ScraperAPI.
+    Poupa 50% dos créditos (apenas 6 créditos/dia = ~180 créditos/mês de 1000 disponíveis).
+    Inclui retentativas contra erros 500 do proxy e fallback pontual de render apenas se necessário.
+    """
     if not session or not BeautifulSoup:
-        return []
+        return [], []
     if not SCRAPER_API_KEY:
         print("  [!] SCRAPER_API_KEY não configurada.", flush=True)
-        return []
+        return [], []
+
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
+
+    # 1. Tenta sem render (1 crédito) com até 2 tentativas para contornar falhas transitórias do proxy (500)
+    for attempt in range(1, 3):
+        try:
+            response = session.get(
+                "https://api.scraperapi.com/",
+                params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
+                headers=HEADERS,
+                timeout=30,
+            )
+            if response.status_code == 200:
+                movie_titles = parse_flixpatrol_titles(response.text, "movie")
+                series_titles = parse_flixpatrol_titles(response.text, "series")
+                if movie_titles or series_titles:
+                    return movie_titles, series_titles
+                # Se respondeu 200 mas sem títulos, pode precisar de render
+                break
+            elif response.status_code in {500, 502, 503, 504}:
+                print(f"  [!] ScraperAPI {response.status_code} ({platform_slug}), tentativa {attempt}/2...", flush=True)
+                time.sleep(2)
+            else:
+                print(f"  [!] ScraperAPI HTTP {response.status_code} ({platform_slug})", flush=True)
+                break
+        except Exception as exc:
+            print(f"  [!] Erro FlixPatrol ({platform_slug}) tentativa {attempt}/2: {exc}", flush=True)
+            time.sleep(2)
+
+    # 2. Se sem render não obteve nada, tenta UMA vez com render (5 créditos) como último recurso
     try:
-        response = session.get(
+        print(f"  [i] A tentar FlixPatrol ({platform_slug}) com render...", flush=True)
+        rendered = session.get(
             "https://api.scraperapi.com/",
-            params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
+            params={
+                "api_key": SCRAPER_API_KEY,
+                "render": "true",
+                "wait_for_selector": "h3, h2, a[href*='/title/']",
+                "url": url,
+            },
             headers=HEADERS,
-            timeout=30,
+            timeout=60,
         )
-        if response.status_code != 200:
-            print(f"  [!] ScraperAPI HTTP {response.status_code} ({platform_slug})", flush=True)
-            return []
-        titles = parse_flixpatrol_titles(response.text, media_type)
-        if titles:
-            print(f"  [i] FlixPatrol ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
-        return titles
+        if rendered.status_code == 200:
+            movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
+            series_titles = parse_flixpatrol_titles(rendered.text, "series")
+            if movie_titles or series_titles:
+                print(f"  [i] FlixPatrol ({platform_slug}) obtido via render com sucesso", flush=True)
+                return movie_titles, series_titles
     except Exception as exc:
-        print(f"  [!] Erro FlixPatrol ({platform_slug}): {exc}", flush=True)
-        return []
+        print(f"  [!] Erro FlixPatrol render ({platform_slug}): {exc}", flush=True)
+
+    return [], []
+
+
+def get_flixpatrol_top10(platform_slug, media_type):
+    """Wrapper de retrocompatibilidade."""
+    movies, series = get_flixpatrol_platform_data(platform_slug)
+    return movies if media_type == "movie" else series
 
 
 # Fallback via TMDB caso alguma fonte externa esteja indisponível
@@ -1242,18 +1290,18 @@ def main():
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
 
-        movie_titles = []
-        series_titles = []
+        movie_titles, series_titles = get_flixpatrol_platform_data(prov["flix_slug"])
+        if movie_titles:
+            print(f"  [i] FlixPatrol ({prov['flix_slug']}, movie): {len(movie_titles)} títulos", flush=True)
+        else:
+            print("  [i] FlixPatrol indisponível para filmes; a usar fallback JustWatch...", flush=True)
+            movie_titles = get_justwatch_top10(prov.get("jw_pkg", ""), "movie") if prov.get("jw_pkg") else []
 
-        print(f"  -> A recolher rankings FlixPatrol Portugal ({prov['name']})...", flush=True)
-        movie_titles = get_flixpatrol_top10(prov["flix_slug"], "movie")
-        series_titles = get_flixpatrol_top10(prov["flix_slug"], "series")
-        if not movie_titles:
-          print("  [i] FlixPatrol indisponível para filmes; a usar fallback JustWatch...", flush=True)
-          movie_titles = get_justwatch_top10(prov.get("jw_pkg", ""), "movie") if prov.get("jw_pkg") else []
-        if not series_titles:
-          print("  [i] FlixPatrol indisponível para séries; a usar fallback JustWatch...", flush=True)
-          series_titles = get_justwatch_top10(prov.get("jw_pkg", ""), "series") if prov.get("jw_pkg") else []
+        if series_titles:
+            print(f"  [i] FlixPatrol ({prov['flix_slug']}, series): {len(series_titles)} títulos", flush=True)
+        else:
+            print("  [i] FlixPatrol indisponível para séries; a usar fallback JustWatch...", flush=True)
+            series_titles = get_justwatch_top10(prov.get("jw_pkg", ""), "series") if prov.get("jw_pkg") else []
 
         movie_items = resolve_titles_to_items(movie_titles, "movie")
         if not movie_items:
