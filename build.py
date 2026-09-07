@@ -474,32 +474,32 @@ def draw_rank_badge(poster_bytes, rank):
         overlay = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
 
-        margin_x = 24
-        margin_y = 24
-        badge_h = 46
-        radius = badge_h // 2  # 23px
+        margin_x = 28
+        margin_y = 28
+        badge_h = 76
+        radius = badge_h // 2  # 38px
 
         rank_text = f"#{rank}"
         accent_color = (255, 255, 255, 255)
-        outline_color = (255, 255, 255, 100)
-        fill_color = (10, 10, 20, 230)
+        outline_color = (255, 255, 255, 120)
+        fill_color = (10, 10, 20, 235)
 
-        font_badge = get_badge_font(22, bold=True)
+        font_badge = get_badge_font(48, bold=True)
         text_bbox = draw.textbbox((0, 0), rank_text, font=font_badge)
         text_w = text_bbox[2] - text_bbox[0]
         text_h = text_bbox[3] - text_bbox[1]
 
-        pad_x = 18
-        badge_w = max(62, text_w + (2 * pad_x))
+        pad_x = 26
+        badge_w = max(100, text_w + (2 * pad_x))
 
         # Sombra suave para contraste em capas claras
         shadow_box = [
-            margin_x + 2,
-            margin_y + 3,
-            margin_x + badge_w + 2,
-            margin_y + badge_h + 3
+            margin_x + 3,
+            margin_y + 4,
+            margin_x + badge_w + 3,
+            margin_y + badge_h + 4
         ]
-        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 150))
+        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 160))
 
         # Pílula principal
         box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
@@ -508,7 +508,7 @@ def draw_rank_badge(poster_bytes, rank):
             radius=radius,
             fill=fill_color,
             outline=outline_color,
-            width=2
+            width=3
         )
 
         # Texto centrado
