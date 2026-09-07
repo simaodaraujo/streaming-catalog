@@ -29,8 +29,6 @@ except ImportError:
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
 SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "https://top-streaming-pt.vercel.app").rstrip("/")
-HISTORY_FILE = "dist/history.json"
-LOCAL_HISTORY = "history.json"
 
 TMDB_GENRES = {
     28: "Ação", 12: "Aventura", 16: "Animação", 35: "Comédia", 80: "Crime",
@@ -481,9 +479,9 @@ def get_badge_font(size, bold=False):
         return ImageFont.load_default()
 
 
-def draw_rank_badge(poster_bytes, rank, variation):
+def draw_rank_badge(poster_bytes, rank):
     """
-    Desenha uma pílula bem visível no canto superior esquerdo com a indicação de subida/queda/estreia.
+    Desenha uma pílula com o número de ranking (#1 a #10) no canto superior esquerdo.
     Padroniza todos os posters para o rácio 2:3 exato (600x900px), garantindo posição
     100% idêntica e milimétrica do badge em qualquer filme ou série.
     """
@@ -512,45 +510,36 @@ def draw_rank_badge(poster_bytes, rank, variation):
         badge_h = 46
         radius = badge_h // 2  # 23px
 
-        if variation.startswith('+'):
-            var_text = f"▲ +{variation[1:]}"
-            accent_color = (74, 222, 128, 255)       # Verde vivo
-            outline_color = (74, 222, 128, 210)
-            fill_color = (8, 26, 15, 240)
-        elif variation.startswith('-'):
-            var_text = f"▼ {variation[1:]}"
-            accent_color = (248, 113, 113, 255)     # Vermelho claro
-            outline_color = (248, 113, 113, 210)
-            fill_color = (30, 10, 14, 240)
-        elif variation in ('NOVO', 'ENTRADA'):
-            var_text = "★ ENTRADA"
-            accent_color = (250, 204, 21, 255)      # Dourado vivo
-            outline_color = (250, 204, 21, 210)
-            fill_color = (24, 18, 4, 240)
+        # Badge de ranking simples: #1, #2, ... #10
+        rank_text = f"#{rank}"
+        # #1 recebe destaque dourado, restantes ficam brancos
+        if rank == 1:
+            accent_color = (250, 204, 21, 255)   # Dourado
+            outline_color = (250, 204, 21, 180)
+            fill_color = (20, 15, 3, 245)
         else:
-            var_text = "● ="
-            accent_color = (226, 232, 240, 255)     # Prateado suave
-            outline_color = (148, 163, 184, 180)
-            fill_color = (15, 23, 42, 240)
+            accent_color = (255, 255, 255, 255)  # Branco
+            outline_color = (255, 255, 255, 100)
+            fill_color = (10, 10, 20, 230)
 
-        font_badge = get_badge_font(21, bold=True)
-        text_bbox = draw.textbbox((0, 0), var_text, font=font_badge)
+        font_badge = get_badge_font(22, bold=True)
+        text_bbox = draw.textbbox((0, 0), rank_text, font=font_badge)
         text_w = text_bbox[2] - text_bbox[0]
         text_h = text_bbox[3] - text_bbox[1]
 
-        pad_x = 16
-        badge_w = max(70, text_w + (2 * pad_x))
+        pad_x = 18
+        badge_w = max(62, text_w + (2 * pad_x))
 
-        # 4. Sombra suave para contraste máximo em capas claras
+        # Sombra suave para contraste em capas claras
         shadow_box = [
             margin_x + 2,
             margin_y + 3,
             margin_x + badge_w + 2,
             margin_y + badge_h + 3
         ]
-        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 140))
+        draw.rounded_rectangle(shadow_box, radius=radius, fill=(0, 0, 0, 150))
 
-        # 5. Pílula principal com rebordo translúcido colorido
+        # Pílula principal
         box = [margin_x, margin_y, margin_x + badge_w, margin_y + badge_h]
         draw.rounded_rectangle(
             box,
@@ -560,11 +549,11 @@ def draw_rank_badge(poster_bytes, rank, variation):
             width=2
         )
 
-        # 6. Desenhar texto perfeitamente centrado
+        # Texto centrado
         try:
             draw.text(
                 (margin_x + badge_w / 2, margin_y + badge_h / 2),
-                var_text,
+                rank_text,
                 font=font_badge,
                 fill=accent_color,
                 anchor="mm"
@@ -572,7 +561,7 @@ def draw_rank_badge(poster_bytes, rank, variation):
         except TypeError:
             draw.text(
                 (margin_x + (badge_w - text_w) / 2, margin_y + (badge_h - text_h) / 2),
-                var_text,
+                rank_text,
                 font=font_badge,
                 fill=accent_color
             )
@@ -587,43 +576,9 @@ def draw_rank_badge(poster_bytes, rank, variation):
         return poster_bytes
 
 
-def load_history():
-    for path in [HISTORY_FILE, LOCAL_HISTORY]:
-        if os.path.exists(path):
-            try:
-                with open(path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                pass
-    # O GitHub Actions começa num checkout limpo. Recupera o histórico do último
-    # deploy para as setas compararem com o ranking do dia anterior.
-    if session and BASE_URL:
-        try:
-            res = session.get(f"{BASE_URL}/history.json", timeout=10)
-            if res.status_code == 200:
-                history = res.json()
-                if isinstance(history, dict):
-                    print("[i] Histórico de rankings recuperado do último deploy.", flush=True)
-                    return history
-        except Exception as e:
-            print(f"[!] Não foi possível recuperar o histórico publicado: {e}", flush=True)
-    return {}
-
-
-def save_history(history):
-    os.makedirs("dist", exist_ok=True)
-    try:
-        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-        with open(LOCAL_HISTORY, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f"  [!] Erro ao guardar histórico de rankings: {e}", flush=True)
-
-
-def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streaming"):
+def apply_badges_to_catalog(items, cat_id, provider_name="Streaming"):
     """
-    Calcula variações de ranking, desenha badges nos posters e guarda em dist/posters.
+    Desenha badges de ranking (#1-#10) nos posters e guarda em dist/posters.
     Mantém os metadados (géneros, sinopse, rating) originais e limpos para o Cinemeta/Stremio.
     """
     os.makedirs("dist/posters", exist_ok=True)
@@ -633,18 +588,6 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
     for rank, item in enumerate(items, 1):
         item_copy = dict(item)
         item_id = item_copy.get("id")
-        old_rank = history_dict.get(item_id) if history_dict else None
-
-        if old_rank is None:
-            variation = "ENTRADA"
-        else:
-            diff = old_rank - rank
-            if diff > 0:
-                variation = f"+{diff}"
-            elif diff < 0:
-                variation = f"{diff}"
-            else:
-                variation = "="
 
         if item_id:
             new_cat_history[item_id] = rank
@@ -660,7 +603,7 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
             try:
                 res = session.get(original_poster, timeout=8)
                 if res.status_code == 200:
-                    badged_bytes = draw_rank_badge(res.content, rank, variation)
+                    badged_bytes = draw_rank_badge(res.content, rank)
                     if badged_bytes and len(badged_bytes) > 0:
                         with open(poster_path, "wb") as f:
                             f.write(badged_bytes)
@@ -673,7 +616,7 @@ def apply_badges_to_catalog(items, cat_id, history_dict, provider_name="Streamin
 
         updated_items.append(item_copy)
 
-    return updated_items, new_cat_history
+    return updated_items
 
 
 def create_landing_page(featured_items=None):
@@ -1105,7 +1048,7 @@ def create_landing_page(featured_items=None):
     <img src="logo.png" alt="Top 10 Streams PT" class="main-logo" draggable="false" onerror="this.style.display='none'">
 
     <p class="subtitle">Extensão para ver o TOP 10 filmes e séries de várias plataformas de streaming em Portugal.</p>
-    <h3 class="tags-heading">Clique nas plataformas que queres ver disponível no stremio(<bold>todas selecionadas por padrão<bold>):</h3>
+    <h3 class="tags-heading">Seleciona as plataformas — <strong>todas selecionadas por padrão</strong>:</h3>
 
     <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
       <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
@@ -1344,8 +1287,6 @@ def main():
     if os.path.exists("img/logo.png"):
         shutil.copy("img/logo.png", "dist/logo.png")
 
-    history = load_history()
-    new_history = {}
     manifest_catalogs = []
     featured_items = []
 
@@ -1373,8 +1314,7 @@ def main():
         print(f"  -> Filmes encontrados: {len(movie_items)}/10", flush=True)
         if movie_items:
             cat_id = f"{prov['id']}_pt_movies"
-            movie_items, cat_hist = apply_badges_to_catalog(movie_items, cat_id, history.get(cat_id, {}), prov["name"])
-            new_history[cat_id] = cat_hist
+            movie_items = apply_badges_to_catalog(movie_items, cat_id, prov["name"])
             for rank, item in enumerate(movie_items, 1):
               featured_items.append({
                 "platform": prov["name"],
@@ -1406,8 +1346,7 @@ def main():
         print(f"  -> Séries encontradas: {len(series_items)}/10", flush=True)
         if series_items:
             cat_id = f"{prov['id']}_pt_series"
-            series_items, cat_hist = apply_badges_to_catalog(series_items, cat_id, history.get(cat_id, {}), prov["name"])
-            new_history[cat_id] = cat_hist
+            series_items = apply_badges_to_catalog(series_items, cat_id, prov["name"])
             for rank, item in enumerate(series_items, 1):
               featured_items.append({
                 "platform": prov["name"],
@@ -1430,8 +1369,6 @@ def main():
                 "name": f"{prov['name']} Top 10",
                 "extra": [{"name": "skip", "isRequired": False}]
             })
-
-    save_history(new_history)
 
     # 1. Manifest Padrão (todas as plataformas)
     manifest = {

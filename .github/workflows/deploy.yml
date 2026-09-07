@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  schedule:
-    # Corre todos os dias às 12:30 UTC
-    - cron: '30 12 * * *'
   workflow_dispatch:
 
 jobs:
