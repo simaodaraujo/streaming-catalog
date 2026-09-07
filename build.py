@@ -40,6 +40,65 @@ TMDB_GENRES = {
     10765: "Sci-Fi e Fantasia", 10766: "Novela", 10767: "Talk Show", 10768: "Guerra e Política"
 }
 
+GENRE_MAP = {
+    "Ação": ["Ação", "Ação e Aventura", "Action", "Action & Adventure"],
+    "Aventura": ["Aventura", "Ação e Aventura", "Adventure", "Action & Adventure"],
+    "Animação": ["Animação", "Animation"],
+    "Comédia": ["Comédia", "Comedy"],
+    "Crime": ["Crime"],
+    "Documentário": ["Documentário", "Documentary"],
+    "Drama": ["Drama"],
+    "Família": ["Família", "Infantil", "Family", "Kids"],
+    "Fantasia": ["Fantasia", "Sci-Fi e Fantasia", "Fantasy", "Sci-Fi & Fantasy"],
+    "Ficção científica": ["Ficção científica", "Sci-Fi e Fantasia", "Sci-Fi", "Science Fiction", "Sci-Fi & Fantasy"],
+    "Guerra": ["Guerra", "Guerra e Política", "War", "War & Politics"],
+    "História": ["História", "History"],
+    "Mistério": ["Mistério", "Mystery"],
+    "Música": ["Música", "Music"],
+    "Reality": ["Reality"],
+    "Romance": ["Romance"],
+    "Terror": ["Terror", "Horror"],
+    "Thriller": ["Thriller", "Suspense"],
+    "Faroeste": ["Faroeste", "Western"],
+}
+
+ALL_GENRES = list(GENRE_MAP.keys())
+
+ENGLISH_GENRE_MAP = {
+    "Action": "Ação",
+    "Adventure": "Aventura",
+    "Animation": "Animação",
+    "Comedy": "Comédia",
+    "Crime": "Crime",
+    "Documentary": "Documentário",
+    "Drama": "Drama",
+    "Family": "Família",
+    "Fantasy": "Fantasia",
+    "Sci-Fi": "Ficção científica",
+    "Science Fiction": "Ficção científica",
+    "War": "Guerra",
+    "History": "História",
+    "Mystery": "Mistério",
+    "Music": "Música",
+    "Reality": "Reality",
+    "Romance": "Romance",
+    "Horror": "Terror",
+    "Thriller": "Thriller",
+    "Western": "Faroeste",
+}
+
+
+def filter_items_by_genre(items, genre_name):
+    """Filtra itens procurando correspondências de géneros, incluindo variantes de TV e sinónimos."""
+    aliases = {a.casefold() for a in GENRE_MAP.get(genre_name, [genre_name])}
+    matched = []
+    for item in items:
+        item_genres = {g.casefold() for g in item.get("genres", [])}
+        if aliases & item_genres:
+            matched.append(item)
+    return matched
+
+
 if not TMDB_API_KEY and os.path.exists(".env"):
     try:
         with open(".env", "r", encoding="utf-8") as f:
@@ -430,6 +489,7 @@ def resolve_titles_to_items(titles, media_type):
         if not item:
             item = search_imdb_title(title, media_type)
         if item and not any(existing["id"] == item["id"] for existing in items):
+            item["type"] = media_type
             items.append(item)
         elif not item:
             print(f"  [!] Título descartado do catálogo {media_type}: {title}", flush=True)
@@ -740,12 +800,89 @@ def create_landing_page(featured_items=None):
       opacity: 0.7;
       flex-shrink: 0;
     }}
-    .tags-heading {{
+    .platform-customizer {{
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 20px auto;
+    }}
+    .customizer-btn {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background-color: #27272a;
+      border: 1px solid #3f3f46;
+      color: #e4e4e7;
+      padding: 10px 14px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      outline: none;
+    }}
+    .customizer-btn:hover {{
+      background-color: #323238;
+      border-color: #52525b;
+      color: #ffffff;
+    }}
+    .customizer-btn.open {{
+      border-color: #71717a;
+      background-color: #2e2e33;
+    }}
+    .customizer-btn-left {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    .customizer-btn-left svg {{
+      width: 15px;
+      height: 15px;
       color: #a1a1aa;
-      margin-bottom: 12px;
-      letter-spacing: 0.01em;
+    }}
+    .customizer-btn-right {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }}
+    .customizer-counter {{
+      font-size: 11px;
+      font-weight: 600;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      color: #4ade80;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      transition: color 0.2s ease;
+    }}
+    .customizer-chevron {{
+      width: 15px;
+      height: 15px;
+      color: #a1a1aa;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }}
+    .customizer-btn.open .customizer-chevron {{
+      transform: rotate(180deg);
+    }}
+    .customizer-drawer {{
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
+      margin-top: 0;
+    }}
+    .customizer-drawer.open {{
+      max-height: 300px;
+      opacity: 1;
+      margin-top: 12px;
+    }}
+    .customizer-hint {{
+      font-size: 11px;
+      color: #71717a;
+      margin-bottom: 8px;
+      text-align: center;
     }}
 
     .tags {{
@@ -753,18 +890,18 @@ def create_landing_page(featured_items=None):
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 28px;
+      margin-bottom: 8px;
     }}
     .tag {{
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background-color: #27272a;
+      background-color: #1f1f23;
       border: 1px solid #3f3f46;
       color: #d4d4d8;
       font-size: 11px;
       font-weight: 500;
-      padding: 6px 12px;
+      padding: 7px 12px;
       border-radius: 8px;
       cursor: pointer;
       user-select: none;
@@ -774,12 +911,12 @@ def create_landing_page(featured_items=None):
     }}
     .tag svg {{ height: 12px; width: auto; opacity: 0.9; fill: currentColor; }}
     .tag:hover {{
-      background-color: #323238;
+      background-color: #27272a;
       border-color: #52525b;
       color: #ffffff;
     }}
     .tag.inactive {{
-      opacity: 0.3;
+      opacity: 0.35;
       background-color: #18181b;
       border-color: #27272a;
       color: #71717a;
@@ -1062,43 +1199,61 @@ def create_landing_page(featured_items=None):
         Filtro por género
       </div>
     </div>
-    <h3 class="tags-heading">Seleciona as plataformas — <strong>todas selecionadas por padrão</strong>:</h3>
-
-    <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
-      <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #E50914;"><path fill="currentColor" d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
-        Netflix
+    <div class="platform-customizer">
+      <button type="button" class="customizer-btn" id="customizer-toggle" onclick="toggleCustomizer()" aria-expanded="false">
+        <div class="customizer-btn-left">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+          </svg>
+          <span>Personalizar Plataformas</span>
+        </div>
+        <div class="customizer-btn-right">
+          <span class="customizer-counter" id="platform-counter">6 de 6 ativas</span>
+          <svg viewBox="0 0 20 20" fill="currentColor" class="customizer-chevron" id="customizer-chevron">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </div>
       </button>
 
-      <button type="button" class="tag" data-provider="disney" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #0063e5;">
-          <path fill="currentColor" d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
-          <path fill="currentColor" d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
-        </svg>
-        Disney+
-      </button>
+      <div class="customizer-drawer" id="customizer-drawer">
+        <p class="customizer-hint">Clica numa plataforma para incluir ou retirar do teu addon:</p>
+        <div class="tags" id="platform-tags" title="Clica numa plataforma para incluir ou retirar do addon">
+          <button type="button" class="tag" data-provider="netflix" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #E50914;"><path fill="currentColor" d="M6.3 21.5L6.3 2.5L9.5 2.5L16.5 15.5L16.5 2.5L19.7 2.5L19.7 21.5L16.5 21.5L9.5 8.5L9.5 21.5Z"/></svg>
+            Netflix
+          </button>
 
-      <button type="button" class="tag" data-provider="prime" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path fill="currentColor" d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
-        Prime Video
-      </button>
+          <button type="button" class="tag" data-provider="disney" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #0063e5;">
+              <path fill="currentColor" d="M12.92 11.23c-.73-.24-1.78-.45-2.9-.6-1.08 1.4-2.4 2.87-4.14 4.02-1.2.78-2.22 1.14-2.92 1.14-.65 0-1.02-.32-1.02-.9 0-.82.68-1.98 1.96-3.32 1.36-1.44 3.1-2.6 4.95-3.46C7.54 5.92 6.55 4.7 6.55 3.8c0-.6.38-1 1.1-1 .78 0 1.83.6 2.86 1.7.53-.1.97-.15 1.3-.15 1.15 0 2 .3 2.37.82.4.52.44 1.13.13 1.7-.12.22-.3.42-.55.62 1.63.15 3.14.4 4.4.78 1.67.5 2.65 1.1 2.65 1.75 0 .5-.47.92-1.28 1.17-.6.18-1.34.3-2.12.3-.57 0-1.15-.04-1.73-.13.1.25.17.5.17.77 0 .5-.15.93-.43 1.3-.28.37-.67.55-1.17.55-.47 0-.9-.16-1.27-.47zm-1.8-1.5c-1.37.95-2.73 2.1-3.97 3.32-.82.8-1.25 1.5-1.25 1.95 0 .15.07.25.2.25.26 0 .9-.28 1.75-.82 1.34-.84 2.4-1.95 3.12-3.1-1.07-.46-2.02-1-2.8-1.57zm1.1-1.98c.5-.83 1-1.77 1.4-2.74-.83.35-1.6.85-2.3 1.48.33.4.63.83.9 1.26zm3.22 1.98c-1.08-.34-2.38-.55-3.8-.65-.18.77-.45 1.5-.83 2.15 1.3-.14 2.32-.38 3-.73.47-.2.7-.42.7-.63 0-.1-.13-.23-.38-.34l-1.3-.4-.14.6z"/>
+              <path fill="currentColor" d="M22.5 10h-2.5V7.5h-1.5V10h-2.5v1.5h2.5v2.5h1.5v-2.5h2.5z"/>
+            </svg>
+            Disney+
+          </button>
 
-      <button type="button" class="tag" data-provider="hbo" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #a855f7;">
-          <path fill="currentColor" d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
-        </svg>
-        HBO
-      </button>
+          <button type="button" class="tag" data-provider="prime" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #00a8e1;"><path fill="currentColor" d="M12 18C7.5 18 4 15.5 3 12C4.5 14.5 8 16 12 16C16 16 19.5 14.5 21 12C20 15.5 16.5 18 12 18Z"/></svg>
+            Prime Video
+          </button>
 
-      <button type="button" class="tag" data-provider="apple" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 384 512" style="color: #ffffff;"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-        Apple TV+
-      </button>
+          <button type="button" class="tag" data-provider="hbo" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #a855f7;">
+              <path fill="currentColor" d="M13.6 15.39h-2.92V8.61h2.92c1.78 0 2.82.95 2.82 2.38v.03c0 .87-.4 1.54-1.07 1.97.83.35 1.34 1.12 1.34 2.06v.03c0 1.5-1.12 2.5-3.1 2.5zm-1.17-3.8h.98c.84 0 1.32-.4 1.32-1.02v-.03c0-.68-.5-.98-1.28-.98h-1.02v2.03zm0 2.65h1.16c.86 0 1.45-.44 1.45-1.1v-.02c0-.75-.62-1.12-1.46-1.12h-1.15v2.24zM8.33 15.39H6.58v-2.85H2.9v2.85H1.15V8.61H2.9v2.66h3.68V8.61h1.75v6.78zM19.14 15.5c2.14 0 3.7-1.57 3.7-3.48v-.03c0-1.92-1.55-3.5-3.7-3.5s-3.7 1.57-3.7 3.48v.03c0 1.92 1.55 3.5 3.7 3.5zm0-1.47c-1.15 0-1.94-.92-1.94-2.01v-.03c0-1.1.8-2.02 1.94-2.02s1.95.91 1.95 2.01v.03c0 1.1-.8 2.02-1.95 2.02z"/>
+            </svg>
+            HBO
+          </button>
 
-      <button type="button" class="tag" data-provider="skyshowtime" onclick="toggleProvider(this)">
-        <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        SkyShowtime
-      </button>
+          <button type="button" class="tag" data-provider="apple" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 384 512" style="color: #ffffff;"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+            Apple TV+
+          </button>
+
+          <button type="button" class="tag" data-provider="skyshowtime" onclick="toggleProvider(this)">
+            <svg viewBox="0 0 24 24" style="color: #00ff7f;"><path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            SkyShowtime
+          </button>
+        </div>
+      </div>
     </div>
 
     <a id="install-btn" href="#" class="btn btn-stremio">
@@ -1167,6 +1322,14 @@ def create_landing_page(featured_items=None):
       return window.location.origin;
     }}
 
+    function toggleCustomizer() {{
+      const btn = document.getElementById('customizer-toggle');
+      const drawer = document.getElementById('customizer-drawer');
+      const isOpen = drawer.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      btn.setAttribute('aria-expanded', isOpen);
+    }}
+
     function toggleProvider(element) {{
       element.classList.toggle('inactive');
       updateManifestUrls();
@@ -1177,7 +1340,19 @@ def create_landing_page(featured_items=None):
       const selected = activeTags.map(el => el.getAttribute('data-provider')).sort();
       const installBtn = document.getElementById('install-btn');
       const copyBtn = document.getElementById('copy-btn');
+      const counter = document.getElementById('platform-counter');
       const origin = getBaseHostUrl();
+
+      if (counter) {{
+        counter.textContent = `${{selected.length}} de ${{ALL_PROVIDERS.length}} ativas`;
+        if (selected.length === ALL_PROVIDERS.length) {{
+          counter.style.color = '#4ade80';
+        }} else if (selected.length > 0) {{
+          counter.style.color = '#facc15';
+        }} else {{
+          counter.style.color = '#f87171';
+        }}
+      }}
 
       if (selected.length === 0) {{
         installBtn.classList.add('disabled');
@@ -1347,17 +1522,20 @@ def main():
             with open(f"dist/catalog/movie/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": clean_movie_items}, f, ensure_ascii=False)
 
-            # Gerar catálogos filtrados por género
-            movie_genres = sorted({g for item in clean_movie_items for g in item.get("genres", [])})
-            if movie_genres:
-                os.makedirs(f"dist/catalog/movie/{cat_id}", exist_ok=True)
-                for genre in movie_genres:
-                    genre_items = [item for item in clean_movie_items if genre in item.get("genres", [])]
-                    if genre_items:
-                        with open(f"dist/catalog/movie/{cat_id}/genre={genre}.json", "w", encoding="utf-8") as f:
-                            json.dump({"metas": genre_items}, f, ensure_ascii=False)
+            # Gerar catálogos filtrados para TODOS os géneros possíveis
+            os.makedirs(f"dist/catalog/movie/{cat_id}", exist_ok=True)
+            for genre in ALL_GENRES:
+                genre_items = filter_items_by_genre(clean_movie_items, genre)
+                with open(f"dist/catalog/movie/{cat_id}/genre={genre}.json", "w", encoding="utf-8") as f:
+                    json.dump({"metas": genre_items}, f, ensure_ascii=False)
 
-            genre_extra = [{"name": "genre", "isRequired": False, "options": movie_genres}] if movie_genres else []
+            # Também cria ficheiros para aliases em inglês (ex: Action, Drama, Horror) para compatibilidade universal
+            for en_genre, pt_genre in ENGLISH_GENRE_MAP.items():
+                en_items = filter_items_by_genre(clean_movie_items, pt_genre)
+                with open(f"dist/catalog/movie/{cat_id}/genre={en_genre}.json", "w", encoding="utf-8") as f:
+                    json.dump({"metas": en_items}, f, ensure_ascii=False)
+
+            genre_extra = [{"name": "genre", "isRequired": False, "options": ALL_GENRES}]
             manifest_catalogs.append({
                 "type": "movie",
                 "id": cat_id,
@@ -1392,17 +1570,20 @@ def main():
             with open(f"dist/catalog/series/{cat_id}.json", "w", encoding="utf-8") as f:
                 json.dump({"metas": clean_series_items}, f, ensure_ascii=False)
 
-            # Gerar catálogos filtrados por género
-            series_genres = sorted({g for item in clean_series_items for g in item.get("genres", [])})
-            if series_genres:
-                os.makedirs(f"dist/catalog/series/{cat_id}", exist_ok=True)
-                for genre in series_genres:
-                    genre_items = [item for item in clean_series_items if genre in item.get("genres", [])]
-                    if genre_items:
-                        with open(f"dist/catalog/series/{cat_id}/genre={genre}.json", "w", encoding="utf-8") as f:
-                            json.dump({"metas": genre_items}, f, ensure_ascii=False)
+            # Gerar catálogos filtrados para TODOS os géneros possíveis
+            os.makedirs(f"dist/catalog/series/{cat_id}", exist_ok=True)
+            for genre in ALL_GENRES:
+                genre_items = filter_items_by_genre(clean_series_items, genre)
+                with open(f"dist/catalog/series/{cat_id}/genre={genre}.json", "w", encoding="utf-8") as f:
+                    json.dump({"metas": genre_items}, f, ensure_ascii=False)
 
-            genre_extra = [{"name": "genre", "isRequired": False, "options": series_genres}] if series_genres else []
+            # Também cria ficheiros para aliases em inglês (ex: Action, Drama, Horror) para compatibilidade universal
+            for en_genre, pt_genre in ENGLISH_GENRE_MAP.items():
+                en_items = filter_items_by_genre(clean_series_items, pt_genre)
+                with open(f"dist/catalog/series/{cat_id}/genre={en_genre}.json", "w", encoding="utf-8") as f:
+                    json.dump({"metas": en_items}, f, ensure_ascii=False)
+
+            genre_extra = [{"name": "genre", "isRequired": False, "options": ALL_GENRES}]
             manifest_catalogs.append({
                 "type": "series",
                 "id": cat_id,
