@@ -5,7 +5,7 @@ import re
 import io
 import shutil
 import itertools
-from datetime import datetime, date, timedelta
+from datetime import datetime
 
 try:
     import requests
@@ -77,7 +77,6 @@ PROVIDERS = [
   {"id": "skyshowtime", "name": "SkyShowtime", "tmdb_id": 1773, "flix_slug": "skyshowtime", "jw_pkg": "sst", "color": "#00ff7f"},
 ]
 
-NETFLIX_COUNTRY_SLUG = "portugal"
 
 
 def clean_title(title):
@@ -223,57 +222,6 @@ def search_imdb_title(title, media_type):
         print(f"  [!] Erro IMDb ao procurar '{title}': {e}", flush=True)
     return None
 
-def _last_published_sunday(reference=None):
-    ref = reference or date.today()
-    w = ref.weekday()
-    if w == 6:
-        days = 7
-    elif w == 0:
-        days = 8
-    else:
-        days = w + 1
-    return ref - timedelta(days=days)
-
-
-_last_sunday = _last_published_sunday
-
-
-def get_netflix_official_top10(media_type):
-    """
-    media_type: 'films' ou 'tv'
-    Tenta as ultimas 3 semanas publicadas.
-    """
-    candidate_sunday = _last_published_sunday()
-
-    for _ in range(3):
-        date_str = candidate_sunday.isoformat()
-        url = f"https://top10.netflix.com/{NETFLIX_COUNTRY_SLUG}/{media_type}/{date_str}"
-        try:
-            res = session.get(url, headers=HEADERS, timeout=10)
-            if res.status_code == 200:
-                soup = BeautifulSoup(res.text, "html.parser")
-                table = soup.find("table")
-                titles = []
-                if table:
-                    rows = table.select("tbody tr") or table.find_all("tr")[1:]
-                    for row in rows[:10]:
-                        cols = row.find_all("td")
-                        if cols:
-                            btn = cols[0].find("button")
-                            title_text = btn.get_text(strip=True) if btn else cols[0].get_text(strip=True)
-                            title_text = re.sub(r'^\d+\.?\s*', '', title_text)
-                            if title_text:
-                                titles.append(title_text)
-                if titles:
-                    print(f"  [i] Netflix Top 10 ({media_type}) da semana de {date_str} ({len(titles)} títulos)", flush=True)
-                    return titles
-        except Exception as e:
-            print(f"  [!] Erro ao obter Top 10 oficial da Netflix ({date_str}): {e}", flush=True)
-
-        candidate_sunday -= timedelta(days=7)
-
-    return []
-
 def get_justwatch_top10(package_code, media_type):
     """
     Recolhe o Top 10 real de Portugal para a plataforma indicada via JustWatch GraphQL.
@@ -346,53 +294,26 @@ def parse_flixpatrol_titles(html, media_type):
 
 
 def get_flixpatrol_top10(platform_slug, media_type):
-    """Recolhe o ranking FlixPatrol exclusivamente através do ScraperAPI."""
+    """Recolhe o ranking FlixPatrol via ScraperAPI (sem render para poupar créditos)."""
     if not session or not BeautifulSoup:
+        return []
+    if not SCRAPER_API_KEY:
+        print("  [!] SCRAPER_API_KEY não configurada.", flush=True)
         return []
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
     try:
-        if not SCRAPER_API_KEY:
-            print("  [!] SCRAPER_API_KEY não configurada; não foi possível consultar FlixPatrol.", flush=True)
-            return []
-
-        response = None
-        try:
-          response = session.get(
+        response = session.get(
             "https://api.scraperapi.com/",
             params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
             headers=HEADERS,
             timeout=30,
-          )
-        except Exception as exc:
-          print(f"  [!] FlixPatrol proxy sem render falhou: {exc}", flush=True)
-        if response is not None and response.status_code != 200:
-          print(f"  [!] ScraperAPI respondeu HTTP {response.status_code} sem render ({platform_slug})", flush=True)
-        titles = parse_flixpatrol_titles(response.text, media_type) if response is not None and response.status_code == 200 else []
-        if response is not None and response.status_code == 200 and not titles:
-          print(f"  [!] ScraperAPI respondeu sem a secção Top 10 ({platform_slug}, {media_type})", flush=True)
-        if not titles:
-          try:
-            rendered = session.get(
-              "https://api.scraperapi.com/",
-              params={
-                "api_key": SCRAPER_API_KEY,
-                "render": "true",
-                "wait_for_selector": "h3",
-                "url": url,
-              },
-              headers=HEADERS,
-              timeout=75,
-            )
-            if rendered.status_code == 200:
-              titles = parse_flixpatrol_titles(rendered.text, media_type)
-              if titles:
-                print(f"  [i] FlixPatrol renderizado ({platform_slug}, {media_type})", flush=True)
-            else:
-              print(f"  [!] ScraperAPI respondeu HTTP {rendered.status_code} com render ({platform_slug})", flush=True)
-          except Exception as exc:
-            print(f"  [!] FlixPatrol proxy renderizado falhou: {exc}", flush=True)
+        )
+        if response.status_code != 200:
+            print(f"  [!] ScraperAPI HTTP {response.status_code} ({platform_slug})", flush=True)
+            return []
+        titles = parse_flixpatrol_titles(response.text, media_type)
         if titles:
-            print(f"  [i] FlixPatrol via ScraperAPI ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
+            print(f"  [i] FlixPatrol ({platform_slug}, {media_type}): {len(titles)} títulos", flush=True)
         return titles
     except Exception as exc:
         print(f"  [!] Erro FlixPatrol ({platform_slug}): {exc}", flush=True)
@@ -1074,10 +995,6 @@ def create_landing_page(featured_items=None):
       <div class="feature-pill">
         <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.553.894l-4 2A1 1 0 016 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
         Filtro por género
-      </div>
-      <div class="feature-pill">
-        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        Netflix · Disney+ · Prime · HBO · Apple TV+ · SkyShowtime
       </div>
     </div>
     <h3 class="tags-heading">Seleciona as plataformas — <strong>todas selecionadas por padrão</strong>:</h3>
