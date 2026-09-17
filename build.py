@@ -511,7 +511,7 @@ def get_badge_font(size, bold=False):
 
 def draw_rank_badge(poster_bytes, rank):
     """
-    Desenha uma pílula com o número de ranking (#1 a #10) no canto superior esquerdo.
+    Desenha uma pílula com o número de ranking (#1 a #10) no canto superior direito (evitando sobreposicao com o visto de reproducao do Stremio no canto esquerdo).
     Padroniza todos os posters para o rácio 2:3 exato (600x900px), garantindo posição
     100% idêntica e milimétrica do badge em qualquer filme ou série.
     """
@@ -535,7 +535,6 @@ def draw_rank_badge(poster_bytes, rank):
         overlay = Image.new("RGBA", (TARGET_W, TARGET_H), (0, 0, 0, 0))
         draw = ImageDraw.Draw(overlay)
 
-        margin_x = 28
         margin_y = 28
         badge_h = 76
         radius = badge_h // 2  # 38px
@@ -552,6 +551,9 @@ def draw_rank_badge(poster_bytes, rank):
 
         pad_x = 26
         badge_w = max(100, text_w + (2 * pad_x))
+
+        # Canto superior direito (para nao colidir com o visto de visto/assistido do Stremio no canto superior esquerdo)
+        margin_x = TARGET_W - badge_w - 28
 
         # Sombra suave para contraste em capas claras
         shadow_box = [
