@@ -984,35 +984,6 @@ def create_landing_page(featured_items=None):
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
     }}
-    .nuvio-tip-card {{
-      max-width: 480px;
-      margin: 16px auto 0 auto;
-      padding: 12px 16px;
-      background: rgba(14, 165, 233, 0.07);
-      border: 1px solid rgba(14, 165, 233, 0.22);
-      border-radius: 10px;
-      text-align: left;
-      font-size: 12px;
-      line-height: 1.55;
-      color: #94a3b8;
-    }}
-    .nuvio-tip-title {{
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-weight: 600;
-      color: #38bdf8;
-      margin-bottom: 4px;
-      font-size: 12.5px;
-    }}
-    .nuvio-tip-title svg {{
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
-    }}
-    .nuvio-tip-card strong {{
-      color: #f1f5f9;
-    }}
     .btn-outline {{
       background-color: #27272a;
       color: #a1a1aa;
@@ -1212,18 +1183,6 @@ def create_landing_page(featured_items=None):
       </svg>
       Copiar Manifest
     </button>
-
-    <div class="nuvio-tip-card">
-      <div class="nuvio-tip-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-        <span>Dica para a Página Principal no Nuvio</span>
-      </div>
-      <p>Para exibir no ecrã inicial do Nuvio: vá a <strong>Definições &rarr; Conteúdo e Descoberta &rarr; Reordenar Catálogos</strong>, certifique-se de que o TOP 10 está <strong>ativado</strong> e mova as linhas para o topo.</p>
-    </div>
 
     <!-- Sneak Peek Section -->
     <div class="sneak-peek-section">
