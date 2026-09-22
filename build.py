@@ -1168,13 +1168,13 @@ def create_landing_page(featured_items=None):
       Instalar no Stremio
     </a>
 
-    <a id="install-nuvio-btn" href="#" class="btn btn-nuvio">
+    <button type="button" id="install-nuvio-btn" onclick="handleNuvioInstall()" class="btn btn-nuvio">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
         <polyline points="17 2 12 7 7 2"></polyline>
       </svg>
       Instalar no Nuvio
-    </a>
+    </button>
 
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
       <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -1270,9 +1270,29 @@ def create_landing_page(featured_items=None):
       }}
 
       const stremioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'stremio://');
-      const nuvioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'nuvio://');
       installBtn.href = stremioUrl;
-      if (installNuvioBtn) installNuvioBtn.href = nuvioUrl;
+    }}
+
+    function handleNuvioInstall() {{
+      if (!currentManifestUrl) return;
+      navigator.clipboard.writeText(currentManifestUrl);
+      const btn = document.getElementById('install-nuvio-btn');
+      btn.innerHTML = '<span style="color:#ffffff; display:inline-flex; align-items:center; gap:6px;">✔ Link Copiado para o Nuvio!</span>';
+
+      const nuvioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'nuvio://');
+      try {{
+        window.location.href = nuvioUrl;
+      }} catch (err) {{}}
+
+      setTimeout(() => {{
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>
+          Instalar no Nuvio
+        `;
+      }}, 3000);
     }}
 
     function copyManifestUrl() {{

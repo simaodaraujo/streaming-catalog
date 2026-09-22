@@ -440,13 +440,13 @@
       Instalar no Stremio
     </a>
 
-    <a id="install-nuvio-btn" href="#" class="btn btn-nuvio">
+    <button type="button" id="install-nuvio-btn" onclick="handleNuvioInstall()" class="btn btn-nuvio">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
         <polyline points="17 2 12 7 7 2"></polyline>
       </svg>
       Instalar no Nuvio
-    </a>
+    </button>
 
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
       <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -463,67 +463,47 @@
               <div class="peek-track peek-track-0">
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_9.jpg" alt="Toy Story - Os Rivais" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_9.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_1.jpg" alt="A Guerra dos Tronos" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_8.jpg" alt="Homem-Aranha: No Universo-Aranha" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_8.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_2.jpg" alt="Ted Lasso" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_10.jpg" alt="Prison Break: Fuga da Prisão" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_10.jpg'">
+              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_10.jpg" alt="Dune - Duna" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_6.jpg" alt="Gladiador" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_6.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_6.jpg" alt="Lei & Ordem" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_6.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_5.jpg" alt="Teen Titans, Ação!" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_5.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_10.jpg" alt="Breaking Bad" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_7.jpg" alt="Family Guy" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_7.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg" alt="Vingadores: Guerra do Infinito" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_1.jpg" alt="Lioness" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_1.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_7.jpg" alt="Terapia Sem Filtros" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_7.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_9.jpg" alt="Homem-Aranha: No Universo-Aranha" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_9.jpg'">
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg" alt="Elize: Sombras de uma Mulher" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg'">
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_9.jpg" alt="Toy Story - Os Rivais" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_9.jpg'">
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_8.jpg" alt="Homem-Aranha: No Universo-Aranha" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_8.jpg'">
-            </div>
-          </article>
-          <article class="peek-card">
-            <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_10.jpg" alt="Prison Break: Fuga da Prisão" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_10.jpg'">
+              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
@@ -533,134 +513,154 @@
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_6.jpg" alt="Gladiador" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_6.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_1.jpg" alt="A Guerra dos Tronos" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_5.jpg" alt="Teen Titans, Ação!" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_5.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_2.jpg" alt="Ted Lasso" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_7.jpg" alt="Family Guy" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_7.jpg'">
+              <img src="posters/prime_pt_movies_1.jpg" alt="The Runner" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_1.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_1.jpg" alt="Lioness" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_1.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_10.jpg" alt="Dune - Duna" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_9.jpg" alt="Homem-Aranha: No Universo-Aranha" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_9.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_6.jpg" alt="Lei & Ordem" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_6.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg" alt="Elize: Sombras de uma Mulher" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_10.jpg" alt="Breaking Bad" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_10.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg" alt="Vingadores: Guerra do Infinito" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_3.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_7.jpg" alt="Terapia Sem Filtros" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_7.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="posters/hbo_pt_movies_1.jpg" alt="Os Condenados de Shawshank" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_movies_1.jpg'">
+            </div>
+          </article>
+          <article class="peek-card">
+            <div class="peek-poster-box">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_7.jpg'">
             </div>
           </article>
         </div>
         <div class="peek-track peek-track-1">
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_4.jpg" alt="Rua Sésamo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_9.jpg" alt="Friends" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_9.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg" alt="The Last Sunrise" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_3.jpg" alt="Investigação Criminal" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_3.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_10.jpg" alt="Missão Greyhound" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_7.jpg" alt="Rick and Morty" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_7.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_6.jpg" alt="Dr. House" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_6.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg" alt="O Silo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg" alt="Elize: Sombras de uma Mulher" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_8.jpg" alt="The Gentlemen: Senhores do Crime: A Série" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_8.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_3.jpg" alt="Lei & Ordem: Unidade Especial" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_3.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg" alt="Top Gun: Maverick" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_4.jpg" alt="Star Wars - The Mandalorian and Grogu" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_10.jpg" alt="Mythic Quest" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_10.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_5.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_4.jpg" alt="Teen Titans, Ação!" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_4.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_8.jpg" alt="No Limite" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_8.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_2.jpg" alt="O Mentalista" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_2.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_3.jpg" alt="Mentes Criminosas" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_3.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg" alt="Os Vingadores" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_2.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_4.jpg" alt="Rua Sésamo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_9.jpg" alt="Friends" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_9.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg" alt="The Last Sunrise" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_movies_2.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_3.jpg" alt="Investigação Criminal" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_3.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_movies_10.jpg" alt="Missão Greyhound" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_7.jpg" alt="Rick and Morty" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_7.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_6.jpg" alt="Dr. House" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_6.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg" alt="O Silo" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_1.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg" alt="Elize: Sombras de uma Mulher" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_movies_10.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/netflix_pt_series_8.jpg" alt="The Gentlemen: Senhores do Crime: A Série" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/netflix_pt_series_8.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_3.jpg" alt="Lei & Ordem: Unidade Especial" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_3.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg" alt="Top Gun: Maverick" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_movies_5.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_movies_4.jpg" alt="Star Wars - The Mandalorian and Grogu" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_movies_4.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/apple_pt_series_10.jpg" alt="Mythic Quest" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/apple_pt_series_10.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_5.jpg" alt="O Escritório" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/skyshowtime_pt_series_5.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/hbo_pt_series_4.jpg" alt="Teen Titans, Ação!" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/hbo_pt_series_4.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_8.jpg" alt="No Limite" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_8.jpg'">
             </div>
           </article>
           <article class="peek-card">
             <div class="peek-poster-box">
-              <img src="https://top-streaming-pt.vercel.app/posters/prime_pt_series_2.jpg" alt="O Mentalista" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/prime_pt_series_2.jpg'">
+              <img src="https://top-streaming-pt.vercel.app/posters/disney_pt_series_3.jpg" alt="Mentes Criminosas" loading="eager" decoding="async" onerror="this.src='https://top-streaming-pt.vercel.app/posters/disney_pt_series_3.jpg'">
             </div>
           </article>
         </div>
@@ -669,7 +669,7 @@
     </div>
 
     <div class="footer">
-      <span id="time-ago" data-time="2026-09-22T19:31:16.369015Z">Atualizado recentemente</span>
+      <span id="time-ago" data-time="2026-09-22T19:36:00.520186Z">Atualizado recentemente</span>
       <span class="schedule">Atualiza todos os dias às 12h30 UTC</span>
       <span class="version">v1.1.0</span>
     </div>
@@ -745,9 +745,29 @@
       }
 
       const stremioUrl = currentManifestUrl.replace(/^https?:\/\//, 'stremio://');
-      const nuvioUrl = currentManifestUrl.replace(/^https?:\/\//, 'nuvio://');
       installBtn.href = stremioUrl;
-      if (installNuvioBtn) installNuvioBtn.href = nuvioUrl;
+    }
+
+    function handleNuvioInstall() {
+      if (!currentManifestUrl) return;
+      navigator.clipboard.writeText(currentManifestUrl);
+      const btn = document.getElementById('install-nuvio-btn');
+      btn.innerHTML = '<span style="color:#ffffff; display:inline-flex; align-items:center; gap:6px;">✔ Link Copiado para o Nuvio!</span>';
+
+      const nuvioUrl = currentManifestUrl.replace(/^https?:\/\//, 'nuvio://');
+      try {
+        window.location.href = nuvioUrl;
+      } catch (err) {}
+
+      setTimeout(() => {
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+            <polyline points="17 2 12 7 7 2"></polyline>
+          </svg>
+          Instalar no Nuvio
+        `;
+      }, 3000);
     }
 
     function copyManifestUrl() {
