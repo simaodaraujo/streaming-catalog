@@ -1,12 +1,43 @@
 {
-  "rewrites": [],
+  "rewrites": [
+    {"source": "/c/:config/catalog/:path*", "destination": "/catalog/:path*"},
+    {"source": "/c/:config/posters/:path*", "destination": "/posters/:path*"},
+    {"source": "/c/:config/logo.png", "destination": "/logo.png"},
+    {"source": "/c/:config/configure", "destination": "/index.html"},
+    {"source": "/c/:config", "destination": "/index.html"},
+    {"source": "/configure", "destination": "/index.html"}
+  ],
   "headers": [
+    {
+      "source": "/posters/(.*)",
+      "headers": [
+        {"key": "Access-Control-Allow-Origin", "value": "*"},
+        {"key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS"},
+        {"key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400"}
+      ]
+    },
+    {
+      "source": "/catalog/(.*)",
+      "headers": [
+        {"key": "Access-Control-Allow-Origin", "value": "*"},
+        {"key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS"},
+        {"key": "Cache-Control", "value": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=86400"}
+      ]
+    },
+    {
+      "source": "/(.*)manifest.json",
+      "headers": [
+        {"key": "Access-Control-Allow-Origin", "value": "*"},
+        {"key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS"},
+        {"key": "Cache-Control", "value": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=86400"}
+      ]
+    },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS" },
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
+        {"key": "Access-Control-Allow-Origin", "value": "*"},
+        {"key": "Access-Control-Allow-Methods", "value": "GET, HEAD, OPTIONS"},
+        {"key": "Cache-Control", "value": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=86400"}
       ]
     }
   ]

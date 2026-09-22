@@ -39,7 +39,7 @@ jobs:
           mkdir -p .vercel/output/static
           cp -r dist/* .vercel/output/static/
 
-          # Config que garante ficheiros estáticos sem framework detection
+          # Config que garante ficheiros estáticos sem framework detection e com caching optimizado
           cat > .vercel/output/config.json << 'EOF'
           {
             "version": 3,
@@ -69,10 +69,38 @@ jobs:
                 "dest": "/index.html"
               },
               {
+                "src": "^/(?:c/[^/]+/)?posters/.*$",
+                "headers": {
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+                  "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400"
+                },
+                "continue": true
+              },
+              {
+                "src": "^/(?:c/[^/]+/)?catalog/.*$",
+                "headers": {
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+                  "Cache-Control": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=86400"
+                },
+                "continue": true
+              },
+              {
+                "src": ".*manifest\\.json$",
+                "headers": {
+                  "Access-Control-Allow-Origin": "*",
+                  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+                  "Cache-Control": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=86400"
+                },
+                "continue": true
+              },
+              {
                 "src": "/(.*)",
                 "headers": {
                   "Access-Control-Allow-Origin": "*",
-                  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS"
+                  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+                  "Cache-Control": "public, max-age=1800, s-maxage=86400, stale-while-revalidate=86400"
                 },
                 "continue": true
               }
