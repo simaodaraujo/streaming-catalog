@@ -973,6 +973,46 @@ def create_landing_page(featured_items=None):
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     }}
+    .btn-nuvio {{
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }}
+    .btn-nuvio:hover {{
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+    }}
+    .nuvio-tip-card {{
+      max-width: 480px;
+      margin: 16px auto 0 auto;
+      padding: 12px 16px;
+      background: rgba(14, 165, 233, 0.07);
+      border: 1px solid rgba(14, 165, 233, 0.22);
+      border-radius: 10px;
+      text-align: left;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #94a3b8;
+    }}
+    .nuvio-tip-title {{
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-bottom: 4px;
+      font-size: 12.5px;
+    }}
+    .nuvio-tip-title svg {{
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }}
+    .nuvio-tip-card strong {{
+      color: #f1f5f9;
+    }}
     .btn-outline {{
       background-color: #27272a;
       color: #a1a1aa;
@@ -1154,7 +1194,15 @@ def create_landing_page(featured_items=None):
       <svg viewBox="0 0 24 24" style="fill: currentColor;">
         <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.5 2.5 0 0 1 0 5H2v4c0 1.1.9 2 2 2h3.8v-1.5a2.5 2.5 0 0 1 5 0V21H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5z"/>
       </svg>
-      Instalar Addon
+      Instalar no Stremio
+    </a>
+
+    <a id="install-nuvio-btn" href="#" class="btn btn-nuvio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+        <polyline points="17 2 12 7 7 2"></polyline>
+      </svg>
+      Instalar no Nuvio
     </a>
 
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
@@ -1164,6 +1212,18 @@ def create_landing_page(featured_items=None):
       </svg>
       Copiar Manifest
     </button>
+
+    <div class="nuvio-tip-card">
+      <div class="nuvio-tip-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Dica para a Página Principal no Nuvio</span>
+      </div>
+      <p>Para exibir no ecrã inicial do Nuvio: vá a <strong>Definições &rarr; Conteúdo e Descoberta &rarr; Reordenar Catálogos</strong>, certifique-se de que o TOP 10 está <strong>ativado</strong> e mova as linhas para o topo.</p>
+    </div>
 
     <!-- Sneak Peek Section -->
     <div class="sneak-peek-section">
@@ -1206,6 +1266,7 @@ def create_landing_page(featured_items=None):
       const activeTags = Array.from(document.querySelectorAll('.tag:not(.inactive)'));
       const selected = activeTags.map(el => el.getAttribute('data-provider')).sort();
       const installBtn = document.getElementById('install-btn');
+      const installNuvioBtn = document.getElementById('install-nuvio-btn');
       const copyBtn = document.getElementById('copy-btn');
       const counter = document.getElementById('platform-counter');
       const origin = getBaseHostUrl();
@@ -1230,12 +1291,17 @@ def create_landing_page(featured_items=None):
       if (selected.length === 0) {{
         installBtn.classList.add('disabled');
         installBtn.removeAttribute('href');
+        if (installNuvioBtn) {{
+          installNuvioBtn.classList.add('disabled');
+          installNuvioBtn.removeAttribute('href');
+        }}
         copyBtn.classList.add('disabled');
         currentManifestUrl = '';
         return;
       }}
 
       installBtn.classList.remove('disabled');
+      if (installNuvioBtn) installNuvioBtn.classList.remove('disabled');
       copyBtn.classList.remove('disabled');
 
       if (selected.length === ALL_PROVIDERS.length) {{
@@ -1245,7 +1311,9 @@ def create_landing_page(featured_items=None):
       }}
 
       const stremioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'stremio://');
+      const nuvioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'nuvio://');
       installBtn.href = stremioUrl;
+      if (installNuvioBtn) installNuvioBtn.href = nuvioUrl;
     }}
 
     function copyManifestUrl() {{
@@ -1438,6 +1506,8 @@ def main():
                 "type": "movie",
                 "id": cat_id,
                 "name": f"{prov['name']} Top 10",
+                "pageSize": 10,
+                "showInHome": True,
                 "extra": genre_extra + [{"name": "skip", "isRequired": False}]
             })
 
@@ -1486,6 +1556,8 @@ def main():
                 "type": "series",
                 "id": cat_id,
                 "name": f"{prov['name']} Top 10",
+                "pageSize": 10,
+                "showInHome": True,
                 "extra": genre_extra + [{"name": "skip", "isRequired": False}]
             })
 

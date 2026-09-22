@@ -1,0 +1,476 @@
+{
+  "id": "pt.top-streaming",
+  "version": "1.1.0",
+  "name": "TOP 10 Portugal (Filmes & Séries)",
+  "description": "TOP 10 do momento na Netflix, Disney+, Prime Video, HBO, Apple TV+ e SkyShowtime em Portugal",
+  "logo": "https://top-streaming-pt.vercel.app/logo.png",
+  "resources": [
+    "catalog"
+  ],
+  "types": [
+    "movie",
+    "series"
+  ],
+  "behaviorHints": {
+    "configurable": true,
+    "configurationRequired": false
+  },
+  "catalogs": [
+    {
+      "type": "movie",
+      "id": "netflix_pt_movies",
+      "name": "Netflix Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "netflix_pt_series",
+      "name": "Netflix Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "disney_pt_movies",
+      "name": "Disney+ Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "disney_pt_series",
+      "name": "Disney+ Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "prime_pt_movies",
+      "name": "Prime Video Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "prime_pt_series",
+      "name": "Prime Video Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "hbo_pt_movies",
+      "name": "HBO Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "hbo_pt_series",
+      "name": "HBO Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "apple_pt_movies",
+      "name": "Apple TV+ Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "apple_pt_series",
+      "name": "Apple TV+ Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "movie",
+      "id": "skyshowtime_pt_movies",
+      "name": "SkyShowtime Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "type": "series",
+      "id": "skyshowtime_pt_series",
+      "name": "SkyShowtime Top 10",
+      "pageSize": 10,
+      "showInHome": true,
+      "extra": [
+        {
+          "name": "genre",
+          "isRequired": false,
+          "options": [
+            "Ação",
+            "Aventura",
+            "Animação",
+            "Comédia",
+            "Crime",
+            "Documentário",
+            "Drama",
+            "Família",
+            "Fantasia",
+            "Ficção científica",
+            "Guerra",
+            "História",
+            "Mistério",
+            "Música",
+            "Reality",
+            "Romance",
+            "Terror",
+            "Thriller",
+            "Faroeste"
+          ]
+        },
+        {
+          "name": "skip",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}
