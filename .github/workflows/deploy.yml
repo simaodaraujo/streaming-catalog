@@ -1,6 +1,9 @@
 name: Build and Deploy to Vercel
 
 on:
+  schedule:
+    # Executa 1 vez por dia as 06:00 UTC (quando o Top 10 diario esta consolidado)
+    - cron: '0 6 * * *'
   push:
     branches:
       - main

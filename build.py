@@ -358,70 +358,36 @@ def parse_flixpatrol_titles(html, media_type):
 
 def get_flixpatrol_platform_data(platform_slug):
     """
-    Recolhe simultaneamente os rankings de filmes e séries da FlixPatrol num único pedido ScraperAPI.
-    Poupa 50% dos créditos (apenas 6 créditos/dia = ~180 créditos/mês de 1000 disponíveis).
-    Inclui retentativas contra erros 500 do proxy e fallback pontual de render apenas se necessário.
+    Recolhe rankings de filmes e series do FlixPatrol num unico pedido ScraperAPI estritamente sem render (1 credito).
+    Nunca usa render=true (que gasta 5 a 10 creditos por pedido). Se o FlixPatrol falhar ou estiver protegido,
+    cai de imediato para o fallback gratuito do JustWatch PT (0 creditos), garantindo no maximo 6 moedas/dia.
     """
     if not session or not BeautifulSoup:
         return [], []
     if not SCRAPER_API_KEY:
-        print("  [!] SCRAPER_API_KEY não configurada.", flush=True)
+        print("  [!] SCRAPER_API_KEY nao configurada.", flush=True)
         return [], []
 
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
 
-    # 1. Tenta sem render (1 crédito) com até 2 tentativas para contornar falhas transitórias do proxy (500)
-    for attempt in range(1, 3):
-        try:
-            response = session.get(
-                "https://api.scraperapi.com/",
-                params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
-                headers=HEADERS,
-                timeout=30,
-            )
-            if response.status_code == 200:
-                movie_titles = parse_flixpatrol_titles(response.text, "movie")
-                series_titles = parse_flixpatrol_titles(response.text, "series")
-                if movie_titles or series_titles:
-                    return movie_titles, series_titles
-                # Se respondeu 200 mas sem títulos, pode precisar de render
-                break
-            elif response.status_code in {500, 502, 503, 504}:
-                print(f"  [!] ScraperAPI {response.status_code} ({platform_slug}), tentativa {attempt}/2...", flush=True)
-                time.sleep(2)
-            else:
-                print(f"  [!] ScraperAPI HTTP {response.status_code} ({platform_slug})", flush=True)
-                break
-        except Exception as exc:
-            print(f"  [!] Erro FlixPatrol ({platform_slug}) tentativa {attempt}/2: {exc}", flush=True)
-            time.sleep(2)
-
-    # 2. Se sem render não obteve nada, tenta UMA vez com render (5 créditos) como último recurso
     try:
-        print(f"  [i] A tentar FlixPatrol ({platform_slug}) com render...", flush=True)
-        rendered = session.get(
+        response = session.get(
             "https://api.scraperapi.com/",
-            params={
-                "api_key": SCRAPER_API_KEY,
-                "render": "true",
-                "wait_for_selector": "h3, h2, a[href*='/title/']",
-                "url": url,
-            },
+            params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
             headers=HEADERS,
-            timeout=60,
+            timeout=25,
         )
-        if rendered.status_code == 200:
-            movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
-            series_titles = parse_flixpatrol_titles(rendered.text, "series")
+        if response.status_code == 200:
+            movie_titles = parse_flixpatrol_titles(response.text, "movie")
+            series_titles = parse_flixpatrol_titles(response.text, "series")
             if movie_titles or series_titles:
-                print(f"  [i] FlixPatrol ({platform_slug}) obtido via render com sucesso", flush=True)
                 return movie_titles, series_titles
+        else:
+            print(f"  [!] ScraperAPI HTTP {response.status_code} ({platform_slug})", flush=True)
     except Exception as exc:
-        print(f"  [!] Erro FlixPatrol render ({platform_slug}): {exc}", flush=True)
+        print(f"  [!] Erro FlixPatrol ({platform_slug}): {exc}", flush=True)
 
     return [], []
-
-
 def get_flixpatrol_top10(platform_slug, media_type):
     """Wrapper de retrocompatibilidade."""
     movies, series = get_flixpatrol_platform_data(platform_slug)
