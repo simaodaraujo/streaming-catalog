@@ -358,9 +358,11 @@ def parse_flixpatrol_titles(html, media_type):
 
 def get_flixpatrol_platform_data(platform_slug):
     """
-    Recolhe rankings de filmes e series do FlixPatrol num unico pedido ScraperAPI estritamente sem render (1 credito).
-    Nunca usa render=true (que gasta 5 a 10 creditos por pedido). Se o FlixPatrol falhar ou estiver protegido,
-    cai de imediato para o fallback gratuito do JustWatch PT (0 creditos), garantindo no maximo 6 moedas/dia.
+    Recolhe simultaneamente os rankings oficiais de filmes e series da FlixPatrol num unico pedido.
+    1. Tenta primeiro sem render (1 credito).
+    2. Se nao obtiver os titulos (pois a FlixPatrol requer JS), tenta 1 vez com render (5 creditos)
+       para garantir o Top 10 real oficial das plataformas em vez de aproximacoes por cliques.
+    3. Se falhar, o script usa JustWatch PT como rede de seguranca.
     """
     if not session or not BeautifulSoup:
         return [], []
@@ -370,6 +372,7 @@ def get_flixpatrol_platform_data(platform_slug):
 
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
 
+    # 1. Tentativa sem render (apenas 1 credito)
     try:
         response = session.get(
             "https://api.scraperapi.com/",
@@ -381,11 +384,33 @@ def get_flixpatrol_platform_data(platform_slug):
             movie_titles = parse_flixpatrol_titles(response.text, "movie")
             series_titles = parse_flixpatrol_titles(response.text, "series")
             if movie_titles or series_titles:
+                print(f"  [i] FlixPatrol ({platform_slug}) obtido sem render (1 credito)", flush=True)
                 return movie_titles, series_titles
-        else:
-            print(f"  [!] ScraperAPI HTTP {response.status_code} ({platform_slug})", flush=True)
     except Exception as exc:
-        print(f"  [!] Erro FlixPatrol ({platform_slug}): {exc}", flush=True)
+        print(f"  [!] FlixPatrol ({platform_slug}) tentativa sem render: {exc}", flush=True)
+
+    # 2. Se sem render nao veio a tabela (Cloudflare ou JS rendering), faz 1 tentativa com render (5 creditos)
+    try:
+        print(f"  [i] A obter Top 10 real FlixPatrol ({platform_slug}) com render...", flush=True)
+        rendered = session.get(
+            "https://api.scraperapi.com/",
+            params={
+                "api_key": SCRAPER_API_KEY,
+                "render": "true",
+                "wait_for_selector": "h3, h2, a[href*='/title/']",
+                "url": url,
+            },
+            headers=HEADERS,
+            timeout=50,
+        )
+        if rendered.status_code == 200:
+            movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
+            series_titles = parse_flixpatrol_titles(rendered.text, "series")
+            if movie_titles or series_titles:
+                print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via render", flush=True)
+                return movie_titles, series_titles
+    except Exception as exc:
+        print(f"  [!] Erro FlixPatrol render ({platform_slug}): {exc}", flush=True)
 
     return [], []
 def get_flixpatrol_top10(platform_slug, media_type):
@@ -1393,7 +1418,33 @@ def main():
     for prov in PROVIDERS:
         print(f"\n--- A processar {prov['name']} ---", flush=True)
 
-        movie_titles, series_titles = get_flixpatrol_platform_data(prov["flix_slug"])
+        # Se for um push de codigo normal (nao o agendamento diario) e ja existirem dados gerados,
+        # reutiliza os catalogos para poupar 100% das moedas da ScraperAPI.
+        existing_movie_cat = f"dist/catalog/movie/{prov['id']}_pt_movies.json"
+        existing_series_cat = f"dist/catalog/series/{prov['id']}_pt_series.json"
+        should_reuse_local = (
+            os.environ.get("GITHUB_EVENT_NAME") == "push"
+            and os.environ.get("FORCE_SCRAPE", "").lower() != "true"
+            and os.path.exists(existing_movie_cat)
+            and os.path.exists(existing_series_cat)
+        )
+
+        movie_titles = []
+        series_titles = []
+
+        if should_reuse_local:
+            try:
+                with open(existing_movie_cat, "r", encoding="utf-8") as f:
+                    movie_titles = [m.get("name") for m in json.load(f).get("metas", []) if m.get("name")]
+                with open(existing_series_cat, "r", encoding="utf-8") as f:
+                    series_titles = [s.get("name") for s in json.load(f).get("metas", []) if s.get("name")]
+                if movie_titles or series_titles:
+                    print(f"  [i] Catalogo local reutilizado para {prov['name']} (0 moedas gastas no git push).", flush=True)
+            except Exception:
+                movie_titles, series_titles = [], []
+
+        if not movie_titles and not series_titles:
+            movie_titles, series_titles = get_flixpatrol_platform_data(prov["flix_slug"])
         if movie_titles:
             print(f"  [i] FlixPatrol ({prov['flix_slug']}, movie): {len(movie_titles)} títulos", flush=True)
         else:
