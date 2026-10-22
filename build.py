@@ -717,6 +717,339 @@ def create_landing_page(featured_items=None):
         rows_html.append(f'        <div class="peek-track peek-track-{row_index}">\n{row_cards}{row_cards}        </div>')
     rows_html = "\n".join(rows_html)
 
+    style_css = """* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: #1c1c1e;
+  color: #f5f5f7;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrapper {
+  max-width: 900px;
+  width: 100%;
+  text-align: center;
+  margin: 0 auto;
+}
+.main-logo {
+  display: block;
+  margin: 0 auto 20px;
+  max-width: 100%;
+  height: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+p.subtitle {
+  font-size: 14px;
+  color: #a1a1aa;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.features-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.feature-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  color: #a1a1aa;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 9999px;
+}
+.feature-pill svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+.platform-customizer {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 20px auto;
+}
+.customizer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #27272a;
+  border: 1px solid #3f3f46;
+  color: #e4e4e7;
+  padding: 11px 15px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.customizer-btn:hover {
+  background-color: #323238;
+  border-color: #52525b;
+  color: #ffffff;
+}
+.customizer-btn:active {
+  transform: scale(0.99);
+}
+.customizer-btn.open {
+  border-color: #52525b;
+  background-color: #2e2e33;
+}
+.customizer-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.customizer-btn-left svg {
+  width: 17px;
+  height: 17px;
+  color: #a1a1aa;
+  flex-shrink: 0;
+}
+.customizer-btn-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.customizer-counter {
+  font-size: 11px;
+  font-weight: 600;
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  color: #4ade80;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.customizer-chevron {
+  width: 15px;
+  height: 15px;
+  color: #a1a1aa;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.customizer-btn.open .customizer-chevron {
+  transform: rotate(180deg);
+}
+.customizer-drawer {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
+  margin-top: 0;
+}
+.customizer-drawer.open {
+  max-height: 350px;
+  opacity: 1;
+  margin-top: 10px;
+}
+.customizer-panel {
+  background-color: #222226;
+  border: 1px solid #38383e;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.customizer-hint {
+  font-size: 11px;
+  color: #71717a;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #1f1f23;
+  border: 1px solid #38383e;
+  color: #d4d4d8;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  outline: none;
+}
+.tag svg { height: 12px; width: auto; opacity: 0.9; fill: currentColor; }
+.tag:hover {
+  background-color: #2a2a2f;
+  border-color: #52525b;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.tag:active {
+  transform: scale(0.96);
+}
+.tag.inactive {
+  opacity: 0.35;
+  background-color: #18181b;
+  border: 1px dashed #2e2e33;
+  color: #71717a;
+  filter: grayscale(100%);
+  text-decoration: line-through;
+  transform: none;
+}
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+  font-family: inherit;
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+.btn-stremio {
+  background-color: #7b5bf5;
+  color: #ffffff;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.btn-stremio:hover {
+  background-color: #6a4ce0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.btn-outline {
+  background-color: #27272a;
+  color: #a1a1aa;
+  border: 1px solid #3f3f46;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.btn-outline:hover {
+  background-color: #323238;
+  border-color: #52525b;
+  color: #f5f5f7;
+  transform: translateY(-1px);
+}
+.btn svg { width: 20px; height: 20px; }
+.sneak-peek-section {
+  margin-top: 32px;
+  text-align: center;
+}
+.peek-marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 8px 0 12px;
+  margin: 0 -12px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+.peek-gallery-drift {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.peek-track {
+  display: flex;
+  width: max-content;
+  gap: 8px;
+  animation: gallery-drift 140s linear infinite;
+  will-change: transform;
+}
+.peek-track-1 { animation-duration: 155s; animation-direction: reverse; }
+.peek-marquee:hover .peek-track { animation-play-state: paused; }
+@keyframes gallery-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 4px)); }
+}
+.peek-card {
+  position: relative;
+  width: auto;
+  background: transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  text-align: left;
+}
+.peek-poster-box {
+  position: relative;
+  width: 108px;
+  height: 162px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #15151a;
+  border-radius: 6px;
+  border: 1px solid #2e2e33;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+.peek-card:hover .peek-poster-box {
+  transform: scale(1.03);
+  border-color: #52525b;
+}
+.peek-poster-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+.footer {
+  margin-top: 32px;
+  font-size: 12px;
+  color: #52525b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.schedule { color: #71717a; }
+.version { color: #3f3f46; font-size: 11px; margin-top: 4px; }
+@media (max-width: 520px) {
+  .peek-marquee {
+    margin: 0 -8px;
+    padding-top: 6px;
+  }
+  .peek-poster-box {
+    width: 82px;
+    height: 123px;
+  }
+}"""
+
     html_content = f"""<!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -726,356 +1059,7 @@ def create_landing_page(featured_items=None):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{
-      background-color: #1c1c1e;
-      color: #f5f5f7;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-      -webkit-font-smoothing: antialiased;
-    }}
-    .wrapper {{
-      max-width: 900px;
-      width: 100%;
-      text-align: center;
-      margin: 0 auto;
-    }}
-    .main-logo {{
-      display: block;
-      margin: 0 auto 20px;
-      max-width: 100%;
-      height: auto;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
-      user-select: none;
-      -webkit-user-drag: none;
-    }}
-    p.subtitle {{
-      font-size: 14px;
-      color: #a1a1aa;
-      margin-bottom: 16px;
-      line-height: 1.5;
-    }}
-    .features-row {{
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 24px;
-    }}
-    .feature-pill {{
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background-color: #27272a;
-      border: 1px solid #3f3f46;
-      color: #a1a1aa;
-      font-size: 12px;
-      font-weight: 500;
-      padding: 5px 12px;
-      border-radius: 9999px;
-    }}
-    .feature-pill svg {{
-      width: 13px;
-      height: 13px;
-      opacity: 0.8;
-      flex-shrink: 0;
-    }}
-    .platform-customizer {{
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto 20px auto;
-    }}
-    .customizer-btn {{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      background-color: #27272a;
-      border: 1px solid #3f3f46;
-      color: #e4e4e7;
-      padding: 11px 15px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      font-family: inherit;
-      outline: none;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }}
-    .customizer-btn:hover {{
-      background-color: #323238;
-      border-color: #52525b;
-      color: #ffffff;
-    }}
-    .customizer-btn:active {{
-      transform: scale(0.99);
-    }}
-    .customizer-btn.open {{
-      border-color: #52525b;
-      background-color: #2e2e33;
-    }}
-    .customizer-btn-left {{
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }}
-    .customizer-btn-left svg {{
-      width: 17px;
-      height: 17px;
-      color: #a1a1aa;
-      flex-shrink: 0;
-    }}
-    .customizer-btn-right {{
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }}
-    .customizer-counter {{
-      font-size: 11px;
-      font-weight: 600;
-      background: #18181b;
-      border: 1px solid #3f3f46;
-      color: #4ade80;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }}
-    .customizer-chevron {{
-      width: 15px;
-      height: 15px;
-      color: #a1a1aa;
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }}
-    .customizer-btn.open .customizer-chevron {{
-      transform: rotate(180deg);
-    }}
-    .customizer-drawer {{
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, margin 0.25s ease;
-      margin-top: 0;
-    }}
-    .customizer-drawer.open {{
-      max-height: 350px;
-      opacity: 1;
-      margin-top: 10px;
-    }}
-    .customizer-panel {{
-      background-color: #222226;
-      border: 1px solid #38383e;
-      border-radius: 10px;
-      padding: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }}
-    .customizer-hint {{
-      font-size: 11px;
-      color: #71717a;
-      margin-bottom: 8px;
-      text-align: center;
-    }}
-
-    .tags {{
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-    }}
-    .tag {{
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background-color: #1f1f23;
-      border: 1px solid #38383e;
-      color: #d4d4d8;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 7px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-      font-family: inherit;
-      outline: none;
-    }}
-    .tag svg {{ height: 12px; width: auto; opacity: 0.9; fill: currentColor; }}
-    .tag:hover {{
-      background-color: #2a2a2f;
-      border-color: #52525b;
-      color: #ffffff;
-      transform: translateY(-1px);
-    }}
-    .tag:active {{
-      transform: scale(0.96);
-    }}
-    .tag.inactive {{
-      opacity: 0.35;
-      background-color: #18181b;
-      border: 1px dashed #2e2e33;
-      color: #71717a;
-      filter: grayscale(100%);
-      text-decoration: line-through;
-      transform: none;
-    }}
-
-    .btn {{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      border: none;
-      font-family: inherit;
-    }}
-    .btn:active {{
-      transform: scale(0.98);
-    }}
-    .btn.disabled {{
-      opacity: 0.4;
-      pointer-events: none;
-      cursor: not-allowed;
-    }}
-    .btn-stremio {{
-      background-color: #7b5bf5;
-      color: #ffffff;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }}
-    .btn-stremio:hover {{
-      background-color: #6a4ce0;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-    }}
-    .btn-nuvio {{
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      color: #ffffff;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-    }}
-    .btn-nuvio:hover {{
-      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
-    }}
-    .btn-outline {{
-      background-color: #27272a;
-      color: #a1a1aa;
-      border: 1px solid #3f3f46;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }}
-    .btn-outline:hover {{
-      background-color: #323238;
-      border-color: #52525b;
-      color: #f5f5f7;
-      transform: translateY(-1px);
-    }}
-    .btn svg {{ width: 20px; height: 20px; }}
-
-    /* SNEAK PEEK / GALLERY SECTION */
-    .sneak-peek-section {{
-      margin-top: 32px;
-      text-align: center;
-    }}
-    .peek-marquee {{
-      position: relative;
-      overflow: hidden;
-      padding: 8px 0 12px;
-      margin: 0 -12px;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-      mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-    }}
-    .peek-gallery-drift {{
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }}
-    .peek-track {{
-      display: flex;
-      width: max-content;
-      gap: 8px;
-      animation: gallery-drift 140s linear infinite;
-      will-change: transform;
-    }}
-    .peek-track-1 {{ animation-duration: 155s; animation-direction: reverse; }}
-    .peek-marquee:hover .peek-track {{ animation-play-state: paused; }}
-    @keyframes gallery-drift {{
-      from {{ transform: translateX(0); }}
-      to {{ transform: translateX(calc(-50% - 4px)); }}
-    }}
-    .peek-card {{
-      position: relative;
-      width: auto;
-      background: transparent;
-      border-radius: 6px;
-      overflow: hidden;
-      text-align: left;
-    }}
-    .peek-poster-box {{
-      position: relative;
-      width: 108px;
-      height: 162px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #15151a;
-      border-radius: 6px;
-      border: 1px solid #2e2e33;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
-    }}
-    .peek-card:hover .peek-poster-box {{
-      transform: scale(1.03);
-      border-color: #52525b;
-    }}
-    .peek-poster-box img {{
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      object-position: center;
-      display: block;
-    }}
-
-    .footer {{
-      margin-top: 32px;
-      font-size: 12px;
-      color: #52525b;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }}
-    .schedule {{ color: #71717a; }}
-    .version {{ color: #3f3f46; font-size: 11px; margin-top: 4px; }}
-    @media (max-width: 520px) {{
-      .peek-marquee {{
-        margin: 0 -8px;
-        padding-top: 6px;
-      }}
-      .peek-poster-box {{
-        width: 82px;
-        height: 123px;
-      }}
-    }}
-  </style>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="wrapper">
@@ -1159,14 +1143,6 @@ def create_landing_page(featured_items=None):
       Instalar no Stremio
     </a>
 
-    <button type="button" id="install-nuvio-btn" onclick="handleNuvioInstall()" class="btn btn-nuvio">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
-        <polyline points="17 2 12 7 7 2"></polyline>
-      </svg>
-      Instalar no Nuvio
-    </button>
-
     <button id="copy-btn" onclick="copyManifestUrl()" class="btn btn-outline">
       <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
@@ -1175,7 +1151,6 @@ def create_landing_page(featured_items=None):
       Copiar Manifest
     </button>
 
-    <!-- Sneak Peek Section -->
     <div class="sneak-peek-section">
       <div class="peek-marquee" aria-label="Títulos em destaque">
         <div class="peek-gallery-drift">
@@ -1216,7 +1191,6 @@ def create_landing_page(featured_items=None):
       const activeTags = Array.from(document.querySelectorAll('.tag:not(.inactive)'));
       const selected = activeTags.map(el => el.getAttribute('data-provider')).sort();
       const installBtn = document.getElementById('install-btn');
-      const installNuvioBtn = document.getElementById('install-nuvio-btn');
       const copyBtn = document.getElementById('copy-btn');
       const counter = document.getElementById('platform-counter');
       const origin = getBaseHostUrl();
@@ -1241,17 +1215,12 @@ def create_landing_page(featured_items=None):
       if (selected.length === 0) {{
         installBtn.classList.add('disabled');
         installBtn.removeAttribute('href');
-        if (installNuvioBtn) {{
-          installNuvioBtn.classList.add('disabled');
-          installNuvioBtn.removeAttribute('href');
-        }}
         copyBtn.classList.add('disabled');
         currentManifestUrl = '';
         return;
       }}
 
       installBtn.classList.remove('disabled');
-      if (installNuvioBtn) installNuvioBtn.classList.remove('disabled');
       copyBtn.classList.remove('disabled');
 
       if (selected.length === ALL_PROVIDERS.length) {{
@@ -1262,28 +1231,6 @@ def create_landing_page(featured_items=None):
 
       const stremioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'stremio://');
       installBtn.href = stremioUrl;
-    }}
-
-    function handleNuvioInstall() {{
-      if (!currentManifestUrl) return;
-      navigator.clipboard.writeText(currentManifestUrl);
-      const btn = document.getElementById('install-nuvio-btn');
-      btn.innerHTML = '<span style="color:#ffffff; display:inline-flex; align-items:center; gap:6px;">✔ Link Copiado para o Nuvio!</span>';
-
-      const nuvioUrl = currentManifestUrl.replace(/^https?:\\/\\//, 'nuvio://');
-      try {{
-        window.location.href = nuvioUrl;
-      }} catch (err) {{}}
-
-      setTimeout(() => {{
-        btn.innerHTML = `
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
-            <polyline points="17 2 12 7 7 2"></polyline>
-          </svg>
-          Instalar no Nuvio
-        `;
-      }}, 3000);
     }}
 
     function copyManifestUrl() {{
@@ -1342,10 +1289,12 @@ def create_landing_page(featured_items=None):
 </body>
 </html>
 """
+    with open("dist/style.css", "w", encoding="utf-8") as f:
+        f.write(style_css)
+
     with open("dist/index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    # Criar também dist/configure.html para garantir compatibilidade se acedido diretamente
     with open("dist/configure.html", "w", encoding="utf-8") as f:
         f.write(html_content)
 
@@ -1366,6 +1315,7 @@ def main():
             {"source": "/c/:config/catalog/:path*", "destination": "/catalog/:path*"},
             {"source": "/c/:config/posters/:path*", "destination": "/posters/:path*"},
             {"source": "/c/:config/logo.png", "destination": "/logo.png"},
+            {"source": "/c/:config/style.css", "destination": "/style.css"},
             {"source": "/c/:config/configure", "destination": "/index.html"},
             {"source": "/c/:config", "destination": "/index.html"},
             {"source": "/configure", "destination": "/index.html"}

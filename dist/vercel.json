@@ -3,6 +3,7 @@
     {"source": "/c/:config/catalog/:path*", "destination": "/catalog/:path*"},
     {"source": "/c/:config/posters/:path*", "destination": "/posters/:path*"},
     {"source": "/c/:config/logo.png", "destination": "/logo.png"},
+    {"source": "/c/:config/style.css", "destination": "/style.css"},
     {"source": "/c/:config/configure", "destination": "/index.html"},
     {"source": "/c/:config", "destination": "/index.html"},
     {"source": "/configure", "destination": "/index.html"}
