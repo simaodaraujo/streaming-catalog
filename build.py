@@ -381,6 +381,16 @@ def parse_flixpatrol_titles(html, media_type):
         titles.append(title)
         if len(titles) == 10:
             break
+
+    if not titles:
+        for a in soup.find_all("a", href=re.compile(r"/title/")):
+            title = re.sub(r"\s+", " ", a.get_text(" ", strip=True)).strip()
+            if len(title) >= 2 and title.casefold() not in seen:
+                seen.add(title.casefold())
+                titles.append(title)
+                if len(titles) == 10:
+                    break
+
     return titles
 
 
