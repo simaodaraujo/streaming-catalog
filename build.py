@@ -397,16 +397,14 @@ def parse_flixpatrol_titles(html, media_type):
 def get_flixpatrol_platform_data(platform_slug):
     """
     Recolhe simultaneamente os rankings oficiais de filmes e series da FlixPatrol num unico pedido.
-    1. Tenta ScrapingAnt (10.000 créditos gratuitos/mês, browser=True para ultrapassar Cloudflare).
-    2. Se falhar ou não estiver configurado, tenta ScraperAPI (direto com render=True para poupar créditos).
-    3. Se ambos falharem, o script usa JustWatch PT como rede de seguranca.
+    Usa ScraperAPI (com render=True) para recolher os dados oficiais do Top 10 de Portugal.
     """
     if not session or not BeautifulSoup:
         return [], []
 
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
 
-    # 1. ScraperAPI (Primário: conta com 5.000 créditos, render=True para ultrapassar Cloudflare)
+    # 1. ScraperAPI (render=True para executar JavaScript e ultrapassar proteção)
     if SCRAPER_API_KEY:
         try:
             print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScraperAPI (render)...", flush=True)
@@ -417,23 +415,21 @@ def get_flixpatrol_platform_data(platform_slug):
                     "render": "true",
                     "url": url,
                 },
-                headers=HEADERS,
-                timeout=75,
+                timeout=60,
             )
-            # Se for um domínio estritamente protegido pela Cloudflare (HTTP 500 "Protected"), reitera com proxies residenciais premium
+            # Se for um domínio estritamente protegido pela Cloudflare (HTTP 500 "Protected"), reitera com proxies ultra_premium
             if rendered.status_code == 500 and "Protected" in rendered.text:
-                print(f"  [i] A tentar ScraperAPI com premium=true para {platform_slug}...", flush=True)
+                print(f"  [i] A tentar ScraperAPI com ultra_premium=true para {platform_slug}...", flush=True)
                 time.sleep(2)
                 rendered = requests.get(
                     "https://api.scraperapi.com/",
                     params={
                         "api_key": SCRAPER_API_KEY,
                         "render": "true",
-                        "premium": "true",
+                        "ultra_premium": "true",
                         "url": url,
                     },
-                    headers=HEADERS,
-                    timeout=75,
+                    timeout=60,
                 )
 
             if rendered.status_code == 200:
@@ -450,40 +446,8 @@ def get_flixpatrol_platform_data(platform_slug):
         except Exception as exc:
             print(f"  [!] Erro ScraperAPI render ({platform_slug}): {exc}", flush=True)
 
-    # 2. ScrapingAnt (Secundário / Backup)
-    if SCRAPINGANT_API_KEY:
-        scrapingant_proxy_type = os.environ.get("SCRAPINGANT_PROXY_TYPE", "").strip()
-        params = {
-            "x-api-key": SCRAPINGANT_API_KEY,
-            "url": url,
-            "browser": "true",
-            "wait_for_selector": "a[href*='/title/']",
-        }
-        if scrapingant_proxy_type:
-            params["proxy_type"] = scrapingant_proxy_type
-
-        try:
-            print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt (backup)...", flush=True)
-            response = requests.get(
-                "https://api.scrapingant.com/v2/general",
-                params=params,
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=75,
-            )
-            if response.status_code == 200:
-                movie_titles = parse_flixpatrol_titles(response.text, "movie")
-                series_titles = parse_flixpatrol_titles(response.text, "series")
-                if movie_titles or series_titles:
-                    print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScrapingAnt", flush=True)
-                    time.sleep(5)
-                    return movie_titles, series_titles
-            else:
-                print(f"  [!] ScrapingAnt HTTP {response.status_code} ({platform_slug}): {response.text[:120]}", flush=True)
-        except Exception as exc:
-            print(f"  [!] Erro ScrapingAnt ({platform_slug}): {exc}", flush=True)
-
-    if not SCRAPINGANT_API_KEY and not SCRAPER_API_KEY:
-        print("  [!] Nem SCRAPINGANT_API_KEY nem SCRAPER_API_KEY configuradas para obter FlixPatrol.", flush=True)
+    if not SCRAPER_API_KEY:
+        print("  [!] SCRAPER_API_KEY não configurada para obter FlixPatrol.", flush=True)
 
     return [], []
 
