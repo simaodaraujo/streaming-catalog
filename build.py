@@ -131,7 +131,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 # Plataformas de streaming em Portugal
 PROVIDERS = [
   {"id": "netflix", "name": "Netflix", "tmdb_id": 8, "flix_slug": "netflix", "jw_pkg": "nfx", "color": "#E50914"},
-  {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney-plus", "jw_pkg": "dnp", "color": "#0063e5"},
+  {"id": "disney", "name": "Disney+", "tmdb_id": 337, "flix_slug": "disney", "jw_pkg": "dnp", "color": "#0063e5"},
   {"id": "prime", "name": "Prime Video", "tmdb_id": 119, "flix_slug": "amazon-prime", "jw_pkg": "prv", "color": "#00a8e1"},
   {"id": "hbo", "name": "HBO", "tmdb_id": 1899, "flix_slug": "hbo-max", "jw_pkg": "hbm", "color": "#a855f7"},
   {"id": "apple", "name": "Apple TV+", "tmdb_id": 350, "flix_slug": "apple-tv", "jw_pkg": "atp", "color": "#ffffff"},

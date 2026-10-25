@@ -67,8 +67,8 @@ def test_providers_config():
     for p in providers:
         if not p.get("flix_slug") or not p.get("jw_pkg") or not p.get("tmdb_id"):
             fail(f"Configuração incompleta para {p.get('name')}")
-        if p["id"] == "disney" and p["flix_slug"] != "disney-plus":
-            fail("Disney+ deve usar flix_slug 'disney-plus'")
+        if p["id"] == "disney" and p["flix_slug"] not in ("disney", "disney-plus"):
+            fail("Disney+ deve usar flix_slug 'disney'")
 
     ok("configuração de provedores (FlixPatrol, JustWatch, TMDB)")
 
