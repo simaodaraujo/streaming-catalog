@@ -379,16 +379,23 @@ def get_flixpatrol_platform_data(platform_slug):
 
     # 1. ScrapingAnt (Primário: 10.000 créditos gratuitos/mês, browser headless Chrome)
     if SCRAPINGANT_API_KEY:
-        for attempt in range(1, 3):
+        scrapingant_proxy_type = os.environ.get("SCRAPINGANT_PROXY_TYPE", "").strip()
+        proxy_countries = ["US", "GB", "DE"]
+        for attempt, country in enumerate(proxy_countries, 1):
             try:
-                print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt (tentativa {attempt}/2)...", flush=True)
+                print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt (tentativa {attempt}/{len(proxy_countries)}, proxy={country})...", flush=True)
+                params = {
+                    "x-api-key": SCRAPINGANT_API_KEY,
+                    "url": url,
+                    "browser": "true",
+                    "proxy_country": country,
+                }
+                if scrapingant_proxy_type:
+                    params["proxy_type"] = scrapingant_proxy_type
+
                 response = requests.get(
                     "https://api.scrapingant.com/v2/general",
-                    params={
-                        "x-api-key": SCRAPINGANT_API_KEY,
-                        "url": url,
-                        "browser": "true",
-                    },
+                    params=params,
                     headers={"User-Agent": "Mozilla/5.0"},
                     timeout=65,
                 )
@@ -396,21 +403,30 @@ def get_flixpatrol_platform_data(platform_slug):
                     movie_titles = parse_flixpatrol_titles(response.text, "movie")
                     series_titles = parse_flixpatrol_titles(response.text, "series")
                     if movie_titles or series_titles:
-                        print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScrapingAnt", flush=True)
+                        print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScrapingAnt ({country})", flush=True)
                         time.sleep(3)  # Pausa breve para libertar o slot de concorrência gratuito
                         return movie_titles, series_titles
                     else:
                         print(f"  [!] ScrapingAnt retornou 200 mas sem títulos para {platform_slug}", flush=True)
                         break
+                elif response.status_code == 423:
+                    print(f"  [!] ScrapingAnt 423 (anti-bot detetou proxy {country}), a tentar outro país...", flush=True)
+                    time.sleep(4)
+                    continue
                 elif response.status_code == 409:
                     print(f"  [!] ScrapingAnt 409 (slot ocupado), a aguardar 6s para tentar novamente...", flush=True)
                     time.sleep(6)
+                    continue
+                elif response.status_code in (400, 403) and scrapingant_proxy_type:
+                    print(f"  [!] ScrapingAnt recusou proxy_type='{scrapingant_proxy_type}', a desativar...", flush=True)
+                    scrapingant_proxy_type = ""
+                    time.sleep(2)
                     continue
                 else:
                     print(f"  [!] ScrapingAnt HTTP {response.status_code} ({platform_slug}): {response.text[:120]}", flush=True)
                     break
             except Exception as exc:
-                print(f"  [!] Erro ScrapingAnt ({platform_slug}): {exc}", flush=True)
+                print(f"  [!] Erro ScrapingAnt ({platform_slug}, {country}): {exc}", flush=True)
                 time.sleep(3)
 
 

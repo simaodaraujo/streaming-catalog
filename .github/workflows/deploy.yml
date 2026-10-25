@@ -31,6 +31,7 @@ jobs:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           SCRAPER_API_KEY: ${{ secrets.SCRAPER_API_KEY }}
           SCRAPINGANT_API_KEY: ${{ secrets.SCRAPINGANT_API_KEY }}
+          SCRAPINGANT_PROXY_TYPE: ${{ secrets.SCRAPINGANT_PROXY_TYPE }}
         run: python build.py
 
       - name: Instalar Vercel CLI
