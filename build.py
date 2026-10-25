@@ -1235,7 +1235,7 @@ p.subtitle {
 
     <div class="footer">
       <span id="time-ago" data-time="{now_iso}">Atualizado recentemente</span>
-      <span class="schedule">Atualiza todos os dias às 12h30 UTC</span>
+      <span class="schedule">Atualiza de 2 em 2 dias às 12h30 UTC</span>
       <span class="version">v1.1.0</span>
     </div>
   </div>
