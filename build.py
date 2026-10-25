@@ -381,16 +381,15 @@ def get_flixpatrol_platform_data(platform_slug):
     if SCRAPINGANT_API_KEY:
         try:
             print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt...", flush=True)
-            response = session.get(
+            response = requests.get(
                 "https://api.scrapingant.com/v2/general",
                 params={
                     "x-api-key": SCRAPINGANT_API_KEY,
                     "url": url,
                     "browser": "true",
-                    "wait_for_selector": "h3, h2, a[href*='/title/']",
                 },
                 headers={"User-Agent": "Mozilla/5.0"},
-                timeout=60,
+                timeout=30,
             )
             if response.status_code == 200:
                 movie_titles = parse_flixpatrol_titles(response.text, "movie")
@@ -409,7 +408,7 @@ def get_flixpatrol_platform_data(platform_slug):
     if SCRAPER_API_KEY:
         try:
             print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScraperAPI (render)...", flush=True)
-            rendered = session.get(
+            rendered = requests.get(
                 "https://api.scraperapi.com/",
                 params={
                     "api_key": SCRAPER_API_KEY,
@@ -418,7 +417,7 @@ def get_flixpatrol_platform_data(platform_slug):
                     "url": url,
                 },
                 headers=HEADERS,
-                timeout=60,
+                timeout=30,
             )
             if rendered.status_code == 200:
                 movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
