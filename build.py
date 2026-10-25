@@ -380,39 +380,52 @@ def get_flixpatrol_platform_data(platform_slug):
     # 1. ScrapingAnt (Primário: 10.000 créditos gratuitos/mês, browser headless Chrome)
     if SCRAPINGANT_API_KEY:
         scrapingant_proxy_type = os.environ.get("SCRAPINGANT_PROXY_TYPE", "").strip()
-        try:
-            print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt...", flush=True)
-            params = {
-                "x-api-key": SCRAPINGANT_API_KEY,
-                "url": url,
-                "browser": "true",
-            }
-            if scrapingant_proxy_type:
-                params["proxy_type"] = scrapingant_proxy_type
+        params = {
+            "x-api-key": SCRAPINGANT_API_KEY,
+            "url": url,
+            "browser": "true",
+            "wait_for_selector": "a[href*='/title/']",
+        }
+        if scrapingant_proxy_type:
+            params["proxy_type"] = scrapingant_proxy_type
 
-            response = requests.get(
-                "https://api.scrapingant.com/v2/general",
-                params=params,
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=40,
-            )
-            if response.status_code == 200:
-                movie_titles = parse_flixpatrol_titles(response.text, "movie")
-                series_titles = parse_flixpatrol_titles(response.text, "series")
-                if movie_titles or series_titles:
-                    print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScrapingAnt", flush=True)
-                    time.sleep(2)
-                    return movie_titles, series_titles
+        for attempt in range(1, 4):
+            try:
+                print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt (tentativa {attempt}/3)...", flush=True)
+                response = requests.get(
+                    "https://api.scrapingant.com/v2/general",
+                    params=params,
+                    headers={"User-Agent": "Mozilla/5.0"},
+                    timeout=70,
+                )
+                if response.status_code == 200:
+                    movie_titles = parse_flixpatrol_titles(response.text, "movie")
+                    series_titles = parse_flixpatrol_titles(response.text, "series")
+                    if movie_titles or series_titles:
+                        print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScrapingAnt", flush=True)
+                        time.sleep(8)  # Garante que a sessão é fechada e o slot de concorrência fica livre
+                        return movie_titles, series_titles
+                    else:
+                        print(f"  [!] ScrapingAnt retornou 200 mas sem títulos para {platform_slug}", flush=True)
+                        break
+                elif response.status_code == 409:
+                    print(f"  [!] ScrapingAnt 409 (slot ocupado em {platform_slug}), a aguardar 12s para libertar sessão...", flush=True)
+                    time.sleep(12)
+                    continue
+                elif response.status_code == 423:
+                    print(f"  [!] ScrapingAnt 423 (Cloudflare em {platform_slug}), a aguardar 8s para nova tentativa...", flush=True)
+                    time.sleep(8)
+                    continue
                 else:
-                    print(f"  [!] ScrapingAnt retornou 200 mas sem títulos para {platform_slug}", flush=True)
-            elif response.status_code == 423:
-                print(f"  [!] ScrapingAnt 423 (Cloudflare anti-bot detetou browser em {platform_slug}), a avançar para fallback...", flush=True)
-            elif response.status_code == 409:
-                print(f"  [!] ScrapingAnt 409 (slot ocupado em {platform_slug})...", flush=True)
-            else:
-                print(f"  [!] ScrapingAnt HTTP {response.status_code} ({platform_slug}): {response.text[:120]}", flush=True)
-        except Exception as exc:
-            print(f"  [!] Erro ScrapingAnt ({platform_slug}): {exc}", flush=True)
+                    print(f"  [!] ScrapingAnt HTTP {response.status_code} ({platform_slug}): {response.text[:120]}", flush=True)
+                    break
+            except requests.exceptions.Timeout:
+                print(f"  [!] ScrapingAnt timeout (>70s) em {platform_slug}, a aguardar 10s para libertar o slot...", flush=True)
+                time.sleep(10)
+                continue
+            except Exception as exc:
+                print(f"  [!] Erro ScrapingAnt ({platform_slug}): {exc}", flush=True)
+                time.sleep(5)
 
 
     # 2. ScraperAPI (Secundário / Backup: diretamente com render=True sem desperdiçar créditos em render=False)
@@ -428,14 +441,17 @@ def get_flixpatrol_platform_data(platform_slug):
                     "url": url,
                 },
                 headers=HEADERS,
-                timeout=30,
+                timeout=40,
             )
             if rendered.status_code == 200:
                 movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
                 series_titles = parse_flixpatrol_titles(rendered.text, "series")
                 if movie_titles or series_titles:
                     print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScraperAPI render", flush=True)
+                    time.sleep(3)
                     return movie_titles, series_titles
+            else:
+                print(f"  [!] ScraperAPI retornou HTTP {rendered.status_code} ({platform_slug}): {rendered.text[:120]}", flush=True)
         except Exception as exc:
             print(f"  [!] Erro ScraperAPI render ({platform_slug}): {exc}", flush=True)
 
