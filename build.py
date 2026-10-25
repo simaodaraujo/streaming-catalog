@@ -346,7 +346,26 @@ def parse_flixpatrol_titles(html, media_type):
         None,
     )
     if not heading:
-        return []
+        # Plataformas com tabela unificada (ex: Disney+ em Portugal tem apenas 'TOP 10' global)
+        heading = next(
+            (
+                tag for tag in soup.find_all(["h2", "h3", "h4"])
+                if any(term in tag.get_text(" ", strip=True).casefold() for term in ("top 10", "top ranked", "ranking"))
+            ),
+            None,
+        )
+    if not heading:
+        # Fallback de parsing: recolhe diretamente os links com /title/
+        titles = []
+        seen = set()
+        for a in soup.find_all("a", href=re.compile(r"/title/")):
+            title = re.sub(r"\s+", " ", a.get_text(" ", strip=True)).strip()
+            if len(title) >= 2 and title.casefold() not in seen:
+                seen.add(title.casefold())
+                titles.append(title)
+                if len(titles) == 10:
+                    break
+        return titles
 
     titles = []
     seen = set()
