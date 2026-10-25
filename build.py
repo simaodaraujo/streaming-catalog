@@ -1393,12 +1393,8 @@ def main():
         # reutiliza os catalogos para poupar 100% das moedas da ScraperAPI.
         existing_movie_cat = f"dist/catalog/movie/{prov['id']}_pt_movies.json"
         existing_series_cat = f"dist/catalog/series/{prov['id']}_pt_series.json"
-        should_reuse_local = (
-            os.environ.get("GITHUB_EVENT_NAME") == "push"
-            and os.environ.get("FORCE_SCRAPE", "").lower() != "true"
-            and os.path.exists(existing_movie_cat)
-            and os.path.exists(existing_series_cat)
-        )
+        # ScrapingAnt ativo: recolhe os dados reais do Top 10 oficial
+        should_reuse_local = False
 
         movie_titles = []
         series_titles = []
