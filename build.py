@@ -377,7 +377,7 @@ def get_flixpatrol_platform_data(platform_slug):
 
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
 
-    # 1. ScraperAPI (Primário: conta com 5.000 créditos, render=True com rotação residencial para ultrapassar Cloudflare)
+    # 1. ScraperAPI (Primário: conta com 5.000 créditos, render=True para ultrapassar Cloudflare)
     if SCRAPER_API_KEY:
         try:
             print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScraperAPI (render)...", flush=True)
@@ -391,6 +391,22 @@ def get_flixpatrol_platform_data(platform_slug):
                 headers=HEADERS,
                 timeout=75,
             )
+            # Se for um domínio estritamente protegido pela Cloudflare (HTTP 500 "Protected"), reitera com proxies residenciais premium
+            if rendered.status_code == 500 and "Protected" in rendered.text:
+                print(f"  [i] A tentar ScraperAPI com premium=true para {platform_slug}...", flush=True)
+                time.sleep(2)
+                rendered = requests.get(
+                    "https://api.scraperapi.com/",
+                    params={
+                        "api_key": SCRAPER_API_KEY,
+                        "render": "true",
+                        "premium": "true",
+                        "url": url,
+                    },
+                    headers=HEADERS,
+                    timeout=75,
+                )
+
             if rendered.status_code == 200:
                 movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
                 series_titles = parse_flixpatrol_titles(rendered.text, "series")
