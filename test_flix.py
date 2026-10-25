@@ -98,14 +98,14 @@ def test_flixpatrol_parser():
 
 def run_build():
     env = os.environ.copy()
-    if not env.get("TMDB_API_KEY") and os.path.exists(".env"):
+    if os.path.exists(".env"):
         try:
             with open(".env", "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
-                    if line.startswith("TMDB_API_KEY="):
-                        env["TMDB_API_KEY"] = line.split("=", 1)[1].strip().strip('"').strip("'")
-                        break
+                    for k in ("TMDB_API_KEY", "SCRAPINGANT_API_KEY", "SCRAPER_API_KEY"):
+                        if line.startswith(f"{k}=") and not env.get(k):
+                            env[k] = line.split("=", 1)[1].strip().strip('"').strip("'")
         except Exception:
             pass
 

@@ -28,6 +28,7 @@ except ImportError:
     ImageOps = None
 
 TMDB_API_KEY = os.environ.get("TMDB_API_KEY", "")
+SCRAPINGANT_API_KEY = os.environ.get("SCRAPINGANT_API_KEY", "")
 SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 BASE_URL = os.environ.get("BASE_URL", "https://top-streaming-pt.vercel.app").rstrip("/")
 
@@ -204,6 +205,14 @@ def search_tmdb_title(title, media_type):
         if results:
             best = results[0]
             actual_type = best.get("media_type", search_type)
+
+            # Descarta títulos futuros que ainda não estrearam (evita unreleased do fallback)
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            rel_date = best.get("release_date") if actual_type == "movie" else best.get("first_air_date")
+            if rel_date and rel_date > today_str:
+                print(f"  [!] Conteúdo ainda não estreado descartado: '{title}' ({rel_date})", flush=True)
+                return None
+
             tmdb_id = best["id"]
             imdb_id = get_imdb_id(tmdb_id, actual_type)
 
@@ -359,60 +368,72 @@ def parse_flixpatrol_titles(html, media_type):
 def get_flixpatrol_platform_data(platform_slug):
     """
     Recolhe simultaneamente os rankings oficiais de filmes e series da FlixPatrol num unico pedido.
-    1. Tenta primeiro sem render (1 credito).
-    2. Se nao obtiver os titulos (pois a FlixPatrol requer JS), tenta 1 vez com render (5 creditos)
-       para garantir o Top 10 real oficial das plataformas em vez de aproximacoes por cliques.
-    3. Se falhar, o script usa JustWatch PT como rede de seguranca.
+    1. Tenta ScrapingAnt (10.000 créditos gratuitos/mês, browser=True para ultrapassar Cloudflare).
+    2. Se falhar ou não estiver configurado, tenta ScraperAPI (direto com render=True para poupar créditos).
+    3. Se ambos falharem, o script usa JustWatch PT como rede de seguranca.
     """
     if not session or not BeautifulSoup:
-        return [], []
-    if not SCRAPER_API_KEY:
-        print("  [!] SCRAPER_API_KEY nao configurada.", flush=True)
         return [], []
 
     url = f"https://flixpatrol.com/top10/{platform_slug}/portugal/"
 
-    # 1. Tentativa sem render (apenas 1 credito)
-    try:
-        response = session.get(
-            "https://api.scraperapi.com/",
-            params={"api_key": SCRAPER_API_KEY, "render": "false", "url": url},
-            headers=HEADERS,
-            timeout=25,
-        )
-        if response.status_code == 200:
-            movie_titles = parse_flixpatrol_titles(response.text, "movie")
-            series_titles = parse_flixpatrol_titles(response.text, "series")
-            if movie_titles or series_titles:
-                print(f"  [i] FlixPatrol ({platform_slug}) obtido sem render (1 credito)", flush=True)
-                return movie_titles, series_titles
-    except Exception as exc:
-        print(f"  [!] FlixPatrol ({platform_slug}) tentativa sem render: {exc}", flush=True)
+    # 1. ScrapingAnt (Primário: 10.000 créditos gratuitos/mês, browser headless Chrome)
+    if SCRAPINGANT_API_KEY:
+        try:
+            print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScrapingAnt...", flush=True)
+            response = session.get(
+                "https://api.scrapingant.com/v2/general",
+                params={
+                    "x-api-key": SCRAPINGANT_API_KEY,
+                    "url": url,
+                    "browser": "true",
+                    "wait_for_selector": "h3, h2, a[href*='/title/']",
+                },
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=60,
+            )
+            if response.status_code == 200:
+                movie_titles = parse_flixpatrol_titles(response.text, "movie")
+                series_titles = parse_flixpatrol_titles(response.text, "series")
+                if movie_titles or series_titles:
+                    print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScrapingAnt", flush=True)
+                    return movie_titles, series_titles
+                else:
+                    print(f"  [!] ScrapingAnt retornou 200 mas sem títulos para {platform_slug}", flush=True)
+            else:
+                print(f"  [!] ScrapingAnt HTTP {response.status_code} ({platform_slug}): {response.text[:120]}", flush=True)
+        except Exception as exc:
+            print(f"  [!] Erro ScrapingAnt ({platform_slug}): {exc}", flush=True)
 
-    # 2. Se sem render nao veio a tabela (Cloudflare ou JS rendering), faz 1 tentativa com render (5 creditos)
-    try:
-        print(f"  [i] A obter Top 10 real FlixPatrol ({platform_slug}) com render...", flush=True)
-        rendered = session.get(
-            "https://api.scraperapi.com/",
-            params={
-                "api_key": SCRAPER_API_KEY,
-                "render": "true",
-                "wait_for_selector": "h3, h2, a[href*='/title/']",
-                "url": url,
-            },
-            headers=HEADERS,
-            timeout=50,
-        )
-        if rendered.status_code == 200:
-            movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
-            series_titles = parse_flixpatrol_titles(rendered.text, "series")
-            if movie_titles or series_titles:
-                print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via render", flush=True)
-                return movie_titles, series_titles
-    except Exception as exc:
-        print(f"  [!] Erro FlixPatrol render ({platform_slug}): {exc}", flush=True)
+    # 2. ScraperAPI (Secundário / Backup: diretamente com render=True sem desperdiçar créditos em render=False)
+    if SCRAPER_API_KEY:
+        try:
+            print(f"  [i] A obter FlixPatrol ({platform_slug}) via ScraperAPI (render)...", flush=True)
+            rendered = session.get(
+                "https://api.scraperapi.com/",
+                params={
+                    "api_key": SCRAPER_API_KEY,
+                    "render": "true",
+                    "wait_for_selector": "h3, h2, a[href*='/title/']",
+                    "url": url,
+                },
+                headers=HEADERS,
+                timeout=60,
+            )
+            if rendered.status_code == 200:
+                movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
+                series_titles = parse_flixpatrol_titles(rendered.text, "series")
+                if movie_titles or series_titles:
+                    print(f"  [i] FlixPatrol ({platform_slug}) Top 10 real obtido com sucesso via ScraperAPI render", flush=True)
+                    return movie_titles, series_titles
+        except Exception as exc:
+            print(f"  [!] Erro ScraperAPI render ({platform_slug}): {exc}", flush=True)
+
+    if not SCRAPINGANT_API_KEY and not SCRAPER_API_KEY:
+        print("  [!] Nem SCRAPINGANT_API_KEY nem SCRAPER_API_KEY configuradas para obter FlixPatrol.", flush=True)
 
     return [], []
+
 def get_flixpatrol_top10(platform_slug, media_type):
     """Wrapper de retrocompatibilidade."""
     movies, series = get_flixpatrol_platform_data(platform_slug)
