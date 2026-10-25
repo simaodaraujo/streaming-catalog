@@ -386,11 +386,10 @@ def get_flixpatrol_platform_data(platform_slug):
                 params={
                     "api_key": SCRAPER_API_KEY,
                     "render": "true",
-                    "wait_for_selector": "h3, h2, a[href*='/title/']",
                     "url": url,
                 },
                 headers=HEADERS,
-                timeout=45,
+                timeout=75,
             )
             if rendered.status_code == 200:
                 movie_titles = parse_flixpatrol_titles(rendered.text, "movie")
@@ -424,7 +423,7 @@ def get_flixpatrol_platform_data(platform_slug):
                 "https://api.scrapingant.com/v2/general",
                 params=params,
                 headers={"User-Agent": "Mozilla/5.0"},
-                timeout=50,
+                timeout=75,
             )
             if response.status_code == 200:
                 movie_titles = parse_flixpatrol_titles(response.text, "movie")
